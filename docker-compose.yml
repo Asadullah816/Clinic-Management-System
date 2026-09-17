@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    container_name: clinic-app
+    ports:
+      - "8000:80"          # app on http://localhost:8000
+    environment:
+      # These OVERRIDE your .env inside the container only.
+      # DB_HOST is the compose service name "db", not 127.0.0.1.
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: clinic_management
+      DB_USERNAME: clinic
+      DB_PASSWORD: clinic_secret
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:11
+    container_name: clinic-db
+    environment:
+      MARIADB_DATABASE: clinic_management
+      MARIADB_USER: clinic
+      MARIADB_PASSWORD: clinic_secret
+      MARIADB_ROOT_PASSWORD: root_secret
+    volumes:
+      - db_data:/var/lib/mysql   # data survives container restarts
+    ports:
+      - "33061:3306"             # host port 33061 (NOT 3306 — that's your local MariaDB!)
+
+volumes:
+  db_data:
