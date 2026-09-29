@@ -9,7 +9,7 @@
         <div class="card-body d-flex justify-content-between align-items-center">
             <div>
                 <div class="text-muted small">Total Outstanding Amount</div>
-                <div class="fs-3 fw-bold text-danger">{{ number_format($totalOutstanding, 2) }}</div>
+                <div class="fs-3 fw-bold text-danger">PKR {{ number_format($totalOutstanding, 2) }}</div>
             </div>
             <i class="bi bi-exclamation-circle fs-1 text-danger opacity-25"></i>
         </div>
@@ -28,9 +28,9 @@
                             <th>Invoice #</th>
                             <th>Date</th>
                             <th>Patient</th>
-                            <th>Total</th>
-                            <th>Paid</th>
-                            <th>Due</th>
+                            <th>Total (PKR)</th>
+                            <th>Paid (PKR)</th>
+                            <th>Due (PKR)</th>
                             <th>Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
@@ -46,9 +46,9 @@
                                     </a>
                                     <div class="text-muted small">{{ $invoice->patient->phone }}</div>
                                 </td>
-                                <td>{{ number_format($invoice->total_amount, 2) }}</td>
-                                <td>{{ number_format($invoice->paid_amount, 2) }}</td>
-                                <td class="text-danger fw-semibold">{{ number_format($invoice->due_amount, 2) }}</td>
+                                <td>PKR {{ number_format($invoice->total_amount, 2) }}</td>
+                                <td>PKR {{ number_format($invoice->paid_amount, 2) }}</td>
+                                <td class="text-danger fw-semibold">PKR {{ number_format($invoice->due_amount, 2) }}</td>
                                 <td>
                                     <span
                                         class="badge text-bg-{{ $invoice->statusColor() }}">{{ $invoice->statusLabel() }}</span>

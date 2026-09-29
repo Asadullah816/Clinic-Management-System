@@ -4,12 +4,12 @@
 
 @section('content')
 
-    <div class="card shadow-sm" style="max-width: 860px;">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <h5 class="mb-0">Edit Product: {{ $medicine->name }}</h5>
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ route('medicines.update', $medicine) }}">
+            <form method="POST" action="{{ route('medicines.update', $medicine) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 @include('medicines._form', [

@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <div class="card shadow-sm" style="max-width: 820px;">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Edit Invoice {{ $invoice->invoice_number }}</h5>
             <span class="badge text-bg-{{ $invoice->statusColor() }}">{{ $invoice->statusLabel() }}</span>

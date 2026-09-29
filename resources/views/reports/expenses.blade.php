@@ -11,7 +11,7 @@
                         (for current filter)
                     @endif
                 </div>
-                <div class="fs-3 fw-bold text-danger">{{ number_format($filteredTotal, 2) }}</div>
+                <div class="fs-3 fw-bold text-danger">PKR {{ number_format($filteredTotal, 2) }}</div>
             </div>
             <i class="bi bi-wallet2 fs-1 text-danger opacity-25"></i>
         </div>
@@ -60,7 +60,7 @@
                             <th>Date</th>
                             <th>Category</th>
                             <th>Description</th>
-                            <th>Amount</th>
+                            <th>Amount (PKR)</th>
                             <th>Method</th>
                         </tr>
                     </thead>
@@ -77,7 +77,7 @@
                                             {{ \Illuminate\Support\Str::limit($expense->description, 60) }}</div>
                                     @endif
                                 </td>
-                                <td class="fw-semibold text-danger">{{ number_format($expense->amount, 2) }}</td>
+                                <td class="fw-semibold text-danger">PKR {{ number_format($expense->amount, 2) }}</td>
                                 <td>{{ $expense->methodLabel() }}</td>
                             </tr>
                         @empty

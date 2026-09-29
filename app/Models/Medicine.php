@@ -27,6 +27,7 @@ class Medicine extends Model
         'minimum_stock',
         'expiry_date',
         'description',
+        'image',
         'status',
     ];
 
@@ -92,5 +93,19 @@ class Medicine extends Model
     public function medicineUsages()
     {
         return $this->hasMany(MedicineUsage::class);
+    }
+
+    public function patientTreatmentMedicines()
+    {
+        return $this->hasMany(PatientTreatmentMedicine::class);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! empty($this->image) && file_exists(public_path($this->image))) {
+            return asset($this->image);
+        }
+
+        return null;
     }
 }

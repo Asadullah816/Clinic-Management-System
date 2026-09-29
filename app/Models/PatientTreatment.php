@@ -18,6 +18,9 @@ class PatientTreatment extends Model
         'treatment_date',
         'price',
         'discount',
+        'medicine_price',
+        'medicine_discount',
+        'medicine_total',
         'total_amount',
         'notes',
         'created_by',
@@ -26,10 +29,13 @@ class PatientTreatment extends Model
     protected function casts(): array
     {
         return [
-            'treatment_date' => 'date',
-            'price'          => 'decimal:2',
-            'discount'       => 'decimal:2',
-            'total_amount'   => 'decimal:2',
+            'treatment_date'    => 'date',
+            'price'             => 'decimal:2',
+            'discount'          => 'decimal:2',
+            'medicine_price'    => 'decimal:2',
+            'medicine_discount' => 'decimal:2',
+            'medicine_total'    => 'decimal:2',
+            'total_amount'      => 'decimal:2',
         ];
     }
 
@@ -50,5 +56,20 @@ class PatientTreatment extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function treatmentMedicines()
+    {
+        return $this->hasMany(PatientTreatmentMedicine::class);
+    }
+
+    public function getTreatmentNetAttribute(): float
+    {
+        return max(0, (float) $this->price - (float) $this->discount);
+    }
+
+    public function getMedicineNetAttribute(): float
+    {
+        return max(0, (float) $this->medicine_price - (float) $this->medicine_discount);
     }
 }

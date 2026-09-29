@@ -39,7 +39,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Description</th>
-                            <th>Price</th>
+                            <th>Price (PKR)</th>
                             <th>Duration</th>
                             <th>Status</th>
                             <th class="text-end">Actions</th>
@@ -50,7 +50,7 @@
                             <tr>
                                 <td class="fw-semibold">{{ $treatment->name }}</td>
                                 <td>{{ \Illuminate\Support\Str::limit($treatment->description ?? '—', 50) }}</td>
-                                <td>{{ number_format($treatment->price, 2) }}</td>
+                                <td class="fw-semibold">PKR {{ number_format($treatment->price, 2) }}</td>
                                 <td>{{ $treatment->duration ? $treatment->duration . ' min' : '—' }}</td>
                                 <td>
                                     <span

@@ -20,7 +20,7 @@
                         <div class="card-body">
                             <div class="text-muted small">Total Revenue <span class="text-lowercase">(payments
                                     received)</span></div>
-                            <div class="fs-3 fw-bold text-success">{{ number_format($totalRevenue, 2) }}</div>
+                            <div class="fs-3 fw-bold text-success">PKR {{ number_format($totalRevenue, 2) }}</div>
                         </div>
                     </div>
                 </div>
@@ -28,7 +28,7 @@
                     <div class="card border-start border-danger border-4 h-100">
                         <div class="card-body">
                             <div class="text-muted small">Total Expenses</div>
-                            <div class="fs-3 fw-bold text-danger">{{ number_format($totalExpenses, 2) }}</div>
+                            <div class="fs-3 fw-bold text-danger">PKR {{ number_format($totalExpenses, 2) }}</div>
                         </div>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
                             <div class="text-muted small">Outstanding Amount <span class="text-lowercase">(owed by
                                     patients)</span></div>
                             <div class="fs-3 fw-bold {{ $totalOutstanding > 0 ? 'text-danger' : '' }}">
-                                {{ number_format($totalOutstanding, 2) }}
+                                PKR {{ number_format($totalOutstanding, 2) }}
                             </div>
                         </div>
                     </div>
@@ -50,7 +50,7 @@
                             <div class="text-muted small">Net Profit <span class="text-lowercase">(revenue &minus;
                                     expenses)</span></div>
                             <div class="fs-3 fw-bold {{ $netProfit >= 0 ? 'text-success' : 'text-danger' }}">
-                                {{ number_format($netProfit, 2) }}
+                                PKR {{ number_format($netProfit, 2) }}
                             </div>
                         </div>
                     </div>

@@ -24,7 +24,7 @@
             @foreach ($treatments as $treatment)
                 <option value="{{ $treatment->id }}"
                     {{ (string) old('treatment_id', $appointment->treatment_id ?? '') === (string) $treatment->id ? 'selected' : '' }}>
-                    {{ $treatment->name }} ({{ number_format($treatment->price, 2) }})
+                    {{ $treatment->name }} (PKR {{ number_format($treatment->price, 2) }})
                 </option>
             @endforeach
         </select>

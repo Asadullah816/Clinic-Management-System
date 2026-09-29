@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <div class="card shadow-sm" style="max-width: 720px;">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <h5 class="mb-0">Clinic Settings</h5>
         </div>
@@ -61,8 +61,8 @@
                     <div class="col-md-4 mb-3">
                         <label for="currency" class="form-label">Currency Code</label>
                         <input type="text" id="currency" name="currency"
-                            value="{{ old('currency', \App\Models\Setting::get('currency')) }}"
-                            class="form-control @error('currency') is-invalid @enderror" placeholder="e.g. PKR, USD">
+                            value="{{ old('currency', \App\Models\Setting::get('currency', 'PKR')) }}"
+                            class="form-control @error('currency') is-invalid @enderror" placeholder="e.g. PKR">
                         <div class="form-text">Stored for future use (e.g. on printed documents).</div>
                         @error('currency')
                             <div class="invalid-feedback">{{ $message }}</div>

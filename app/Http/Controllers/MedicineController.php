@@ -23,6 +23,7 @@ class MedicineController extends Controller
             'minimum_stock'        => 'required|integer|min:0',
             'expiry_date'          => 'nullable|date',
             'description'          => 'nullable|string|max:2000',
+            'image'                => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
             'status'               => 'required|in:active,inactive',
         ];
     }
@@ -70,16 +71,27 @@ class MedicineController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate($this->rules());
+        $validated = $request->validate($this->rules());
 
-        Medicine::create($request->all());
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destination = public_path('uploads/medicines');
+            if (! file_exists($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $validated['image'] = 'uploads/medicines/' . $filename;
+        }
+
+        Medicine::create($validated);
 
         return redirect()
             ->route('medicines.index')
             ->with('success', 'Product created successfully.');
     }
 
-        public function show(Medicine $medicine)
+    public function show(Medicine $medicine)
     {
         $medicine->load([
             'category',
@@ -112,9 +124,30 @@ class MedicineController extends Controller
 
     public function update(Request $request, Medicine $medicine)
     {
-        $request->validate($this->rules());
+        $validated = $request->validate($this->rules());
 
-        $medicine->update($request->all());
+        if ($request->boolean('remove_image') && $medicine->image) {
+            if (file_exists(public_path($medicine->image))) {
+                @unlink(public_path($medicine->image));
+            }
+            $validated['image'] = null;
+        }
+
+        if ($request->hasFile('image')) {
+            if ($medicine->image && file_exists(public_path($medicine->image))) {
+                @unlink(public_path($medicine->image));
+            }
+            $file = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destination = public_path('uploads/medicines');
+            if (! file_exists($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $validated['image'] = 'uploads/medicines/' . $filename;
+        }
+
+        $medicine->update($validated);
 
         return redirect()
             ->route('medicines.show', $medicine)

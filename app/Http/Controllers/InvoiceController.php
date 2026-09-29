@@ -12,11 +12,12 @@ class InvoiceController extends Controller
     {
         return [
             'patient_id' => 'required|exists:patients,id',
-            'invoice_date' => 'required|date',
-            'subtotal' => 'required|numeric|min:0',
-            // lte:subtotal → discount may not exceed the subtotal (total stays >= 0)
-            'discount' => 'nullable|numeric|min:0|lte:subtotal',
-            'notes' => 'nullable|string|max:2000',
+            'invoice_date'        => 'required|date',
+            'subtotal'            => 'required|numeric|min:0',
+            'discount_type'       => 'nullable|in:fixed,percentage',
+            'discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'discount'            => 'nullable|numeric|min:0',
+            'notes'               => 'nullable|string|max:2000',
         ];
     }
 
@@ -61,8 +62,21 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate($this->rules());
 
-        $discount = $validated['discount'] ?? 0;
-        $totalAmount = $validated['subtotal'] - $discount;
+        $subtotal = (float) $validated['subtotal'];
+        $discountType = $validated['discount_type'] ?? 'fixed';
+        if ($discountType === 'percentage' && isset($validated['discount_percentage']) && $validated['discount_percentage'] !== '') {
+            $discount = round($subtotal * ((float) $validated['discount_percentage'] / 100), 2);
+        } else {
+            $discount = (float) ($validated['discount'] ?? 0);
+        }
+
+        if ($discount > $subtotal) {
+            return back()
+                ->withErrors(['discount' => 'Discount cannot exceed subtotal of ' . number_format($subtotal, 2) . '.'])
+                ->withInput();
+        }
+
+        $totalAmount = max(0, $subtotal - $discount);
 
         $nextId = (Invoice::max('id') ?? 0) + 1;
         $invoiceNumber = 'INV-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
@@ -130,8 +144,21 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate($this->rules());
 
-        $discount = $validated['discount'] ?? 0;
-        $totalAmount = $validated['subtotal'] - $discount;
+        $subtotal = (float) $validated['subtotal'];
+        $discountType = $validated['discount_type'] ?? 'fixed';
+        if ($discountType === 'percentage' && isset($validated['discount_percentage']) && $validated['discount_percentage'] !== '') {
+            $discount = round($subtotal * ((float) $validated['discount_percentage'] / 100), 2);
+        } else {
+            $discount = (float) ($validated['discount'] ?? 0);
+        }
+
+        if ($discount > $subtotal) {
+            return back()
+                ->withErrors(['discount' => 'Discount cannot exceed subtotal of ' . number_format($subtotal, 2) . '.'])
+                ->withInput();
+        }
+
+        $totalAmount = max(0, $subtotal - $discount);
 
         // Guard: the new total may never drop below what has already been paid
         if ($totalAmount < $invoice->paid_amount) {

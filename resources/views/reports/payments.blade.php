@@ -11,7 +11,7 @@
                         (for current filter)
                     @endif
                 </div>
-                <div class="fs-3 fw-bold text-success">{{ number_format($filteredTotal, 2) }}</div>
+                <div class="fs-3 fw-bold text-success">PKR {{ number_format($filteredTotal, 2) }}</div>
             </div>
             <i class="bi bi-cash-coin fs-1 text-success opacity-25"></i>
         </div>
@@ -61,7 +61,7 @@
                             <th>Patient</th>
                             <th>Invoice</th>
                             <th>Method</th>
-                            <th>Amount</th>
+                            <th>Amount (PKR)</th>
                             <th>Received By</th>
                         </tr>
                     </thead>
@@ -72,7 +72,7 @@
                                 <td>{{ $payment->patient->full_name }}</td>
                                 <td>{{ $payment->invoice->invoice_number }}</td>
                                 <td>{{ $payment->methodLabel() }}</td>
-                                <td class="fw-semibold text-success">{{ number_format($payment->amount, 2) }}</td>
+                                <td class="fw-semibold text-success">PKR {{ number_format($payment->amount, 2) }}</td>
                                 <td>{{ $payment->receivedBy->name ?? '—' }}</td>
                             </tr>
                         @empty

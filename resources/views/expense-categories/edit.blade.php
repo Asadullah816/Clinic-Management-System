@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <div class="card shadow-sm" style="max-width: 560px;">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <h5 class="mb-0">Edit Expense Category: {{ $category->name }}</h5>
         </div>

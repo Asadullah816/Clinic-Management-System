@@ -16,7 +16,7 @@
         <div class="col-md-4">
             <label class="form-label">Remaining Due</label>
             <input type="text" class="form-control fw-bold text-danger"
-                value="{{ number_format($lockedInvoice->due_amount, 2) }}" disabled>
+                value="PKR {{ number_format($lockedInvoice->due_amount, 2) }}" disabled>
         </div>
     </div>
 @else
@@ -31,7 +31,7 @@
                     data-due="{{ $inv->due_amount }}"
                     {{ (string) old('invoice_id') === (string) $inv->id ? 'selected' : '' }}>
                     {{ $inv->invoice_number }} &mdash; {{ $inv->patient->full_name }} (Due:
-                    {{ number_format($inv->due_amount, 2) }})
+                    PKR {{ number_format($inv->due_amount, 2) }})
                 </option>
             @endforeach
         </select>
@@ -67,12 +67,15 @@
         @enderror
     </div>
     <div class="col-md-4 mb-3">
-        <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
-        <input type="number" step="0.01" min="0.01" id="amount" name="amount"
-            value="{{ old('amount', $payment->amount ?? '') }}"
-            class="form-control @error('amount') is-invalid @enderror" required>
+        <label for="amount" class="form-label">Amount (PKR) <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <span class="input-group-text">PKR</span>
+            <input type="number" step="0.01" min="0.01" id="amount" name="amount"
+                value="{{ old('amount', $payment->amount ?? '') }}"
+                class="form-control @error('amount') is-invalid @enderror" placeholder="0.00" required>
+        </div>
         @error('amount')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback d-block">{{ $message }}</div>
         @enderror
     </div>
     <div class="col-md-4 mb-3">
@@ -126,7 +129,7 @@
                 return;
             }
             patientDisplay.value = option.dataset.patient;
-            dueDisplay.value = parseFloat(option.dataset.due).toFixed(2);
+            dueDisplay.value = 'PKR ' + parseFloat(option.dataset.due).toFixed(2);
             amountInput.setAttribute('max', parseFloat(option.dataset.due).toFixed(2));
         }
 

@@ -166,7 +166,7 @@
                         </div>
                         <div>
                             <div class="d-flex align-items-baseline gap-1">
-                                <span class="text-muted small fw-semibold">Rs.</span>
+                                <span class="text-muted small fw-semibold">PKR</span>
                                 <h3 class="fw-bold mb-0 text-success" style="letter-spacing: -0.02em;">
                                     {{ number_format($periodRevenue, 2) }}
                                 </h3>
@@ -195,7 +195,7 @@
                             </div>
                             <div>
                                 <div class="d-flex align-items-baseline gap-1">
-                                    <span class="text-muted small fw-semibold">Rs.</span>
+                                    <span class="text-muted small fw-semibold">PKR</span>
                                     <h3 class="fw-bold mb-0 text-danger" style="letter-spacing: -0.02em;">
                                         {{ number_format($periodExpenses, 2) }}
                                     </h3>
@@ -225,7 +225,7 @@
                             </div>
                             <div>
                                 <div class="d-flex align-items-baseline gap-1">
-                                    <span class="text-muted small fw-semibold">Rs.</span>
+                                    <span class="text-muted small fw-semibold">PKR</span>
                                     <h3 class="fw-bold mb-0 {{ $totalOutstanding > 0 ? 'text-danger' : 'text-dark' }}" style="letter-spacing: -0.02em;">
                                         {{ number_format($totalOutstanding, 2) }}
                                     </h3>
@@ -254,7 +254,7 @@
                         </div>
                         <div>
                             <div class="d-flex align-items-baseline gap-1">
-                                <span class="text-muted small fw-semibold">Rs.</span>
+                                <span class="text-muted small fw-semibold">PKR</span>
                                 <h3 class="fw-bold mb-0 {{ $periodProfit >= 0 ? 'text-success' : 'text-danger' }}" style="letter-spacing: -0.02em;">
                                     {{ number_format($periodProfit, 2) }}
                                 </h3>

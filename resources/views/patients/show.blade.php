@@ -158,14 +158,14 @@
                 </div>
             </div>
 
-            {{-- Financial summary — real numbers arrive in Phase 8 (Payments) --}}
+            {{-- Financial summary --}}
             <h6 class="text-muted text-uppercase small mt-3">Financial Summary</h6>
             <div class="row g-3">
                 <div class="col-md-3">
                     <div class="card bg-light border-0">
                         <div class="card-body py-3">
                             <div class="text-muted small">Total Treatment Cost</div>
-                            <div class="fs-5 fw-semibold text-muted">Coming in Phase 6</div>
+                            <div class="fs-5 fw-semibold text-primary">PKR {{ number_format($totalTreatmentCost, 2) }}</div>
                         </div>
                     </div>
                 </div>
@@ -173,7 +173,7 @@
                     <div class="card bg-light border-0">
                         <div class="card-body py-3">
                             <div class="text-muted small">Total Invoiced</div>
-                            <div class="fs-5 fw-semibold text-muted">Coming in Phase 7</div>
+                            <div class="fs-5 fw-semibold text-dark">PKR {{ number_format($totalInvoiced, 2) }}</div>
                         </div>
                     </div>
                 </div>
@@ -181,15 +181,17 @@
                     <div class="card bg-light border-0">
                         <div class="card-body py-3">
                             <div class="text-muted small">Total Paid</div>
-                            <div class="fs-5 fw-semibold text-muted">Coming in Phase 8</div>
+                            <div class="fs-5 fw-semibold text-success">PKR {{ number_format($totalPaid, 2) }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card bg-light border-0">
                         <div class="card-body py-3">
-                            <div class="text-muted small">Outstanding</div>
-                            <div class="fs-5 fw-semibold text-muted">Coming in Phase 8</div>
+                            <div class="text-muted small">Outstanding Due</div>
+                            <div class="fs-5 fw-semibold {{ $totalOutstanding > 0 ? 'text-danger' : 'text-success' }}">
+                                PKR {{ number_format($totalOutstanding, 2) }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -427,10 +429,35 @@
                                 @foreach ($patient->patientTreatments as $patientTreatment)
                                     <tr>
                                         <td>{{ $patientTreatment->treatment_date->format('d M Y') }}</td>
-                                        <td>{{ $patientTreatment->treatment->name ?? '—' }}</td>
-                                        <td>{{ number_format($patientTreatment->price, 2) }}</td>
-                                        <td>{{ number_format($patientTreatment->discount, 2) }}</td>
-                                        <td class="fw-semibold">{{ number_format($patientTreatment->total_amount, 2) }}
+                                        <td>
+                                            <div class="fw-semibold">{{ $patientTreatment->treatment->name ?? '—' }}</div>
+                                            @if ($patientTreatment->treatmentMedicines->isNotEmpty())
+                                                <div class="mt-1">
+                                                    @foreach ($patientTreatment->treatmentMedicines as $tm)
+                                                        <span class="badge bg-light text-dark border me-1 small">
+                                                            <i class="bi bi-capsule text-success me-1"></i>{{ $tm->quantity }}x {{ $tm->medicine->name ?? 'Product' }}
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div>PKR {{ number_format($patientTreatment->price, 2) }}</div>
+                                            @if ((float) $patientTreatment->medicine_price > 0)
+                                                <div class="small text-muted">+ Meds: PKR {{ number_format($patientTreatment->medicine_price, 2) }}</div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div>PKR {{ number_format($patientTreatment->discount, 2) }}</div>
+                                            @if ((float) $patientTreatment->medicine_discount > 0)
+                                                <div class="small text-muted">+ Meds: PKR {{ number_format($patientTreatment->medicine_discount, 2) }}</div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">PKR {{ number_format($patientTreatment->total_amount, 2) }}</div>
+                                            @if ((float) $patientTreatment->medicine_total > 0)
+                                                <div class="small text-muted">Proc: PKR {{ number_format($patientTreatment->treatment_net, 2) }} | Med: PKR {{ number_format($patientTreatment->medicine_net, 2) }}</div>
+                                            @endif
                                         </td>
                                         <td>{{ \Illuminate\Support\Str::limit($patientTreatment->notes ?? '—', 25) }}</td>
                                         <td class="text-end">
@@ -491,10 +518,10 @@
                                     <tr>
                                         <td class="fw-semibold">{{ $invoice->invoice_number }}</td>
                                         <td>{{ $invoice->invoice_date->format('d M Y') }}</td>
-                                        <td>{{ number_format($invoice->total_amount, 2) }}</td>
-                                        <td>{{ number_format($invoice->paid_amount, 2) }}</td>
+                                        <td class="fw-semibold">PKR {{ number_format($invoice->total_amount, 2) }}</td>
+                                        <td class="text-success">PKR {{ number_format($invoice->paid_amount, 2) }}</td>
                                         <td class="{{ $invoice->due_amount > 0 ? 'text-danger fw-semibold' : '' }}">
-                                            {{ number_format($invoice->due_amount, 2) }}
+                                            PKR {{ number_format($invoice->due_amount, 2) }}
                                         </td>
                                         <td>
                                             <span class="badge text-bg-{{ $invoice->statusColor() }}">
@@ -516,7 +543,6 @@
                     </div>
                     <div class="text-muted small mt-2">
                         Full invoice management (edit, delete) is available from <strong>Billing &rarr; Invoices</strong>.
-                        Payment recording arrives in Phase 8.
                     </div>
                 @endif
                 <h6 class="mt-4 mb-2">Payment History</h6>
@@ -541,7 +567,7 @@
                                     <tr>
                                         <td>{{ $payment->payment_date->format('d M Y') }}</td>
                                         <td>{{ $payment->invoice->invoice_number }}</td>
-                                        <td class="fw-semibold text-success">{{ number_format($payment->amount, 2) }}</td>
+                                        <td class="fw-semibold text-success">PKR {{ number_format($payment->amount, 2) }}</td>
                                         <td>{{ $payment->methodLabel() }}</td>
                                         <td>{{ $payment->receivedBy->name ?? '—' }}</td>
                                         <td class="text-end">

@@ -43,9 +43,9 @@
                             <th>Invoice #</th>
                             <th>Date</th>
                             <th>Patient</th>
-                            <th>Total</th>
-                            <th>Paid</th>
-                            <th>Due</th>
+                            <th>Total (PKR)</th>
+                            <th>Paid (PKR)</th>
+                            <th>Due (PKR)</th>
                             <th>Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
@@ -60,10 +60,10 @@
                                         {{ $invoice->patient->full_name }}
                                     </a>
                                 </td>
-                                <td>{{ number_format($invoice->total_amount, 2) }}</td>
-                                <td>{{ number_format($invoice->paid_amount, 2) }}</td>
+                                <td>PKR {{ number_format($invoice->total_amount, 2) }}</td>
+                                <td>PKR {{ number_format($invoice->paid_amount, 2) }}</td>
                                 <td class="{{ $invoice->due_amount > 0 ? 'text-danger fw-semibold' : '' }}">
-                                    {{ number_format($invoice->due_amount, 2) }}
+                                    PKR {{ number_format($invoice->due_amount, 2) }}
                                 </td>
                                 <td>
                                     <span class="badge text-bg-{{ $invoice->statusColor() }}">

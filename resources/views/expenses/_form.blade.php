@@ -30,12 +30,15 @@
 
 <div class="row">
     <div class="col-md-4 mb-3">
-        <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
-        <input type="number" step="0.01" min="0.01" id="amount" name="amount"
-            value="{{ old('amount', $expense->amount ?? '') }}"
-            class="form-control @error('amount') is-invalid @enderror" required>
+        <label for="amount" class="form-label">Amount (PKR) <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <span class="input-group-text">PKR</span>
+            <input type="number" step="0.01" min="0.01" id="amount" name="amount"
+                value="{{ old('amount', $expense->amount ?? '') }}"
+                class="form-control @error('amount') is-invalid @enderror" placeholder="0.00" required>
+        </div>
         @error('amount')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback d-block">{{ $message }}</div>
         @enderror
     </div>
     <div class="col-md-4 mb-3">

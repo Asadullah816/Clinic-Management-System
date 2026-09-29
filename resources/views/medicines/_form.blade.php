@@ -71,22 +71,28 @@
 
 <div class="row">
     <div class="col-md-3 mb-3">
-        <label for="purchase_price" class="form-label">Purchase Price <span class="text-danger">*</span></label>
-        <input type="number" step="0.01" min="0" id="purchase_price" name="purchase_price"
-            value="{{ old('purchase_price', $medicine->purchase_price ?? '') }}"
-            class="form-control @error('purchase_price') is-invalid @enderror" required>
+        <label for="purchase_price" class="form-label">Purchase Price (PKR) <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <span class="input-group-text bg-white">PKR</span>
+            <input type="number" step="0.01" min="0" id="purchase_price" name="purchase_price"
+                value="{{ old('purchase_price', $medicine->purchase_price ?? '') }}"
+                class="form-control @error('purchase_price') is-invalid @enderror" placeholder="0.00" required>
+        </div>
         @error('purchase_price')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback d-block">{{ $message }}</div>
         @enderror
     </div>
     <div class="col-md-3 mb-3">
-        <label for="selling_price" class="form-label">Selling Price <span class="text-danger">*</span></label>
-        <input type="number" step="0.01" min="0" id="selling_price" name="selling_price"
-            value="{{ old('selling_price', $medicine->selling_price ?? '') }}"
-            class="form-control @error('selling_price') is-invalid @enderror" required>
+        <label for="selling_price" class="form-label">Selling Price (PKR) <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <span class="input-group-text bg-white">PKR</span>
+            <input type="number" step="0.01" min="0" id="selling_price" name="selling_price"
+                value="{{ old('selling_price', $medicine->selling_price ?? '') }}"
+                class="form-control @error('selling_price') is-invalid @enderror" placeholder="0.00" required>
+        </div>
         <div class="form-text">Set 0 for supplies used internally.</div>
         @error('selling_price')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback d-block">{{ $message }}</div>
         @enderror
     </div>
     <div class="col-md-3 mb-3">
@@ -140,7 +146,58 @@
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="image" class="form-label">Product Image</label>
+        <input type="file" id="image" name="image" class="form-control @error('image') is-invalid @enderror"
+            accept="image/*" onchange="previewMedicineImage(this)">
+        <div class="form-text">Upload product picture (JPG, PNG, WebP up to 2MB).</div>
+        @error('image')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+
+        @if (!empty($medicine?->image_url))
+            <div class="mt-2 p-2 border rounded bg-light d-flex align-items-center gap-3">
+                <img src="{{ $medicine->image_url }}" alt="{{ $medicine->name }}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;">
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" name="remove_image" value="1" id="remove_image">
+                    <label class="form-check-label text-danger small" for="remove_image">
+                        Remove current image
+                    </label>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label class="form-label d-block">Image Preview</label>
+        <div id="image-preview-container" class="border rounded bg-light d-flex align-items-center justify-content-center"
+            style="width: 90px; height: 90px; overflow: hidden;">
+            @if (!empty($medicine?->image_url))
+                <img id="image-preview" src="{{ $medicine->image_url }}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+            @else
+                <i id="image-placeholder" class="bi bi-image text-muted fs-2"></i>
+                <img id="image-preview" src="#" alt="Preview" class="d-none" style="width: 100%; height: 100%; object-fit: cover;">
+            @endif
+        </div>
+    </div>
 </div>
+
+<script>
+    function previewMedicineImage(input) {
+        var preview = document.getElementById('image-preview');
+        var placeholder = document.getElementById('image-placeholder');
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                if (placeholder) placeholder.classList.add('d-none');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 
 <div class="alert alert-light border py-2 small text-muted mb-0">
     <i class="bi bi-info-circle me-1"></i>

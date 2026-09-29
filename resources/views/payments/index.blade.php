@@ -44,7 +44,7 @@
                             <th>Date</th>
                             <th>Patient</th>
                             <th>Invoice</th>
-                            <th>Amount</th>
+                            <th>Amount (PKR)</th>
                             <th>Method</th>
                             <th>Received By</th>
                             <th class="text-end">Actions</th>
@@ -64,7 +64,7 @@
                                         {{ $payment->invoice->invoice_number }}
                                     </a>
                                 </td>
-                                <td class="fw-semibold text-success">{{ number_format($payment->amount, 2) }}</td>
+                                <td class="fw-semibold text-success">PKR {{ number_format($payment->amount, 2) }}</td>
                                 <td>{{ $payment->methodLabel() }}</td>
                                 <td>{{ $payment->receivedBy->name ?? '—' }}</td>
                                 <td class="text-end">

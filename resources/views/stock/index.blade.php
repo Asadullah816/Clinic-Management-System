@@ -68,8 +68,8 @@
                             <th>Product</th>
                             <th>Type</th>
                             <th>Qty</th>
-                            <th>Unit Cost</th>
-                            <th>Total Cost</th>
+                            <th>Unit Cost (PKR)</th>
+                            <th>Total Cost (PKR)</th>
                             <th>Supplier</th>
                             <th>Reference</th>
                             <th>By</th>
@@ -92,14 +92,13 @@
                                     </span>
                                 </td>
                                 <td class="fw-semibold">{{ $transaction->quantity }}</td>
-                                <td>{{ $transaction->unit_cost ? number_format($transaction->unit_cost, 2) : '—' }}</td>
+                                <td>{{ $transaction->unit_cost ? 'PKR ' . number_format($transaction->unit_cost, 2) : '—' }}</td>
                                 <td>
-                                    {{ $transaction->totalCost() !== null ? number_format($transaction->totalCost(), 2) : '—' }}
+                                    {{ $transaction->totalCost() !== null ? 'PKR ' . number_format($transaction->totalCost(), 2) : '—' }}
                                     @if ($transaction->expense_id)
                                         <span class="badge text-bg-success"
                                             title="Also posted as an expense">Expensed</span>
                                     @endif
-                                </td>
                                 </td>
                                 <td>{{ $transaction->supplier->name ?? '—' }}</td>
                                 <td>{{ $transaction->reference ?? '—' }}</td>

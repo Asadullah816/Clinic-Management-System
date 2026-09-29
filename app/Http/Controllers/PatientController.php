@@ -84,7 +84,7 @@ class PatientController extends Controller
                       ->orderByDesc('appointment_time');
             },
             'patientTreatments' => function ($query) {
-                $query->with('treatment')->orderByDesc('treatment_date');
+                $query->with(['treatment', 'treatmentMedicines.medicine'])->orderByDesc('treatment_date');
             },
             'invoices' => function ($query) {
                 $query->orderByDesc('invoice_date')->orderByDesc('id');

@@ -68,7 +68,7 @@
                             <th>Product</th>
                             <th>Category</th>
                             <th>Supplier</th>
-                            <th>Selling Price</th>
+                            <th>Selling Price (PKR)</th>
                             <th>Stock</th>
                             <th>Expiry</th>
                             <th>Status</th>
@@ -79,17 +79,28 @@
                         @forelse ($medicines as $medicine)
                             <tr>
                                 <td>
-                                    <a href="{{ route('medicines.show', $medicine) }}"
-                                        class="text-decoration-none fw-semibold">
-                                        {{ $medicine->name }}
-                                    </a>
-                                    @if ($medicine->generic_name)
-                                        <div class="text-muted small">{{ $medicine->generic_name }}</div>
-                                    @endif
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if ($medicine->image_url)
+                                            <img src="{{ $medicine->image_url }}" alt="{{ $medicine->name }}" class="rounded border" style="width: 38px; height: 38px; object-fit: cover; flex-shrink: 0;">
+                                        @else
+                                            <div class="rounded border bg-light d-flex align-items-center justify-content-center text-muted flex-shrink-0" style="width: 38px; height: 38px;">
+                                                <i class="bi bi-capsule fs-5"></i>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <a href="{{ route('medicines.show', $medicine) }}"
+                                                class="text-decoration-none fw-semibold">
+                                                {{ $medicine->name }}
+                                            </a>
+                                            @if ($medicine->generic_name)
+                                                <div class="text-muted small">{{ $medicine->generic_name }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>{{ $medicine->category->name }}</td>
                                 <td>{{ $medicine->supplier->name ?? '—' }}</td>
-                                <td>{{ number_format($medicine->selling_price, 2) }}</td>
+                                <td class="fw-semibold">PKR {{ number_format($medicine->selling_price, 2) }}</td>
                                 <td>
                                     @if ($medicine->isOutOfStock())
                                         <span class="badge text-bg-danger">Out of stock</span>

@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Invoice {{ $invoice->invoice_number }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -77,23 +80,23 @@
         <table class="table table-bordered">
             <tr>
                 <th>Subtotal</th>
-                <td class="text-end">{{ number_format($invoice->subtotal, 2) }}</td>
+                <td class="text-end">PKR {{ number_format($invoice->subtotal, 2) }}</td>
             </tr>
             <tr>
                 <th>Discount</th>
-                <td class="text-end">&minus; {{ number_format($invoice->discount, 2) }}</td>
+                <td class="text-end">&minus; PKR {{ number_format($invoice->discount, 2) }}</td>
             </tr>
             <tr class="table-light">
                 <th>Total Amount</th>
-                <td class="text-end fw-bold">{{ number_format($invoice->total_amount, 2) }}</td>
+                <td class="text-end fw-bold">PKR {{ number_format($invoice->total_amount, 2) }}</td>
             </tr>
             <tr>
                 <th>Paid</th>
-                <td class="text-end">{{ number_format($invoice->paid_amount, 2) }}</td>
+                <td class="text-end">PKR {{ number_format($invoice->paid_amount, 2) }}</td>
             </tr>
             <tr>
                 <th>Amount Due</th>
-                <td class="text-end fw-bold">{{ number_format($invoice->due_amount, 2) }}</td>
+                <td class="text-end fw-bold">PKR {{ number_format($invoice->due_amount, 2) }}</td>
             </tr>
         </table>
 

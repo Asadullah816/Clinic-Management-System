@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <div class="card shadow-sm" style="max-width: 820px;">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Invoice {{ $invoice->invoice_number }}</h5>
             <span class="badge text-bg-{{ $invoice->statusColor() }} fs-6">{{ $invoice->statusLabel() }}</span>
@@ -34,24 +34,24 @@
             <table class="table table-sm table-bordered">
                 <tr>
                     <th class="w-50">Subtotal</th>
-                    <td class="text-end">{{ number_format($invoice->subtotal, 2) }}</td>
+                    <td class="text-end">PKR {{ number_format($invoice->subtotal, 2) }}</td>
                 </tr>
                 <tr>
                     <th>Discount</th>
-                    <td class="text-end">&minus; {{ number_format($invoice->discount, 2) }}</td>
+                    <td class="text-end">&minus; PKR {{ number_format($invoice->discount, 2) }}</td>
                 </tr>
                 <tr class="table-light">
                     <th>Total Amount</th>
-                    <td class="text-end fw-bold">{{ number_format($invoice->total_amount, 2) }}</td>
+                    <td class="text-end fw-bold">PKR {{ number_format($invoice->total_amount, 2) }}</td>
                 </tr>
                 <tr>
                     <th>Paid</th>
-                    <td class="text-end text-success">{{ number_format($invoice->paid_amount, 2) }}</td>
+                    <td class="text-end text-success">PKR {{ number_format($invoice->paid_amount, 2) }}</td>
                 </tr>
                 <tr>
                     <th>Due</th>
                     <td class="text-end {{ $invoice->due_amount > 0 ? 'text-danger fw-bold' : 'fw-bold' }}">
-                        {{ number_format($invoice->due_amount, 2) }}
+                        PKR {{ number_format($invoice->due_amount, 2) }}
                     </td>
                 </tr>
             </table>
@@ -71,7 +71,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Date</th>
-                                <th>Amount</th>
+                                <th>Amount (PKR)</th>
                                 <th>Method</th>
                                 <th>Reference</th>
                                 <th>Received By</th>
@@ -82,7 +82,7 @@
                             @foreach ($invoice->payments as $payment)
                                 <tr>
                                     <td>{{ $payment->payment_date->format('d M Y') }}</td>
-                                    <td class="fw-semibold text-success">{{ number_format($payment->amount, 2) }}</td>
+                                    <td class="fw-semibold text-success">PKR {{ number_format($payment->amount, 2) }}</td>
                                     <td>{{ $payment->methodLabel() }}</td>
                                     <td>{{ $payment->reference ?? '—' }}</td>
                                     <td>{{ $payment->receivedBy->name ?? '—' }}</td>
@@ -112,13 +112,13 @@
             @if ($invoice->due_amount > 0)
                 <a href="{{ route('payments.create', ['invoice_id' => $invoice->id]) }}" class="btn btn-success mb-3">
                     <i class="bi bi-cash-coin me-1"></i> Receive Payment (Due:
-                    {{ number_format($invoice->due_amount, 2) }})
+                    PKR {{ number_format($invoice->due_amount, 2) }})
                 </a>
             @else
                 <div class="alert alert-success py-2 mb-3">
                     <i class="bi bi-check-circle me-1"></i> This invoice is fully paid.
                 </div>
-            @endif
+            @endif@endif
 
             <div class="d-flex gap-2">
                 <a href="{{ route('invoices.print', $invoice) }}" class="btn btn-dark">

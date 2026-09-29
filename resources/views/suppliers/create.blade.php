@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <div class="card shadow-sm" style="max-width: 720px;">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <h5 class="mb-0">Add Supplier</h5>
         </div>

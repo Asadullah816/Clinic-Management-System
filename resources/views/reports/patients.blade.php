@@ -32,9 +32,9 @@
                         <tr>
                             <th>Patient</th>
                             <th>Visits</th>
-                            <th>Treatment Cost</th>
-                            <th>Total Paid</th>
-                            <th>Total Due</th>
+                            <th>Treatment Cost (PKR)</th>
+                            <th>Total Paid (PKR)</th>
+                            <th>Total Due (PKR)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,10 +48,10 @@
                                     <div class="text-muted small">{{ $patient->patient_number }}</div>
                                 </td>
                                 <td><span class="badge text-bg-light text-dark">{{ $patient->completed_visits }}</span></td>
-                                <td>{{ number_format($patient->treatment_cost_total ?? 0, 2) }}</td>
-                                <td class="text-success">{{ number_format($patient->paid_total ?? 0, 2) }}</td>
+                                <td>PKR {{ number_format($patient->treatment_cost_total ?? 0, 2) }}</td>
+                                <td class="text-success">PKR {{ number_format($patient->paid_total ?? 0, 2) }}</td>
                                 <td class="{{ ($patient->due_total ?? 0) > 0 ? 'text-danger fw-semibold' : '' }}">
-                                    {{ number_format($patient->due_total ?? 0, 2) }}
+                                    PKR {{ number_format($patient->due_total ?? 0, 2) }}
                                 </td>
                             </tr>
                         @empty

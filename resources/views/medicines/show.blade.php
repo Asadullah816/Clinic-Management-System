@@ -18,7 +18,7 @@
             {{ $medicine->minimum_stock }}). Consider restocking.</div>
     @endif
 
-    <div class="card shadow-sm" style="max-width: 860px;">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">{{ $medicine->name }}</h5>
             <div>
@@ -30,6 +30,15 @@
         </div>
 
         <div class="card-body">
+            @if ($medicine->image_url)
+                <div class="mb-3 d-flex align-items-center gap-3 p-2 bg-light rounded border">
+                    <img src="{{ $medicine->image_url }}" alt="{{ $medicine->name }}" class="rounded border shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">{{ $medicine->name }}</h6>
+                        <span class="text-muted small">{{ $medicine->generic_name ?? 'Product photo' }}</span>
+                    </div>
+                </div>
+            @endif
             <div class="row">
                 <div class="col-md-6">
                     <table class="table table-sm">
@@ -59,11 +68,11 @@
                     <table class="table table-sm">
                         <tr>
                             <th class="w-50">Purchase Price</th>
-                            <td>{{ number_format($medicine->purchase_price, 2) }}</td>
+                            <td>PKR {{ number_format($medicine->purchase_price, 2) }}</td>
                         </tr>
                         <tr>
                             <th>Selling Price</th>
-                            <td>{{ number_format($medicine->selling_price, 2) }}</td>
+                            <td class="fw-semibold">PKR {{ number_format($medicine->selling_price, 2) }}</td>
                         </tr>
                         <tr>
                             <th>Expiry Date</th>

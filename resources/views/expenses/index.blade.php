@@ -13,7 +13,7 @@
                         (also filtered)
                     @endif
                 </div>
-                <div class="fs-3 fw-bold text-danger">{{ number_format($filteredTotal, 2) }}</div>
+                <div class="fs-3 fw-bold text-danger">PKR {{ number_format($filteredTotal, 2) }}</div>
             </div>
             <i class="bi bi-wallet2 fs-1 text-danger opacity-25"></i>
         </div>
@@ -45,38 +45,21 @@
                         @endforeach
                     </select>
                 </div>
-                <form method="GET" action="{{ route('expenses.index') }}" class="row g-2 mb-3">
-                    <div class="col-md-3">
-                        <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                            placeholder="Search title or reference...">
-                    </div>
-                    <div class="col-md-3">
-                        <select name="category_id" class="form-select">
-                            <option value="">All categories</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}"
-                                    {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select name="period" class="form-select" onchange="this.form.submit()">
-                            @foreach ($periods as $value => $label)
-                                <option value="{{ $value }}"
-                                    {{ request('period', 'all') === $value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search me-1"></i>
-                            Filter</button>
-                        <a href="{{ route('expenses.index') }}" class="btn btn-outline-secondary">Reset</a>
-                    </div>
-                </form>
+                <div class="col-md-3">
+                    <select name="period" class="form-select" onchange="this.form.submit()">
+                        @foreach ($periods as $value => $label)
+                            <option value="{{ $value }}"
+                                {{ request('period', 'all') === $value ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search me-1"></i>
+                        Filter</button>
+                    <a href="{{ route('expenses.index') }}" class="btn btn-outline-secondary">Reset</a>
+                </div>
             </form>
 
             <div class="table-responsive">
@@ -86,7 +69,7 @@
                             <th>Date</th>
                             <th>Title</th>
                             <th>Category</th>
-                            <th>Amount</th>
+                            <th>Amount (PKR)</th>
                             <th>Method</th>
                             <th>Reference</th>
                             <th>By</th>
@@ -107,7 +90,7 @@
                                 <td><span
                                         class="badge text-bg-light text-dark">{{ $expense->expenseCategory->name }}</span>
                                 </td>
-                                <td class="fw-semibold text-danger">{{ number_format($expense->amount, 2) }}</td>
+                                <td class="fw-semibold text-danger">PKR {{ number_format($expense->amount, 2) }}</td>
                                 <td>{{ $expense->methodLabel() }}</td>
                                 <td>{{ $expense->reference ?? '—' }}</td>
                                 <td>{{ $expense->createdBy->name ?? '—' }}</td>

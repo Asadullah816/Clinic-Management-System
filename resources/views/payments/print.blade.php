@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Receipt {{ $payment->receiptNumber() }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -77,21 +80,21 @@
 
         <div class="alert alert-success d-flex justify-content-between align-items-center fs-5">
             <span class="fw-semibold">Amount Received:</span>
-            <span class="fw-bold">{{ number_format($payment->amount, 2) }}</span>
+            <span class="fw-bold">PKR {{ number_format($payment->amount, 2) }}</span>
         </div>
 
         <table class="table table-sm table-bordered">
             <tr>
                 <th>Invoice Total</th>
-                <td class="text-end">{{ number_format($payment->invoice->total_amount, 2) }}</td>
+                <td class="text-end">PKR {{ number_format($payment->invoice->total_amount, 2) }}</td>
             </tr>
             <tr>
                 <th>Total Paid (including this payment)</th>
-                <td class="text-end">{{ number_format($payment->invoice->paid_amount, 2) }}</td>
+                <td class="text-end">PKR {{ number_format($payment->invoice->paid_amount, 2) }}</td>
             </tr>
             <tr>
                 <th>Remaining Balance</th>
-                <td class="text-end fw-bold">{{ number_format($payment->invoice->due_amount, 2) }}</td>
+                <td class="text-end fw-bold">PKR {{ number_format($payment->invoice->due_amount, 2) }}</td>
             </tr>
         </table>
 

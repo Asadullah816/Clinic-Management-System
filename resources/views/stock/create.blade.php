@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <div class="card shadow-sm" style="max-width: 820px;">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <h5 class="mb-0">New Stock Transaction</h5>
         </div>
@@ -93,12 +93,16 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="unit_cost" class="form-label">Unit Cost</label>
-                        <input type="number" step="0.01" min="0" id="unit_cost" name="unit_cost"
-                            value="{{ old('unit_cost') }}" class="form-control @error('unit_cost') is-invalid @enderror">
+                        <label for="unit_cost" class="form-label">Unit Cost (PKR)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">PKR</span>
+                            <input type="number" step="0.01" min="0" id="unit_cost" name="unit_cost"
+                                value="{{ old('unit_cost') }}" class="form-control @error('unit_cost') is-invalid @enderror"
+                                placeholder="0.00">
+                        </div>
                         <div class="form-text">Cost per unit for this purchase.</div>
                         @error('unit_cost')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-12">
