@@ -70,23 +70,27 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $isSelf = $user->id === auth()->id();
+
+        $rules = [
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8', // optional: leave blank to keep current
-            'role'     => 'required|in:admin,accountant,receptionist,staff',
-        ]);
+            'role'     => $isSelf ? 'nullable|in:admin,accountant,receptionist,staff' : 'required|in:admin,accountant,receptionist,staff',
+        ];
 
-        $user->name  = $request->name;
-        $user->email = $request->email;
+        $validated = $request->validate($rules);
+
+        $user->name  = $validated['name'];
+        $user->email = $validated['email'];
 
         if ($request->filled('password')) {
             $user->password = $request->password; // hashed automatically by the model cast
         }
 
         // Safety: you cannot change your own role
-        if ($user->id !== auth()->id()) {
-            $user->role = $request->role;
+        if (! $isSelf && ! empty($validated['role'])) {
+            $user->role = $validated['role'];
         }
 
         $user->save();

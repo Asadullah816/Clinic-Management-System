@@ -41,8 +41,8 @@
     <div class="receipt-sheet mx-auto p-5 border rounded shadow-sm">
 
         <div class="text-center mb-4">
-            <h4 class="mb-0">{{ config('app.name', 'Skin Clinic') }}</h4>
-            <div class="text-muted small">Aesthetic &amp; Care Clinic</div>
+            <h4 class="mb-0">{{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar skin care & Aesthethic clinic')) }}</h4>
+            <div class="text-muted small">Ph: {{ \App\Models\Setting::get('phone', '03489030035') }}</div>
             <h5 class="text-uppercase mt-3 mb-0">Payment Receipt</h5>
             <div class="fw-semibold">{{ $payment->receiptNumber() }}</div>
         </div>

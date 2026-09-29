@@ -398,7 +398,7 @@
             <div class="tab-pane fade" id="treatments" role="tabpanel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="mb-0">Treatment History</h6>
-                    <a href="{{ route('patient-treatments.create', ['patient_id' => $patient->id]) }}"
+                    <a href="{{ route('patient-treatments.create', ['patient_id' => $patient->id, 'redirect' => 'patient']) }}"
                         class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-lg me-1"></i> Record Treatment
                     </a>

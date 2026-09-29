@@ -10,9 +10,9 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         $defaults = [
-            'clinic_name' => 'Skin Clinic',
+            'clinic_name' => 'Mayar skin care & Aesthethic clinic',
             'address'     => 'House 12, Main Boulevard, Gulberg',
-            'phone'       => '042-111-222-333',
+            'phone'       => '03489030035',
             'email'       => 'info@skinclinic.test',
             'currency'    => 'PKR',
         ];

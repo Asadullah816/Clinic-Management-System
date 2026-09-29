@@ -24,7 +24,7 @@
                 <div class="mb-3">
                     <label for="clinic_name" class="form-label">Clinic Name <span class="text-danger">*</span></label>
                     <input type="text" id="clinic_name" name="clinic_name"
-                        value="{{ old('clinic_name', \App\Models\Setting::get('clinic_name', config('app.name', 'Skin Clinic'))) }}"
+                        value="{{ old('clinic_name', \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar skin care & Aesthethic clinic'))) }}"
                         class="form-control @error('clinic_name') is-invalid @enderror" required>
                     @error('clinic_name')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -43,7 +43,7 @@
                     <div class="col-md-4 mb-3">
                         <label for="phone" class="form-label">Phone</label>
                         <input type="text" id="phone" name="phone"
-                            value="{{ old('phone', \App\Models\Setting::get('phone')) }}"
+                            value="{{ old('phone', \App\Models\Setting::get('phone', '03489030035')) }}"
                             class="form-control @error('phone') is-invalid @enderror">
                         @error('phone')
                             <div class="invalid-feedback">{{ $message }}</div>

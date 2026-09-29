@@ -11,12 +11,12 @@ class InvoiceController extends Controller
     private function rules(): array
     {
         return [
-            'patient_id'   => 'required|exists:patients,id',
+            'patient_id' => 'required|exists:patients,id',
             'invoice_date' => 'required|date',
-            'subtotal'     => 'required|numeric|min:0',
+            'subtotal' => 'required|numeric|min:0',
             // lte:subtotal → discount may not exceed the subtotal (total stays >= 0)
-            'discount'     => 'nullable|numeric|min:0|lte:subtotal',
-            'notes'        => 'nullable|string|max:2000',
+            'discount' => 'nullable|numeric|min:0|lte:subtotal',
+            'notes' => 'nullable|string|max:2000',
         ];
     }
 
@@ -28,11 +28,11 @@ class InvoiceController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('invoice_number', 'like', "%{$search}%")
-                      ->orWhereHas('patient', function ($p) use ($search) {
-                          $p->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('patient_number', 'like', "%{$search}%");
-                      });
+                        ->orWhereHas('patient', function ($p) use ($search) {
+                            $p->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('patient_number', 'like', "%{$search}%");
+                        });
                 });
             })
             ->when($request->filled('status'), function ($query) use ($request) {
@@ -51,7 +51,7 @@ class InvoiceController extends Controller
     public function create(Request $request)
     {
         return view('invoices.create', [
-            'patients'  => Patient::orderBy('first_name')->orderBy('last_name')->get(),
+            'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
             // From the patient profile: /invoices/create?patient_id=X preselects the patient
             'patientId' => $request->query('patient_id'),
         ]);
@@ -61,20 +61,28 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate($this->rules());
 
-        $discount   = $validated['discount'] ?? 0;
+        $discount = $validated['discount'] ?? 0;
         $totalAmount = $validated['subtotal'] - $discount;
 
+        $nextId = (Invoice::max('id') ?? 0) + 1;
+        $invoiceNumber = 'INV-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
+        while (Invoice::where('invoice_number', $invoiceNumber)->exists()) {
+            $nextId++;
+            $invoiceNumber = 'INV-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
+        }
+
         $invoice = Invoice::create([
-            'patient_id'   => $validated['patient_id'],
+            'patient_id' => $validated['patient_id'],
             'invoice_date' => $validated['invoice_date'],
-            'subtotal'     => $validated['subtotal'],
-            'discount'     => $discount,
+            'subtotal' => $validated['subtotal'],
+            'invoice_number' => $invoiceNumber,
+            'discount' => $discount,
             'total_amount' => $totalAmount,
-            'paid_amount'  => 0,
-            'due_amount'   => $totalAmount,          // nothing paid yet
-            'status'       => 'pending',             // recalculated just below
-            'notes'        => $validated['notes'] ?? null,
-            'created_by'   => auth()->id(),
+            'paid_amount' => 0,
+            'due_amount' => $totalAmount,          // nothing paid yet
+            'status' => 'pending',             // recalculated just below
+            'notes' => $validated['notes'] ?? null,
+            'created_by' => auth()->id(),
         ]);
 
         // Edge case: a fully-discounted invoice (total 0) is instantly "paid"
@@ -83,16 +91,16 @@ class InvoiceController extends Controller
         $invoice->save();
 
         // Generate the number from the auto-increment ID: INV-0001, INV-0002, ...
-        $invoice->update([
-            'invoice_number' => 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT),
-        ]);
+        // $invoice->update([
+        //     // 'invoice_number' => 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT),
+        // ]);
 
         return redirect()
             ->route('invoices.show', $invoice)
-            ->with('success', 'Invoice ' . $invoice->invoice_number . ' created successfully.');
+            ->with('success', 'Invoice '.$invoice->invoice_number.' created successfully.');
     }
 
-        public function show(Invoice $invoice)
+    public function show(Invoice $invoice)
     {
         $invoice->load(['patient', 'createdBy', 'payments.receivedBy']);
 
@@ -113,7 +121,7 @@ class InvoiceController extends Controller
     public function edit(Invoice $invoice)
     {
         return view('invoices.edit', [
-            'invoice'  => $invoice,
+            'invoice' => $invoice,
             'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
         ]);
     }
@@ -122,27 +130,26 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate($this->rules());
 
-        $discount    = $validated['discount'] ?? 0;
+        $discount = $validated['discount'] ?? 0;
         $totalAmount = $validated['subtotal'] - $discount;
 
         // Guard: the new total may never drop below what has already been paid
         if ($totalAmount < $invoice->paid_amount) {
             return back()
-                ->withErrors(['subtotal' =>
-                    'The invoice total (' . number_format($totalAmount, 2) .
-                    ') cannot be less than the amount already paid (' .
-                    number_format($invoice->paid_amount, 2) . ').'])
+                ->withErrors(['subtotal' => 'The invoice total ('.number_format($totalAmount, 2).
+                    ') cannot be less than the amount already paid ('.
+                    number_format($invoice->paid_amount, 2).').'])
                 ->withInput();
         }
 
-        $invoice->subtotal     = $validated['subtotal'];
-        $invoice->discount     = $discount;
+        $invoice->subtotal = $validated['subtotal'];
+        $invoice->discount = $discount;
         $invoice->total_amount = $totalAmount;
-        $invoice->due_amount   = $totalAmount - $invoice->paid_amount;
-        $invoice->status       = $invoice->recalculatePaymentStatus();
-        $invoice->patient_id   = $validated['patient_id'];
+        $invoice->due_amount = $totalAmount - $invoice->paid_amount;
+        $invoice->status = $invoice->recalculatePaymentStatus();
+        $invoice->patient_id = $validated['patient_id'];
         $invoice->invoice_date = $validated['invoice_date'];
-        $invoice->notes        = $validated['notes'] ?? null;
+        $invoice->notes = $validated['notes'] ?? null;
         $invoice->save();
 
         return redirect()

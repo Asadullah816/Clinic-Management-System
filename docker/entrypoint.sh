@@ -5,7 +5,7 @@ cd /var/www/html
 
 # ---------- 1. Ensure a .env exists (Render builds from git, which has no .env) ----------
 if [ ! -f .env ]; then
-    echo "APP_NAME=\"Skin Clinic\"" > .env
+    echo "APP_NAME=\"Mayar skin care & Aesthethic clinic\"" > .env
 fi
 
 # ---------- 2. Ensure Laravel's runtime directories exist ----------

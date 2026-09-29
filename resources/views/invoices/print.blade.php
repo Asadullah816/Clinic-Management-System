@@ -43,8 +43,8 @@
         {{-- Header --}}
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
-                <h4 class="mb-0">{{ config('app.name', 'Skin Clinic') }}</h4>
-                <div class="text-muted small">Aesthetic &amp; Care Clinic</div>
+                <h4 class="mb-0">{{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar skin care & Aesthethic clinic')) }}</h4>
+                <div class="text-muted small">Ph: {{ \App\Models\Setting::get('phone', '03489030035') }}</div>
             </div>
             <div class="text-end">
                 <h2 class="text-uppercase mb-0">Invoice</h2>

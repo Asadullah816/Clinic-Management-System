@@ -46,8 +46,11 @@
 
                 <div class="mb-3">
                     <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                    @if ($isSelf)
+                        <input type="hidden" name="role" value="{{ $user->role }}">
+                    @endif
                     <select name="role" id="role" class="form-select @error('role') is-invalid @enderror"
-                        {{ $isSelf ? 'disabled' : '' }} required>
+                        {{ $isSelf ? 'disabled' : 'required' }}>
                         @foreach ($roles as $roleValue => $roleLabel)
                             <option value="{{ $roleValue }}"
                                 {{ old('role', $user->role) === $roleValue ? 'selected' : '' }}>
