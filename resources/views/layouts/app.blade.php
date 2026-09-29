@@ -166,12 +166,47 @@
             padding: 0.85rem 1.25rem;
         }
 
-        /* Border accents for metric cards */
+        /* ---------------- Stat Cards ---------------- */
+        .stat-card {
+            border: 1px solid var(--cms-card-border) !important;
+            border-radius: 1rem !important;
+            background: #ffffff;
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+            border-color: #cbd5e1 !important;
+        }
+
+        .stat-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover .stat-icon-box {
+            transform: scale(1.08);
+        }
+
+        /* Border accents for legacy metric cards */
         .card.border-start.border-4 {
+            border: 1px solid var(--cms-card-border) !important;
             border-left-width: 4px !important;
             border-top-left-radius: 0.875rem !important;
             border-bottom-left-radius: 0.875rem !important;
         }
+        .card.border-start.border-primary { border-left-color: #0284c7 !important; }
+        .card.border-start.border-success { border-left-color: #10b981 !important; }
+        .card.border-start.border-danger  { border-left-color: #ef4444 !important; }
+        .card.border-start.border-warning { border-left-color: #f59e0b !important; }
+        .card.border-start.border-info    { border-left-color: #06b6d4 !important; }
 
         /* ---------------- Tables ---------------- */
         .table {
