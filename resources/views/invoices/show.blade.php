@@ -118,7 +118,7 @@
                 <div class="alert alert-success py-2 mb-3">
                     <i class="bi bi-check-circle me-1"></i> This invoice is fully paid.
                 </div>
-            @endif@endif
+            @endif
 
             <div class="d-flex gap-2">
                 <a href="{{ route('invoices.print', $invoice) }}" class="btn btn-dark">

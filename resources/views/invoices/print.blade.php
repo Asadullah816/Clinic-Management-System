@@ -14,6 +14,8 @@
     <style>
         body {
             background-color: #f4f6f9;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            color: #0f172a;
         }
 
         .invoice-sheet {
@@ -21,9 +23,19 @@
             background: #fff;
         }
 
+        /* Suppress browser default headers (Title/Date) and footers (URL and Page 1/1) */
+        @page {
+            size: auto;
+            margin: 0mm;
+        }
+
         @media print {
-            body {
-                background: #fff;
+            html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .no-print {
@@ -33,7 +45,20 @@
             .invoice-sheet {
                 border: none !important;
                 box-shadow: none !important;
-                max-width: 100%;
+                border-radius: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 15mm 20mm !important;
+            }
+
+            a {
+                text-decoration: none !important;
+                color: inherit !important;
+            }
+
+            a[href]:after {
+                content: none !important;
             }
         }
     </style>

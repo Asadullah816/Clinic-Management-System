@@ -14,26 +14,51 @@
     <style>
         body {
             background-color: #f4f6f9;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            color: #0f172a;
         }
 
         .receipt-sheet {
-            max-width: 700px;
+            max-width: 720px;
             background: #fff;
         }
 
+        /* Suppress browser default headers (Title/Date) and footers (URL and Page 1/1) */
+        @page {
+            size: auto;
+            margin: 0mm;
+        }
+
         @media print {
-            body {
-                background: #fff;
+            html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .receipt-sheet {
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 15mm 20mm !important;
             }
 
             .no-print {
                 display: none !important;
             }
 
-            .receipt-sheet {
-                border: none !important;
-                box-shadow: none !important;
-                max-width: 100%;
+            a {
+                text-decoration: none !important;
+                color: inherit !important;
+            }
+
+            a[href]:after {
+                content: none !important;
             }
         }
     </style>
@@ -60,8 +85,7 @@
             <tr>
                 <th>Invoice</th>
                 <td>
-                    <a
-                        href="{{ route('invoices.show', $payment->invoice) }}">{{ $payment->invoice->invoice_number }}</a>
+                    <span class="fw-semibold">{{ $payment->invoice->invoice_number }}</span>
                 </td>
             </tr>
             <tr>

@@ -57,6 +57,24 @@ class Invoice extends Model
             : self::STATUS_PENDING;
     }
 
+    public function getRouteKey(): mixed
+    {
+        return $this->invoice_number ?? (string) $this->id;
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?\Illuminate\Database\Eloquent\Model
+    {
+        if (is_string($value) && str_starts_with(strtoupper($value), 'INV-')) {
+            return $this->where('invoice_number', $value)->firstOrFail();
+        }
+
+        if (is_numeric($value)) {
+            return $this->where('id', (int) $value)->firstOrFail();
+        }
+
+        return $this->where($field ?? 'invoice_number', $value)->firstOrFail();
+    }
+
     public static function statuses(): array
     {
         return [

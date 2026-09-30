@@ -46,6 +46,25 @@ class Payment extends Model
         return 'RCP-' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
     }
 
+    public function getRouteKey(): mixed
+    {
+        return $this->receiptNumber();
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?\Illuminate\Database\Eloquent\Model
+    {
+        if (is_string($value) && preg_match('/^RCP-(\d+)$/i', $value, $matches)) {
+            $id = (int) ltrim($matches[1], '0');
+            return $this->where('id', $id)->firstOrFail();
+        }
+
+        if (is_numeric($value)) {
+            return $this->where('id', (int) $value)->firstOrFail();
+        }
+
+        return $this->where($field ?? $this->getRouteKeyName(), $value)->firstOrFail();
+    }
+
     public static function methods(): array
     {
         return [

@@ -316,3 +316,93 @@ test('recording treatment fails validation if paid amount exceeds total amount',
     $response->assertSessionHasErrors(['paid_amount']);
     $this->assertDatabaseMissing('patient_treatments', ['patient_id' => $patient->id]);
 });
+
+test('payment receipt print route resolves business receipt numbers and suppresses print headers', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+    $patient = Patient::create([
+        'patient_number' => 'P-0008',
+        'first_name' => 'John',
+        'last_name' => 'Smith',
+        'gender' => 'male',
+        'phone' => '03001239999',
+        'status' => 'active',
+    ]);
+
+    $invoice = Invoice::create([
+        'patient_id' => $patient->id,
+        'invoice_number' => 'INV-0888',
+        'invoice_date' => '2026-09-29',
+        'subtotal' => 500.00,
+        'discount' => 0.00,
+        'total_amount' => 500.00,
+        'paid_amount' => 500.00,
+        'due_amount' => 0.00,
+        'status' => 'paid',
+        'created_by' => $user->id,
+    ]);
+
+    $payment = Payment::create([
+        'patient_id' => $patient->id,
+        'invoice_id' => $invoice->id,
+        'payment_date' => '2026-09-29',
+        'amount' => 500.00,
+        'payment_method' => 'cash',
+        'received_by' => $user->id,
+    ]);
+
+    $receiptNumber = $payment->receiptNumber(); // e.g. RCP-0001
+    expect($receiptNumber)->toMatch('/^RCP-\d{4}$/');
+
+    // Route using model binding generates /payments/RCP-XXXX/print
+    $routeUrl = route('payments.print', $payment);
+    expect($routeUrl)->toContain($receiptNumber);
+
+    $response = $this->actingAs($user)->get($routeUrl);
+    $response->assertOk();
+    $response->assertSee($receiptNumber);
+    $response->assertSee('Mayar skin care &amp; Aesthethic clinic', false);
+    $response->assertSee('@page', false);
+    $response->assertSee('margin: 0mm', false);
+});
+
+test('invoice print route resolves business invoice numbers and suppresses print headers', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+    $patient = Patient::create([
+        'patient_number' => 'P-0009',
+        'first_name' => 'Elena',
+        'last_name' => 'Rostova',
+        'gender' => 'female',
+        'phone' => '03001238888',
+        'status' => 'active',
+    ]);
+
+    $invoice = Invoice::create([
+        'patient_id' => $patient->id,
+        'invoice_number' => 'INV-0999',
+        'invoice_date' => '2026-09-29',
+        'subtotal' => 1500.00,
+        'discount' => 200.00,
+        'total_amount' => 1300.00,
+        'paid_amount' => 1300.00,
+        'due_amount' => 0.00,
+        'status' => 'paid',
+        'created_by' => $user->id,
+    ]);
+
+    // Route using model binding generates /invoices/INV-0999/print
+    $routeUrl = route('invoices.print', $invoice);
+    expect($routeUrl)->toContain('INV-0999');
+
+    $response = $this->actingAs($user)->get($routeUrl);
+    $response->assertOk();
+    $response->assertSee('INV-0999');
+    $response->assertSee('@page', false);
+    $response->assertSee('margin: 0mm', false);
+
+    // Also verify invoice show page does not have raw Blade artifacts like @endif
+    $showResponse = $this->actingAs($user)->get(route('invoices.show', $invoice));
+    $showResponse->assertOk();
+    $showResponse->assertDontSee('@endif');
+});
+
+
