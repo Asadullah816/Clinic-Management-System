@@ -16,10 +16,10 @@ class SettingController extends Controller
     {
         $validated = $request->validate([
             'clinic_name' => 'required|string|max:255',
-            'address'     => 'nullable|string|max:1000',
-            'phone'       => 'nullable|string|max:30',
-            'email'       => 'nullable|email|max:255',
-            'currency'    => 'nullable|string|max:10',
+            'address' => 'nullable|string|max:1000',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
+            'currency' => 'nullable|string|max:10',
         ]);
 
         // Only the validated keys are written — nothing else can sneak in

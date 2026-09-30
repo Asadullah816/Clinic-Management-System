@@ -25,11 +25,11 @@ class InventorySeeder extends Seeder
         $supplier = Supplier::updateOrCreate(
             ['email' => 'sales@dermasupply.test'],
             [
-                'name'    => 'DermaSupply Co.',
+                'name' => 'DermaSupply Co.',
                 'company' => 'DermaSupply Co. Ltd.',
-                'phone'   => '0300-1234567',
+                'phone' => '0300-1234567',
                 'address' => '12 Pharma Market, Karachi',
-                'status'  => 'active',
+                'status' => 'active',
             ]
         );
 
@@ -85,16 +85,16 @@ class InventorySeeder extends Seeder
             Medicine::updateOrCreate(
                 ['name' => $medicine['name']],
                 [
-                    'generic_name'         => $medicine['generic_name'],
+                    'generic_name' => $medicine['generic_name'],
                     'medicine_category_id' => $categoryId($medicine['category']),
-                    'supplier_id'          => $supplier->id,
-                    'unit'                 => $medicine['unit'],
-                    'purchase_price'       => $medicine['purchase_price'],
-                    'selling_price'        => $medicine['selling_price'],
-                    'stock_quantity'       => $medicine['stock_quantity'],
-                    'minimum_stock'        => $medicine['minimum_stock'],
-                    'expiry_date'          => $medicine['expiry_date'],
-                    'status'               => 'active',
+                    'supplier_id' => $supplier->id,
+                    'unit' => $medicine['unit'],
+                    'purchase_price' => $medicine['purchase_price'],
+                    'selling_price' => $medicine['selling_price'],
+                    'stock_quantity' => $medicine['stock_quantity'],
+                    'minimum_stock' => $medicine['minimum_stock'],
+                    'expiry_date' => $medicine['expiry_date'],
+                    'status' => 'active',
                 ]
             );
         }

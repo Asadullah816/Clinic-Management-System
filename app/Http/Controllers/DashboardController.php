@@ -24,7 +24,7 @@ class DashboardController extends Controller
         [$periodStart, $periodEnd, $periodLabel] = $this->periodRange($period);
 
         // ================= Patient statistics (all roles) =================
-        $totalPatients  = Patient::count();
+        $totalPatients = Patient::count();
         $todaysPatients = Patient::whereDate('created_at', today())->count();
         $monthsPatients = Patient::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
@@ -39,9 +39,9 @@ class DashboardController extends Controller
 
         // ================= Financial (admin, accountant) — period-scoped =================
         $showFinancial = $user->hasRole('admin', 'accountant');
-        $periodRevenue  = 0;
+        $periodRevenue = 0;
         $periodExpenses = 0;
-        $periodProfit   = 0;
+        $periodProfit = 0;
         $totalOutstanding = 0;
 
         if ($showFinancial) {
@@ -54,7 +54,7 @@ class DashboardController extends Controller
                 $expenseQuery->whereBetween('expense_date', [$periodStart, $periodEnd]);
             }
 
-            $periodRevenue  = $revenueQuery->sum('amount');
+            $periodRevenue = $revenueQuery->sum('amount');
             $periodExpenses = $expenseQuery->sum('amount');
 
             // THE formula, now scoped to the selected period
@@ -68,35 +68,35 @@ class DashboardController extends Controller
         $showInventory = $user->hasRole('admin', 'staff');
         $totalProducts = 0;
         $lowStockCount = 0;
-        $expiredCount  = 0;
+        $expiredCount = 0;
 
         if ($showInventory) {
             $totalProducts = Medicine::count();
             $lowStockCount = Medicine::whereColumn('stock_quantity', '<=', 'minimum_stock')->count();
-            $expiredCount  = Medicine::whereDate('expiry_date', '<', today())->count();
+            $expiredCount = Medicine::whereDate('expiry_date', '<', today())->count();
         }
 
         return view('dashboard.index', [
-            'showAppointments'   => $showAppointments,
-            'showFinancial'      => $showFinancial,
-            'showInventory'      => $showInventory,
+            'showAppointments' => $showAppointments,
+            'showFinancial' => $showFinancial,
+            'showInventory' => $showInventory,
 
-            'totalPatients'      => $totalPatients,
-            'todaysPatients'     => $todaysPatients,
-            'monthsPatients'     => $monthsPatients,
+            'totalPatients' => $totalPatients,
+            'todaysPatients' => $todaysPatients,
+            'monthsPatients' => $monthsPatients,
             'todaysAppointments' => $todaysAppointments,
 
-            'period'             => $period,
-            'periodLabel'        => $periodLabel,
-            'periods'            => $this->periods(),
-            'periodRevenue'      => $periodRevenue,
-            'periodExpenses'     => $periodExpenses,
-            'periodProfit'       => $periodProfit,
-            'totalOutstanding'   => $totalOutstanding,
+            'period' => $period,
+            'periodLabel' => $periodLabel,
+            'periods' => $this->periods(),
+            'periodRevenue' => $periodRevenue,
+            'periodExpenses' => $periodExpenses,
+            'periodProfit' => $periodProfit,
+            'totalOutstanding' => $totalOutstanding,
 
-            'totalProducts'      => $totalProducts,
-            'lowStockCount'      => $lowStockCount,
-            'expiredCount'       => $expiredCount,
+            'totalProducts' => $totalProducts,
+            'lowStockCount' => $lowStockCount,
+            'expiredCount' => $expiredCount,
         ]);
     }
 }

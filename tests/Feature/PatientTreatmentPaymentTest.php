@@ -404,5 +404,3 @@ test('invoice print route resolves business invoice numbers and suppresses print
     $showResponse->assertOk();
     $showResponse->assertDontSee('@endif');
 });
-
-

@@ -22,7 +22,7 @@ class ReportController extends Controller
     {
         $request->validate([
             'from' => 'nullable|date',
-            'to'   => 'nullable|date',
+            'to' => 'nullable|date',
         ]);
 
         return [$request->filled('from'), $request->from, $request->to];
@@ -38,8 +38,8 @@ class ReportController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
-                      ->orWhere('last_name', 'like', "%{$search}%")
-                      ->orWhere('patient_number', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('patient_number', 'like', "%{$search}%");
                 });
             })
             // Count only COMPLETED appointments as visits (aliased to completed_visits)
@@ -85,7 +85,7 @@ class ReportController extends Controller
             ->withQueryString();
 
         return view('reports.payments', [
-            'payments'      => $payments,
+            'payments' => $payments,
             'filteredTotal' => $filteredTotal,
         ]);
     }
@@ -116,8 +116,8 @@ class ReportController extends Controller
             ->withQueryString();
 
         return view('reports.expenses', [
-            'expenses'      => $expenses,
-            'categories'    => ExpenseCategory::orderBy('name')->get(),
+            'expenses' => $expenses,
+            'categories' => ExpenseCategory::orderBy('name')->get(),
             'filteredTotal' => $filteredTotal,
         ]);
     }
@@ -170,9 +170,9 @@ class ReportController extends Controller
             ->withQueryString();
 
         return view('reports.usage', [
-            'usages'           => $usages,
-            'patients'         => Patient::orderBy('first_name')->orderBy('last_name')->get(),
-            'medicines'        => Medicine::withTrashed()->orderBy('name')->get(),
+            'usages' => $usages,
+            'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
+            'medicines' => Medicine::withTrashed()->orderBy('name')->get(),
             'filteredQuantity' => $filteredQuantity,
         ]);
     }
@@ -191,10 +191,10 @@ class ReportController extends Controller
         $netProfit = $totalRevenue - $totalExpenses;
 
         return view('reports.financial', [
-            'totalRevenue'     => $totalRevenue,
-            'totalExpenses'    => $totalExpenses,
+            'totalRevenue' => $totalRevenue,
+            'totalExpenses' => $totalExpenses,
             'totalOutstanding' => $totalOutstanding,
-            'netProfit'        => $netProfit,
+            'netProfit' => $netProfit,
         ]);
     }
 }

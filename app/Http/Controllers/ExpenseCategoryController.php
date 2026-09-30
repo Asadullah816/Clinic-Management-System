@@ -7,16 +7,16 @@ use Illuminate\Http\Request;
 
 class ExpenseCategoryController extends Controller
 {
-    private function rules(ExpenseCategory $category = null): array
+    private function rules(?ExpenseCategory $category = null): array
     {
         $uniqueRule = $category
-            ? 'unique:expense_categories,name,' . $category->id
+            ? 'unique:expense_categories,name,'.$category->id
             : 'unique:expense_categories,name';
 
         return [
-            'name'        => 'required|string|max:255|' . $uniqueRule,
+            'name' => 'required|string|max:255|'.$uniqueRule,
             'description' => 'nullable|string|max:1000',
-            'status'      => 'required|in:active,inactive',
+            'status' => 'required|in:active,inactive',
         ];
     }
 
@@ -25,7 +25,7 @@ class ExpenseCategoryController extends Controller
         $categories = ExpenseCategory::query()
             ->withCount('expenses') // gives $category->expenses_count
             ->when($request->filled('search'), function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search . '%');
+                $query->where('name', 'like', '%'.$request->search.'%');
             })
             ->orderBy('name')
             ->paginate(10)

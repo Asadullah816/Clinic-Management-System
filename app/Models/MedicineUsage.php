@@ -5,10 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Patient;
-use App\Models\Treatment;
-use App\Models\Medicine;
-use App\Models\User;
 class MedicineUsage extends Model
 {
     use HasFactory;

@@ -5,18 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Patient;
-use App\Models\Invoice;
-use App\Models\User;
 class Payment extends Model
 {
     use HasFactory;
 
-    const METHOD_CASH   = 'cash';
-    const METHOD_BANK   = 'bank';
-    const METHOD_CARD   = 'card';
+    const METHOD_CASH = 'cash';
+
+    const METHOD_BANK = 'bank';
+
+    const METHOD_CARD = 'card';
+
     const METHOD_ONLINE = 'online';
-    const METHOD_OTHER  = 'other';
+
+    const METHOD_OTHER = 'other';
 
     protected $fillable = [
         'patient_id',
@@ -33,7 +34,7 @@ class Payment extends Model
     {
         return [
             'payment_date' => 'date',
-            'amount'       => 'decimal:2',
+            'amount' => 'decimal:2',
         ];
     }
 
@@ -43,7 +44,7 @@ class Payment extends Model
      */
     public function receiptNumber(): string
     {
-        return 'RCP-' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+        return 'RCP-'.str_pad($this->id, 4, '0', STR_PAD_LEFT);
     }
 
     public function getRouteKey(): mixed
@@ -51,10 +52,11 @@ class Payment extends Model
         return $this->receiptNumber();
     }
 
-    public function resolveRouteBinding($value, $field = null): ?\Illuminate\Database\Eloquent\Model
+    public function resolveRouteBinding($value, $field = null): ?Model
     {
         if (is_string($value) && preg_match('/^RCP-(\d+)$/i', $value, $matches)) {
             $id = (int) ltrim($matches[1], '0');
+
             return $this->where('id', $id)->firstOrFail();
         }
 
@@ -68,11 +70,11 @@ class Payment extends Model
     public static function methods(): array
     {
         return [
-            self::METHOD_CASH   => 'Cash',
-            self::METHOD_BANK   => 'Bank Transfer',
-            self::METHOD_CARD   => 'Card',
+            self::METHOD_CASH => 'Cash',
+            self::METHOD_BANK => 'Bank Transfer',
+            self::METHOD_CARD => 'Card',
             self::METHOD_ONLINE => 'Online',
-            self::METHOD_OTHER  => 'Other',
+            self::METHOD_OTHER => 'Other',
         ];
     }
 

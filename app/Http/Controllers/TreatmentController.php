@@ -10,11 +10,11 @@ class TreatmentController extends Controller
     private function rules(): array
     {
         return [
-            'name'        => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'price'       => 'required|numeric|min:0',
-            'duration'    => 'nullable|integer|min:1|max:1440', // minutes, max 24h
-            'status'      => 'required|in:active,inactive',
+            'price' => 'required|numeric|min:0',
+            'duration' => 'nullable|integer|min:1|max:1440', // minutes, max 24h
+            'status' => 'required|in:active,inactive',
         ];
     }
 
@@ -25,7 +25,7 @@ class TreatmentController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+                        ->orWhere('description', 'like', "%{$search}%");
                 });
             })
             ->when($request->filled('status'), function ($query) use ($request) {

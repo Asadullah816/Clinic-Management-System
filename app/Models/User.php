@@ -7,22 +7,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-use App\Models\MedicalHistory;
-use App\Models\Appointment;
-use App\Models\PatientTreatment;
-use App\Models\Invoice;
-use App\Models\Payment;
-use App\Models\StockTransaction;
-use App\Models\MedicineUsage;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
 
     // ---- Role constants ----
-    const ROLE_ADMIN       = 'admin';
-    const ROLE_ACCOUNTANT  = 'accountant';
-    const ROLE_RECEPTIONIST= 'receptionist';
-    const ROLE_STAFF       = 'staff';
+    const ROLE_ADMIN = 'admin';
+
+    const ROLE_ACCOUNTANT = 'accountant';
+
+    const ROLE_RECEPTIONIST = 'receptionist';
+
+    const ROLE_STAFF = 'staff';
 
     protected $fillable = [
         'name',
@@ -49,10 +45,10 @@ class User extends Authenticatable
     public static function roles(): array
     {
         return [
-            self::ROLE_ADMIN        => 'Administrator',
-            self::ROLE_ACCOUNTANT   => 'Accountant',
+            self::ROLE_ADMIN => 'Administrator',
+            self::ROLE_ACCOUNTANT => 'Accountant',
             self::ROLE_RECEPTIONIST => 'Receptionist',
-            self::ROLE_STAFF        => 'Staff',
+            self::ROLE_STAFF => 'Staff',
         ];
     }
 
@@ -68,35 +64,38 @@ class User extends Authenticatable
     {
         return in_array($this->role, $roles);
     }
-      public function medicalHistories()
+
+    public function medicalHistories()
     {
         return $this->hasMany(MedicalHistory::class, 'created_by');
     }
 
-        public function appointments()
+    public function appointments()
     {
         return $this->hasMany(Appointment::class, 'created_by');
     }
 
-
-        public function patientTreatments()
+    public function patientTreatments()
     {
         return $this->hasMany(PatientTreatment::class, 'created_by');
     }
-        public function invoices()
+
+    public function invoices()
     {
         return $this->hasMany(Invoice::class, 'created_by');
     }
 
-        public function payments()
+    public function payments()
     {
         return $this->hasMany(Payment::class, 'received_by');
     }
-        public function stockTransactions()
+
+    public function stockTransactions()
     {
         return $this->hasMany(StockTransaction::class, 'created_by');
     }
-        public function medicineUsages()
+
+    public function medicineUsages()
     {
         return $this->hasMany(MedicineUsage::class, 'used_by');
     }

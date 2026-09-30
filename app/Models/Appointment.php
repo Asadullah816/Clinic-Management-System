@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Patient;
-use App\Models\User;
-use App\Models\Treatment;
 class Appointment extends Model
 {
     use HasFactory;
 
     const STATUS_SCHEDULED = 'scheduled';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_CANCELLED = 'cancelled';
-    const STATUS_NO_SHOW   = 'no_show';
+
+    const STATUS_NO_SHOW = 'no_show';
 
     protected $fillable = [
         'patient_id',
@@ -51,7 +51,7 @@ class Appointment extends Model
             self::STATUS_SCHEDULED => 'Scheduled',
             self::STATUS_COMPLETED => 'Completed',
             self::STATUS_CANCELLED => 'Cancelled',
-            self::STATUS_NO_SHOW   => 'No Show',
+            self::STATUS_NO_SHOW => 'No Show',
         ];
     }
 
@@ -68,8 +68,8 @@ class Appointment extends Model
         return match ($this->status) {
             self::STATUS_COMPLETED => 'success',
             self::STATUS_CANCELLED => 'danger',
-            self::STATUS_NO_SHOW   => 'warning',
-            default                => 'primary', // scheduled
+            self::STATUS_NO_SHOW => 'warning',
+            default => 'primary', // scheduled
         };
     }
 
@@ -82,7 +82,7 @@ class Appointment extends Model
 
     public function treatment()
     {
-       return $this->belongsTo(Treatment::class)->withTrashed();
+        return $this->belongsTo(Treatment::class)->withTrashed();
     }
 
     public function createdBy()

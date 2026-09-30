@@ -20,8 +20,8 @@ class PatientTreatmentMedicine extends Model
     protected function casts(): array
     {
         return [
-            'quantity'    => 'integer',
-            'unit_price'  => 'decimal:2',
+            'quantity' => 'integer',
+            'unit_price' => 'decimal:2',
             'total_price' => 'decimal:2',
         ];
     }

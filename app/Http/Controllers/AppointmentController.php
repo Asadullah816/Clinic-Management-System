@@ -12,12 +12,12 @@ class AppointmentController extends Controller
     private function rules(): array
     {
         return [
-            'patient_id'       => 'required|exists:patients,id',
-            'treatment_id'     => 'nullable|exists:treatments,id',
+            'patient_id' => 'required|exists:patients,id',
+            'treatment_id' => 'nullable|exists:treatments,id',
             'appointment_date' => 'required|date',
             'appointment_time' => 'required|date_format:H:i',
-            'status'           => 'required|in:scheduled,completed,cancelled,no_show',
-            'notes'            => 'nullable|string|max:2000',
+            'status' => 'required|in:scheduled,completed,cancelled,no_show',
+            'notes' => 'nullable|string|max:2000',
         ];
     }
 
@@ -29,8 +29,8 @@ class AppointmentController extends Controller
                 $search = $request->search;
                 $query->whereHas('patient', function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
-                      ->orWhere('last_name', 'like', "%{$search}%")
-                      ->orWhere('patient_number', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('patient_number', 'like', "%{$search}%");
                 });
             })
             ->when($request->filled('status'), function ($query) use ($request) {
@@ -58,10 +58,10 @@ class AppointmentController extends Controller
     public function create(Request $request)
     {
         return view('appointments.create', [
-            'patients'   => Patient::orderBy('first_name')->orderBy('last_name')->get(),
+            'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
             'treatments' => Treatment::where('status', Treatment::STATUS_ACTIVE)->orderBy('name')->get(),
             // From the patient profile we link here with ?patient_id=X to preselect the patient
-            'patientId'  => $request->query('patient_id'),
+            'patientId' => $request->query('patient_id'),
         ]);
     }
 
@@ -91,8 +91,8 @@ class AppointmentController extends Controller
     {
         return view('appointments.edit', [
             'appointment' => $appointment,
-            'patients'    => Patient::orderBy('first_name')->orderBy('last_name')->get(),
-            'treatments'  => Treatment::where('status', Treatment::STATUS_ACTIVE)->orderBy('name')->get(),
+            'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
+            'treatments' => Treatment::where('status', Treatment::STATUS_ACTIVE)->orderBy('name')->get(),
         ]);
     }
 
@@ -114,7 +114,7 @@ class AppointmentController extends Controller
         // When deleted from the patient profile tab, go back to that profile
         if ($request->query('redirect') === 'patient') {
             return redirect()
-                ->to(route('patients.show', $appointment->patient_id) . '#appointments')
+                ->to(route('patients.show', $appointment->patient_id).'#appointments')
                 ->with('success', 'Appointment deleted successfully.');
         }
 

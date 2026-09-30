@@ -13,7 +13,8 @@ class DatabaseSeeder extends Seeder
             TreatmentSeeder::class,
             InventorySeeder::class,
             ExpenseSeeder::class,
-             SettingSeeder::class,
+            SettingSeeder::class,
+            LaserSeeder::class,
         ]);
     }
 }

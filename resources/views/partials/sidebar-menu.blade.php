@@ -96,6 +96,58 @@
             </a>
         </li>
     @endif
+
+    {{-- ==================================================== --}}
+    {{-- Laser Unit (Shared Asset & Separate Ledger)         --}}
+    {{-- ==================================================== --}}
+    <li class="nav-item mt-2">
+        <div class="px-2 pb-1 d-flex align-items-center justify-content-between">
+            <span class="text-uppercase small fw-bold" style="color: #38bdf8; font-size: 0.72rem; letter-spacing: 0.05em;">
+                <i class="bi bi-lightning-charge-fill me-1"></i> Laser Unit
+            </span>
+            <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size: 0.6rem;">Shared</span>
+        </div>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('laser.dashboard') ? 'active' : '' }} ps-4"
+            href="{{ route('laser.dashboard') }}">
+            <i class="bi bi-speedometer2 me-2"></i> Laser Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('laser.patients.*') ? 'active' : '' }} ps-4"
+            href="{{ route('laser.patients.index') }}">
+            <i class="bi bi-person-badge me-2"></i> Laser Patients
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('laser.sessions.*') ? 'active' : '' }} ps-4"
+            href="{{ route('laser.sessions.index') }}">
+            <i class="bi bi-activity me-2"></i> Laser Sessions
+        </a>
+    </li>
+    @if (auth()->user()->hasRole('admin', 'staff'))
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('laser.treatments.*') ? 'active' : '' }} ps-4"
+                href="{{ route('laser.treatments.index') }}">
+                <i class="bi bi-card-checklist me-2"></i> Laser Catalog
+            </a>
+        </li>
+    @endif
+    @if (auth()->user()->hasRole('admin', 'accountant'))
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('laser.expenses.*', 'laser.expense-categories.*') ? 'active' : '' }} ps-4"
+                href="{{ route('laser.expenses.index') }}">
+                <i class="bi bi-wallet2 me-2"></i> Laser Expenses
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('laser.reports.*') ? 'active' : '' }} ps-4"
+                href="{{ route('laser.reports.financial') }}">
+                <i class="bi bi-graph-up-arrow me-2"></i> Laser Financials
+            </a>
+        </li>
+    @endif
     {{-- Inventory (admin only; staff gains Medicine Usage in Phase 11) --}}
     {{-- @if (auth()->user()->isAdmin())
         <li class="nav-item">

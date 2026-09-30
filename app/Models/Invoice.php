@@ -5,15 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Patient;
-use App\Models\User;
-use App\Models\Payment;
 class Invoice extends Model
 {
     use HasFactory;
 
-    const STATUS_PAID    = 'paid';
+    const STATUS_PAID = 'paid';
+
     const STATUS_PARTIAL = 'partial';
+
     const STATUS_PENDING = 'pending';
 
     protected $fillable = [
@@ -34,11 +33,11 @@ class Invoice extends Model
     {
         return [
             'invoice_date' => 'date',
-            'subtotal'     => 'decimal:2',
-            'discount'     => 'decimal:2',
+            'subtotal' => 'decimal:2',
+            'discount' => 'decimal:2',
             'total_amount' => 'decimal:2',
-            'paid_amount'  => 'decimal:2',
-            'due_amount'   => 'decimal:2',
+            'paid_amount' => 'decimal:2',
+            'due_amount' => 'decimal:2',
         ];
     }
 
@@ -62,7 +61,7 @@ class Invoice extends Model
         return $this->invoice_number ?? (string) $this->id;
     }
 
-    public function resolveRouteBinding($value, $field = null): ?\Illuminate\Database\Eloquent\Model
+    public function resolveRouteBinding($value, $field = null): ?Model
     {
         if (is_string($value) && str_starts_with(strtoupper($value), 'INV-')) {
             return $this->where('invoice_number', $value)->firstOrFail();
@@ -78,7 +77,7 @@ class Invoice extends Model
     public static function statuses(): array
     {
         return [
-            self::STATUS_PAID    => 'Paid',
+            self::STATUS_PAID => 'Paid',
             self::STATUS_PARTIAL => 'Partial',
             self::STATUS_PENDING => 'Pending',
         ];
@@ -92,9 +91,9 @@ class Invoice extends Model
     public function statusColor(): string
     {
         return match ($this->status) {
-            self::STATUS_PAID    => 'success',
+            self::STATUS_PAID => 'success',
             self::STATUS_PARTIAL => 'warning',
-            default              => 'danger', // pending
+            default => 'danger', // pending
         };
     }
 
@@ -111,7 +110,7 @@ class Invoice extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-        public function payments()
+    public function payments()
     {
         return $this->hasMany(Payment::class);
     }

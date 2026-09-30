@@ -7,17 +7,17 @@ use Illuminate\Http\Request;
 
 class MedicineCategoryController extends Controller
 {
-    private function rules(MedicineCategory $category = null): array
+    private function rules(?MedicineCategory $category = null): array
     {
         // 'ignore self' on update so a category can keep its own name
         $uniqueRule = $category
-            ? 'unique:medicine_categories,name,' . $category->id
+            ? 'unique:medicine_categories,name,'.$category->id
             : 'unique:medicine_categories,name';
 
         return [
-            'name'        => 'required|string|max:255|' . $uniqueRule,
+            'name' => 'required|string|max:255|'.$uniqueRule,
             'description' => 'nullable|string|max:1000',
-            'status'      => 'required|in:active,inactive',
+            'status' => 'required|in:active,inactive',
         ];
     }
 
@@ -26,7 +26,7 @@ class MedicineCategoryController extends Controller
         $categories = MedicineCategory::query()
             ->withCount('medicines') // gives $category->medicines_count
             ->when($request->filled('search'), function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search . '%');
+                $query->where('name', 'like', '%'.$request->search.'%');
             })
             ->orderBy('name')
             ->paginate(10)

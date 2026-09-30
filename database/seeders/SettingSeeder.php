@@ -11,10 +11,10 @@ class SettingSeeder extends Seeder
     {
         $defaults = [
             'clinic_name' => 'Mayar skin care & Aesthethic clinic',
-            'address'     => 'House 12, Main Boulevard, Gulberg',
-            'phone'       => '03489030035',
-            'email'       => 'info@skinclinic.test',
-            'currency'    => 'PKR',
+            'address' => 'House 12, Main Boulevard, Gulberg',
+            'phone' => '03489030035',
+            'email' => 'info@skinclinic.test',
+            'currency' => 'PKR',
         ];
 
         foreach ($defaults as $key => $value) {

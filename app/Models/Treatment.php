@@ -6,16 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-use App\Models\Patient;
-use App\Models\Treatment;
-use App\Models\User;
-use App\Models\Appointment;
-use App\Models\PatientTreatment;
 class Treatment extends Model
 {
     use HasFactory, SoftDeletes;
 
-    const STATUS_ACTIVE   = 'active';
+    const STATUS_ACTIVE = 'active';
+
     const STATUS_INACTIVE = 'inactive';
 
     protected $fillable = [
@@ -40,8 +36,7 @@ class Treatment extends Model
         return $this->hasMany(Appointment::class);
     }
 
-
-        public function patientTreatments()
+    public function patientTreatments()
     {
         return $this->hasMany(PatientTreatment::class);
     }

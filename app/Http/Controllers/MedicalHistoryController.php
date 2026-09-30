@@ -14,14 +14,14 @@ class MedicalHistoryController extends Controller
     private function rules(): array
     {
         return [
-            'visit_date'          => 'required|date',
-            'chief_complaint'     => 'required|string|max:1000',
-            'diagnosis'           => 'nullable|string|max:2000',
-            'previous_treatment'  => 'nullable|string|max:2000',
-            'allergies'           => 'nullable|string|max:1000',
-            'medical_conditions'  => 'nullable|string|max:2000',
+            'visit_date' => 'required|date',
+            'chief_complaint' => 'required|string|max:1000',
+            'diagnosis' => 'nullable|string|max:2000',
+            'previous_treatment' => 'nullable|string|max:2000',
+            'allergies' => 'nullable|string|max:1000',
+            'medical_conditions' => 'nullable|string|max:2000',
             'current_medications' => 'nullable|string|max:2000',
-            'notes'               => 'nullable|string|max:2000',
+            'notes' => 'nullable|string|max:2000',
         ];
     }
 
@@ -43,7 +43,7 @@ class MedicalHistoryController extends Controller
 
         // Redirect back to the profile, straight onto the Medical History tab
         return redirect()
-            ->to(route('patients.show', $patient) . '#medical-history')
+            ->to(route('patients.show', $patient).'#medical-history')
             ->with('success', 'Medical history record added successfully.');
     }
 
@@ -51,7 +51,7 @@ class MedicalHistoryController extends Controller
     {
         return view('medical-histories.edit', [
             'medicalHistory' => $medicalHistory,
-            'patient'        => $medicalHistory->patient,
+            'patient' => $medicalHistory->patient,
         ]);
     }
 
@@ -62,7 +62,7 @@ class MedicalHistoryController extends Controller
         $medicalHistory->update($validated);
 
         return redirect()
-            ->to(route('patients.show', $medicalHistory->patient_id) . '#medical-history')
+            ->to(route('patients.show', $medicalHistory->patient_id).'#medical-history')
             ->with('success', 'Medical history record updated successfully.');
     }
 
@@ -73,7 +73,7 @@ class MedicalHistoryController extends Controller
         $medicalHistory->delete();
 
         return redirect()
-            ->to(route('patients.show', $patientId) . '#medical-history')
+            ->to(route('patients.show', $patientId).'#medical-history')
             ->with('success', 'Medical history record deleted successfully.');
     }
 }

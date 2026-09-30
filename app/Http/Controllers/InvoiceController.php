@@ -12,12 +12,12 @@ class InvoiceController extends Controller
     {
         return [
             'patient_id' => 'required|exists:patients,id',
-            'invoice_date'        => 'required|date',
-            'subtotal'            => 'required|numeric|min:0',
-            'discount_type'       => 'nullable|in:fixed,percentage',
+            'invoice_date' => 'required|date',
+            'subtotal' => 'required|numeric|min:0',
+            'discount_type' => 'nullable|in:fixed,percentage',
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
-            'discount'            => 'nullable|numeric|min:0',
-            'notes'               => 'nullable|string|max:2000',
+            'discount' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string|max:2000',
         ];
     }
 
@@ -72,7 +72,7 @@ class InvoiceController extends Controller
 
         if ($discount > $subtotal) {
             return back()
-                ->withErrors(['discount' => 'Discount cannot exceed subtotal of ' . number_format($subtotal, 2) . '.'])
+                ->withErrors(['discount' => 'Discount cannot exceed subtotal of '.number_format($subtotal, 2).'.'])
                 ->withInput();
         }
 
@@ -154,7 +154,7 @@ class InvoiceController extends Controller
 
         if ($discount > $subtotal) {
             return back()
-                ->withErrors(['discount' => 'Discount cannot exceed subtotal of ' . number_format($subtotal, 2) . '.'])
+                ->withErrors(['discount' => 'Discount cannot exceed subtotal of '.number_format($subtotal, 2).'.'])
                 ->withInput();
         }
 

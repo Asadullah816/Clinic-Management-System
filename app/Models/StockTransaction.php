@@ -5,15 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Medicine;
-use App\Models\Supplier;
-use App\Models\User;
-use App\Models\Expense;
 class StockTransaction extends Model
 {
     use HasFactory;
 
-    const TYPE_IN  = 'in';
+    const TYPE_IN = 'in';
+
     const TYPE_OUT = 'out';
 
     protected $fillable = [
@@ -33,14 +30,14 @@ class StockTransaction extends Model
     {
         return [
             'transaction_date' => 'date',
-            'unit_cost'        => 'decimal:2',
+            'unit_cost' => 'decimal:2',
         ];
     }
 
     public static function types(): array
     {
         return [
-            self::TYPE_IN  => 'Stock In',
+            self::TYPE_IN => 'Stock In',
             self::TYPE_OUT => 'Stock Out',
         ];
     }
@@ -82,7 +79,8 @@ class StockTransaction extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-        /**
+
+    /**
      * The expense auto-created along with this purchase (Stock In only).
      */
     public function expense()

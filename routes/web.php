@@ -6,6 +6,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LaserDashboardController;
+use App\Http\Controllers\LaserExpenseCategoryController;
+use App\Http\Controllers\LaserExpenseController;
+use App\Http\Controllers\LaserPatientController;
+use App\Http\Controllers\LaserReportController;
+use App\Http\Controllers\LaserSessionController;
+use App\Http\Controllers\LaserTreatmentController;
 use App\Http\Controllers\MedicalHistoryController;
 use App\Http\Controllers\MedicineCategoryController;
 use App\Http\Controllers\MedicineController;
@@ -30,7 +37,7 @@ Route::get('/', function () {
 
 // ---------- Guest only ----------
 Route::middleware('guest')->group(function () {
-    Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 });
 
@@ -138,11 +145,50 @@ Route::middleware('auth')->group(function () {
 
     // ---------- Reports (admin, accountant) ----------
     Route::middleware('role:admin,accountant')->group(function () {
-        Route::get('reports/patients',  [ReportController::class, 'patients'])->name('reports.patients');
-        Route::get('reports/payments',  [ReportController::class, 'payments'])->name('reports.payments');
-        Route::get('reports/expenses',  [ReportController::class, 'expenses'])->name('reports.expenses');
+        Route::get('reports/patients', [ReportController::class, 'patients'])->name('reports.patients');
+        Route::get('reports/payments', [ReportController::class, 'payments'])->name('reports.payments');
+        Route::get('reports/expenses', [ReportController::class, 'expenses'])->name('reports.expenses');
         Route::get('reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
-        Route::get('reports/usage',     [ReportController::class, 'usage'])->name('reports.usage');
+        Route::get('reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
         Route::get('reports/financial', [ReportController::class, 'financial'])->name('reports.financial');
+    });
+
+    // =======================================================
+    // ---------- LASER UNIT (SHARED ASSET MODULE) ----------
+    // =======================================================
+    Route::prefix('laser')->name('laser.')->group(function () {
+        // Dashboard / Overview
+        Route::get('/', [LaserDashboardController::class, 'index'])->name('dashboard');
+
+        // Laser Patients
+        Route::middleware('role:admin,receptionist,staff')->group(function () {
+            Route::resource('patients', LaserPatientController::class)->except(['index', 'show']);
+        });
+        Route::get('patients', [LaserPatientController::class, 'index'])->name('patients.index');
+        Route::get('patients/{patient}', [LaserPatientController::class, 'show'])->name('patients.show');
+
+        // Laser Treatments Catalog
+        Route::middleware('role:admin,staff')->group(function () {
+            Route::resource('treatments', LaserTreatmentController::class);
+        });
+
+        // Laser Sessions & Billing (LINV-XXXX)
+        Route::middleware('role:admin,receptionist,staff')->group(function () {
+            Route::get('sessions/{session}/print', [LaserSessionController::class, 'print'])->name('sessions.print');
+            Route::resource('sessions', LaserSessionController::class);
+        });
+
+        // Laser Expenses
+        Route::middleware('role:admin,accountant')->group(function () {
+            Route::resource('expense-categories', LaserExpenseCategoryController::class)->except(['show', 'create', 'edit']);
+            Route::resource('expenses', LaserExpenseController::class);
+        });
+
+        // Laser Financial Ledger & Reports
+        Route::middleware('role:admin,accountant')->group(function () {
+            Route::get('reports/financial', [LaserReportController::class, 'financial'])->name('reports.financial');
+            Route::get('reports/sessions', [LaserReportController::class, 'sessions'])->name('reports.sessions');
+            Route::get('reports/expenses', [LaserReportController::class, 'expenses'])->name('reports.expenses');
+        });
     });
 });

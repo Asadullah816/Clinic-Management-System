@@ -10,13 +10,13 @@ class SupplierController extends Controller
     private function rules(): array
     {
         return [
-            'name'    => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'company' => 'nullable|string|max:255',
-            'phone'   => 'nullable|string|max:30',
-            'email'   => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:1000',
-            'notes'   => 'nullable|string|max:2000',
-            'status'  => 'required|in:active,inactive',
+            'notes' => 'nullable|string|max:2000',
+            'status' => 'required|in:active,inactive',
         ];
     }
 
@@ -28,8 +28,8 @@ class SupplierController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('company', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%");
+                        ->orWhere('company', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
                 });
             })
             ->orderBy('name')

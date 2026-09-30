@@ -12,19 +12,19 @@ class MedicineController extends Controller
     private function rules(): array
     {
         return [
-            'name'                 => 'required|string|max:255',
-            'generic_name'         => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'generic_name' => 'nullable|string|max:255',
             'medicine_category_id' => 'required|exists:medicine_categories,id',
-            'supplier_id'          => 'nullable|exists:suppliers,id',
-            'unit'                 => 'nullable|string|max:20',
-            'purchase_price'       => 'required|numeric|min:0',
-            'selling_price'        => 'required|numeric|min:0',
-            'stock_quantity'       => 'required|integer|min:0',
-            'minimum_stock'        => 'required|integer|min:0',
-            'expiry_date'          => 'nullable|date',
-            'description'          => 'nullable|string|max:2000',
-            'image'                => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
-            'status'               => 'required|in:active,inactive',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'unit' => 'nullable|string|max:20',
+            'purchase_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'minimum_stock' => 'required|integer|min:0',
+            'expiry_date' => 'nullable|date',
+            'description' => 'nullable|string|max:2000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
+            'status' => 'required|in:active,inactive',
         ];
     }
 
@@ -35,7 +35,7 @@ class MedicineController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('generic_name', 'like', "%{$search}%");
+                        ->orWhere('generic_name', 'like', "%{$search}%");
                 });
             })
             ->when($request->filled('category_id'), function ($query) use ($request) {
@@ -56,7 +56,7 @@ class MedicineController extends Controller
             ->withQueryString();
 
         return view('medicines.index', [
-            'medicines'  => $medicines,
+            'medicines' => $medicines,
             'categories' => MedicineCategory::orderBy('name')->get(),
         ]);
     }
@@ -65,7 +65,7 @@ class MedicineController extends Controller
     {
         return view('medicines.create', [
             'categories' => MedicineCategory::where('status', 'active')->orderBy('name')->get(),
-            'suppliers'  => Supplier::where('status', 'active')->orderBy('name')->get(),
+            'suppliers' => Supplier::where('status', 'active')->orderBy('name')->get(),
         ]);
     }
 
@@ -75,13 +75,13 @@ class MedicineController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
             $destination = public_path('uploads/medicines');
             if (! file_exists($destination)) {
                 mkdir($destination, 0755, true);
             }
             $file->move($destination, $filename);
-            $validated['image'] = 'uploads/medicines/' . $filename;
+            $validated['image'] = 'uploads/medicines/'.$filename;
         }
 
         Medicine::create($validated);
@@ -98,13 +98,13 @@ class MedicineController extends Controller
             'supplier',
             'stockTransactions' => function ($query) {
                 $query->with(['supplier', 'createdBy'])
-                      ->orderByDesc('transaction_date')
-                      ->orderByDesc('id');
+                    ->orderByDesc('transaction_date')
+                    ->orderByDesc('id');
             },
             'medicineUsages' => function ($query) {
                 $query->with(['patient', 'treatment', 'usedBy'])
-                      ->orderByDesc('usage_date')
-                      ->orderByDesc('id');
+                    ->orderByDesc('usage_date')
+                    ->orderByDesc('id');
             },
         ]);
 
@@ -116,9 +116,9 @@ class MedicineController extends Controller
     public function edit(Medicine $medicine)
     {
         return view('medicines.edit', [
-            'medicine'   => $medicine,
+            'medicine' => $medicine,
             'categories' => MedicineCategory::where('status', 'active')->orderBy('name')->get(),
-            'suppliers'  => Supplier::where('status', 'active')->orderBy('name')->get(),
+            'suppliers' => Supplier::where('status', 'active')->orderBy('name')->get(),
         ]);
     }
 
@@ -138,13 +138,13 @@ class MedicineController extends Controller
                 @unlink(public_path($medicine->image));
             }
             $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
             $destination = public_path('uploads/medicines');
             if (! file_exists($destination)) {
                 mkdir($destination, 0755, true);
             }
             $file->move($destination, $filename);
-            $validated['image'] = 'uploads/medicines/' . $filename;
+            $validated['image'] = 'uploads/medicines/'.$filename;
         }
 
         $medicine->update($validated);

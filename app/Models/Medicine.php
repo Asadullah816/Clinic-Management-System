@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-use App\Models\MedicineCategory;
-use App\Models\Supplier;
 class Medicine extends Model
 {
     use HasFactory, SoftDeletes;
 
-    const STATUS_ACTIVE   = 'active';
+    const STATUS_ACTIVE = 'active';
+
     const STATUS_INACTIVE = 'inactive';
 
     protected $fillable = [
@@ -34,9 +33,9 @@ class Medicine extends Model
     protected function casts(): array
     {
         return [
-            'expiry_date'    => 'date',
+            'expiry_date' => 'date',
             'purchase_price' => 'decimal:2',
-            'selling_price'  => 'decimal:2',
+            'selling_price' => 'decimal:2',
         ];
     }
 

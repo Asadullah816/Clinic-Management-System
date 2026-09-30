@@ -11,11 +11,11 @@ class PaymentController extends Controller
     private function rules(): array
     {
         return [
-            'payment_date'   => 'required|date',
-            'amount'         => 'required|numeric|min:0.01',
+            'payment_date' => 'required|date',
+            'amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|in:cash,bank,card,online,other',
-            'reference'      => 'nullable|string|max:255',
-            'notes'          => 'nullable|string|max:2000',
+            'reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:2000',
         ];
     }
 
@@ -27,8 +27,8 @@ class PaymentController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('patient', function ($p) use ($search) {
                         $p->where('first_name', 'like', "%{$search}%")
-                          ->orWhere('last_name', 'like', "%{$search}%")
-                          ->orWhere('patient_number', 'like', "%{$search}%");
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('patient_number', 'like', "%{$search}%");
                     })->orWhereHas('invoice', function ($i) use ($search) {
                         $i->where('invoice_number', 'like', "%{$search}%");
                     });
@@ -49,7 +49,7 @@ class PaymentController extends Controller
 
     public function create(Request $request)
     {
-        $invoiceId    = $request->query('invoice_id');
+        $invoiceId = $request->query('invoice_id');
         $lockedInvoice = $invoiceId ? Invoice::with('patient')->find($invoiceId) : null;
 
         // Coming from an invoice that is already settled → nowhere to pay
@@ -67,9 +67,9 @@ class PaymentController extends Controller
             ->get();
 
         return view('payments.create', [
-            'payment'      => null,
-            'invoices'     => $invoices,
-            'lockedInvoice'=> $lockedInvoice,
+            'payment' => null,
+            'invoices' => $invoices,
+            'lockedInvoice' => $lockedInvoice,
         ]);
     }
 
@@ -91,41 +91,40 @@ class PaymentController extends Controller
         // Financial guard 2: payment may not exceed the remaining due
         if ((float) $validated['amount'] > (float) $invoice->due_amount) {
             return back()
-                ->withErrors(['amount' =>
-                    'The amount cannot exceed the remaining due of ' .
-                    number_format($invoice->due_amount, 2) . '.'])
+                ->withErrors(['amount' => 'The amount cannot exceed the remaining due of '.
+                    number_format($invoice->due_amount, 2).'.'])
                 ->withInput();
         }
 
         Payment::create([
-            'patient_id'     => $invoice->patient_id, // derived from the invoice — one less field to get wrong
-            'invoice_id'     => $invoice->id,
-            'payment_date'   => $validated['payment_date'],
-            'amount'         => $validated['amount'],
+            'patient_id' => $invoice->patient_id, // derived from the invoice — one less field to get wrong
+            'invoice_id' => $invoice->id,
+            'payment_date' => $validated['payment_date'],
+            'amount' => $validated['amount'],
             'payment_method' => $validated['payment_method'],
-            'reference'      => $validated['reference'] ?? null,
-            'notes'          => $validated['notes'] ?? null,
-            'received_by'    => auth()->id(),
+            'reference' => $validated['reference'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'received_by' => auth()->id(),
         ]);
 
         // Update the invoice: same two lines + status method, everywhere
         $invoice->paid_amount = (float) $invoice->paid_amount + (float) $validated['amount'];
-        $invoice->due_amount  = (float) $invoice->total_amount - (float) $invoice->paid_amount;
-        $invoice->status      = $invoice->recalculatePaymentStatus();
+        $invoice->due_amount = (float) $invoice->total_amount - (float) $invoice->paid_amount;
+        $invoice->status = $invoice->recalculatePaymentStatus();
         $invoice->save();
 
         return redirect()
             ->route('invoices.show', $invoice)
-            ->with('success', 'Payment of ' . number_format($validated['amount'], 2) .
-                ' recorded. Invoice status: ' . $invoice->statusLabel() . '.');
+            ->with('success', 'Payment of '.number_format($validated['amount'], 2).
+                ' recorded. Invoice status: '.$invoice->statusLabel().'.');
     }
 
     public function edit(Payment $payment)
     {
         return view('payments.edit', [
-            'payment'      => $payment,
-            'lockedInvoice'=> $payment->invoice()->with('patient')->first(),
-            'invoices'     => collect(), // the invoice is fixed after creation
+            'payment' => $payment,
+            'lockedInvoice' => $payment->invoice()->with('patient')->first(),
+            'invoices' => collect(), // the invoice is fixed after creation
         ]);
     }
 
@@ -133,22 +132,21 @@ class PaymentController extends Controller
     {
         $validated = $request->validate($this->rules());
 
-        $invoice        = $payment->invoice;
+        $invoice = $payment->invoice;
         $paidWithoutThis = (float) $invoice->paid_amount - (float) $payment->amount;
-        $newPaidTotal    = $paidWithoutThis + (float) $validated['amount'];
+        $newPaidTotal = $paidWithoutThis + (float) $validated['amount'];
 
         // Guard: this invoice's total can never be exceeded
         if ($newPaidTotal > (float) $invoice->total_amount) {
             return back()
-                ->withErrors(['amount' =>
-                    'The maximum allowed for this payment is ' .
-                    number_format((float) $invoice->total_amount - $paidWithoutThis, 2) . '.'])
+                ->withErrors(['amount' => 'The maximum allowed for this payment is '.
+                    number_format((float) $invoice->total_amount - $paidWithoutThis, 2).'.'])
                 ->withInput();
         }
 
         $invoice->paid_amount = $newPaidTotal;
-        $invoice->due_amount  = (float) $invoice->total_amount - $newPaidTotal;
-        $invoice->status      = $invoice->recalculatePaymentStatus();
+        $invoice->due_amount = (float) $invoice->total_amount - $newPaidTotal;
+        $invoice->status = $invoice->recalculatePaymentStatus();
         $invoice->save();
 
         $payment->update($validated); // received_by stays — who received the money doesn't change
@@ -164,8 +162,8 @@ class PaymentController extends Controller
 
         // Reverse this payment's effect on the invoice, then delete
         $invoice->paid_amount = (float) $invoice->paid_amount - (float) $payment->amount;
-        $invoice->due_amount  = (float) $invoice->total_amount - (float) $invoice->paid_amount;
-        $invoice->status      = $invoice->recalculatePaymentStatus();
+        $invoice->due_amount = (float) $invoice->total_amount - (float) $invoice->paid_amount;
+        $invoice->status = $invoice->recalculatePaymentStatus();
         $invoice->save();
 
         $payment->delete();
@@ -190,7 +188,7 @@ class PaymentController extends Controller
         $totalOutstanding = Invoice::where('due_amount', '>', 0)->sum('due_amount');
 
         return view('payments.outstanding', [
-            'invoices'         => $invoices,
+            'invoices' => $invoices,
             'totalOutstanding' => $totalOutstanding,
         ]);
     }

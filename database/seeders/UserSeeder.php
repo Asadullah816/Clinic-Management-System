@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
         $users = [
             ['name' => 'Administrator', 'email' => 'admin@clinic.test',       'role' => 'admin'],
             ['name' => 'Accountant',    'email' => 'accountant@clinic.test',  'role' => 'accountant'],
-            ['name' => 'Receptionist',  'email' => 'receptionist@clinic.test','role' => 'receptionist'],
+            ['name' => 'Receptionist',  'email' => 'receptionist@clinic.test', 'role' => 'receptionist'],
             ['name' => 'Staff Member',  'email' => 'staff@clinic.test',       'role' => 'staff'],
         ];
 
@@ -20,8 +20,8 @@ class UserSeeder extends Seeder
             User::updateOrCreate(
                 ['email' => $userData['email']],          // match on email
                 [
-                    'name'     => $userData['name'],
-                    'role'     => $userData['role'],
+                    'name' => $userData['name'],
+                    'role' => $userData['role'],
                     'password' => 'password',             // hashed automatically by the model cast
                 ]
             );

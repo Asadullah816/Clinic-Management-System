@@ -5,9 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Patient;
-use App\Models\Treatment;
-use App\Models\User;
 class PatientTreatment extends Model
 {
     use HasFactory;
@@ -29,13 +26,13 @@ class PatientTreatment extends Model
     protected function casts(): array
     {
         return [
-            'treatment_date'    => 'date',
-            'price'             => 'decimal:2',
-            'discount'          => 'decimal:2',
-            'medicine_price'    => 'decimal:2',
+            'treatment_date' => 'date',
+            'price' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'medicine_price' => 'decimal:2',
             'medicine_discount' => 'decimal:2',
-            'medicine_total'    => 'decimal:2',
-            'total_amount'      => 'decimal:2',
+            'medicine_total' => 'decimal:2',
+            'total_amount' => 'decimal:2',
         ];
     }
 

@@ -27,16 +27,16 @@ test('medicine can be created with image and updated with a new image', function
     $file = UploadedFile::fake()->image('retinol-serum.jpg', 400, 400);
 
     $response = $this->actingAs($user)->post(route('medicines.store'), [
-        'name'                 => 'Retinol Serum 0.5%',
-        'generic_name'         => 'Retinoid',
+        'name' => 'Retinol Serum 0.5%',
+        'generic_name' => 'Retinoid',
         'medicine_category_id' => $category->id,
-        'purchase_price'       => 20.00,
-        'selling_price'        => 45.00,
-        'stock_quantity'       => 25,
-        'minimum_stock'        => 5,
-        'unit'                 => 'bottle',
-        'status'               => 'active',
-        'image'                => $file,
+        'purchase_price' => 20.00,
+        'selling_price' => 45.00,
+        'stock_quantity' => 25,
+        'minimum_stock' => 5,
+        'unit' => 'bottle',
+        'status' => 'active',
+        'image' => $file,
     ]);
 
     $response->assertRedirect(route('medicines.index'));
@@ -48,8 +48,8 @@ test('medicine can be created with image and updated with a new image', function
     expect($medicine->image_url)->toContain('/uploads/medicines/');
 
     // Clean up created file from public/uploads/medicines
-    if ($medicine->image && File::exists(public_path('uploads/medicines/' . $medicine->image))) {
-        File::delete(public_path('uploads/medicines/' . $medicine->image));
+    if ($medicine->image && File::exists(public_path('uploads/medicines/'.$medicine->image))) {
+        File::delete(public_path('uploads/medicines/'.$medicine->image));
     }
 });
 
@@ -575,5 +575,3 @@ test('invoices support percentage discount calculation on store and update', fun
     expect((float) $invoice->total_amount)->toBe(4500.00);
     expect((float) $invoice->due_amount)->toBe(4500.00);
 });
-
-

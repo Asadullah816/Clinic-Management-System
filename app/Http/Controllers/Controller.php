@@ -19,7 +19,7 @@ abstract class Controller
             '3days' => 'Last 3 Days',
             '7days' => 'Last 7 Days',
             'month' => 'This Month',
-            'all'   => 'All Time',
+            'all' => 'All Time',
         ];
     }
 

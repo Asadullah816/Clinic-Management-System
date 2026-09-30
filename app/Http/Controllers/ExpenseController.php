@@ -12,16 +12,16 @@ class ExpenseController extends Controller
     {
         return [
             'expense_category_id' => 'required|exists:expense_categories,id',
-            'title'               => 'required|string|max:255',
-            'amount'              => 'required|numeric|min:0.01',
-            'expense_date'        => 'required|date',
-            'payment_method'      => 'required|in:cash,bank,card,online,other',
-            'reference'           => 'nullable|string|max:255',
-            'description'         => 'nullable|string|max:2000',
+            'title' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'expense_date' => 'required|date',
+            'payment_method' => 'required|in:cash,bank,card,online,other',
+            'reference' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:2000',
         ];
     }
 
-        public function index(Request $request)
+    public function index(Request $request)
     {
         $period = $request->query('period', 'all');
         [$periodStart, $periodEnd, $periodLabel] = $this->periodRange($period);
@@ -50,11 +50,11 @@ class ExpenseController extends Controller
             ->withQueryString();
 
         return view('expenses.index', [
-            'expenses'      => $expenses,
-            'categories'    => ExpenseCategory::orderBy('name')->get(),
+            'expenses' => $expenses,
+            'categories' => ExpenseCategory::orderBy('name')->get(),
             'filteredTotal' => $filteredTotal,
-            'periods'       => $this->periods(),
-            'periodLabel'   => $periodLabel,
+            'periods' => $this->periods(),
+            'periodLabel' => $periodLabel,
         ]);
     }
 
@@ -79,7 +79,7 @@ class ExpenseController extends Controller
     public function edit(Expense $expense)
     {
         return view('expenses.edit', [
-            'expense'    => $expense,
+            'expense' => $expense,
             'categories' => ExpenseCategory::where('status', 'active')->orderBy('name')->get(),
         ]);
     }

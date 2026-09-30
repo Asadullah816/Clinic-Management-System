@@ -15,7 +15,7 @@ class UserController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%");
                 });
             })
             // Optional filter by role
@@ -42,17 +42,17 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role'     => 'required|in:admin,accountant,receptionist,staff',
+            'role' => 'required|in:admin,accountant,receptionist,staff',
         ]);
 
         User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => $request->password, // hashed automatically by the model cast
-            'role'     => $request->role,
+            'role' => $request->role,
         ]);
 
         return redirect()
@@ -63,7 +63,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         return view('users.edit', [
-            'user'  => $user,
+            'user' => $user,
             'roles' => User::roles(),
         ]);
     }
@@ -73,15 +73,15 @@ class UserController extends Controller
         $isSelf = $user->id === auth()->id();
 
         $rules = [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,'.$user->id,
             'password' => 'nullable|string|min:8', // optional: leave blank to keep current
-            'role'     => $isSelf ? 'nullable|in:admin,accountant,receptionist,staff' : 'required|in:admin,accountant,receptionist,staff',
+            'role' => $isSelf ? 'nullable|in:admin,accountant,receptionist,staff' : 'required|in:admin,accountant,receptionist,staff',
         ];
 
         $validated = $request->validate($rules);
 
-        $user->name  = $validated['name'];
+        $user->name = $validated['name'];
         $user->email = $validated['email'];
 
         if ($request->filled('password')) {
