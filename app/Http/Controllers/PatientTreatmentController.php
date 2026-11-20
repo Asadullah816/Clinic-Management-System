@@ -84,7 +84,7 @@ class PatientTreatmentController extends Controller
 
     private function getPatientAppointmentsMap(): array
     {
-        $appointments = Appointment::with('treatment')
+        $appointments = Appointment::with(['treatment', 'treatments'])
             ->whereIn('status', [Appointment::STATUS_SCHEDULED, Appointment::STATUS_COMPLETED])
             ->orderByDesc('appointment_date')
             ->orderByDesc('appointment_time')
@@ -95,14 +95,31 @@ class PatientTreatmentController extends Controller
             $pid = (int) $appt->patient_id;
             // Prioritize scheduled appointments, otherwise record the latest appointment
             if (! isset($patientAppointments[$pid]) || $appt->status === Appointment::STATUS_SCHEDULED) {
+                $treatmentsList = $appt->treatments->isNotEmpty()
+                    ? $appt->treatments->map(function ($t) {
+                        return [
+                            'treatment_id' => $t->id,
+                            'name' => $t->name,
+                            'price' => (float) $t->price,
+                            'notes' => '',
+                        ];
+                    })->values()->toArray()
+                    : ($appt->treatment ? [[
+                        'treatment_id' => $appt->treatment_id,
+                        'name' => $appt->treatment->name,
+                        'price' => (float) $appt->treatment->price,
+                        'notes' => '',
+                    ]] : []);
+
                 $patientAppointments[$pid] = [
                     'appointment_id' => $appt->id,
                     'treatment_id' => $appt->treatment_id,
-                    'treatment_name' => $appt->treatment?->name ?? 'Walk-in / Consultation',
+                    'treatment_name' => $appt->treatment_names,
                     'treatment_price' => (float) ($appt->treatment?->price ?? 0),
                     'appointment_date' => $appt->appointment_date?->format('d M Y'),
                     'appointment_time' => $appt->appointment_time,
                     'status' => $appt->status,
+                    'treatments' => $treatmentsList,
                 ];
             }
         }

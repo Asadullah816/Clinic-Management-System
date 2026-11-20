@@ -30,10 +30,28 @@ class DashboardController extends Controller
             ->whereYear('created_at', now()->year)
             ->count();
 
-        $todaysAppointments = Appointment::with(['patient', 'treatment'])
-            ->whereDate('appointment_date', today())
+        // Appointments filter on Dashboard
+        $apptDate = $request->query('appt_date') ?: today()->toDateString();
+        $apptStatus = $request->query('appt_status');
+        $apptSearch = $request->query('appt_search');
+
+        $todaysAppointments = Appointment::with(['patient', 'treatment', 'treatments'])
+            ->whereDate('appointment_date', $apptDate)
+            ->when($apptStatus, function ($q) use ($apptStatus) {
+                $q->where('status', $apptStatus);
+            })
+            ->when($apptSearch, function ($q) use ($apptSearch) {
+                $q->whereHas('patient', function ($p) use ($apptSearch) {
+                    $p->where('first_name', 'like', "%{$apptSearch}%")
+                        ->orWhere('last_name', 'like', "%{$apptSearch}%")
+                        ->orWhere('patient_number', 'like', "%{$apptSearch}%")
+                        ->orWhere('phone', 'like', "%{$apptSearch}%");
+                });
+            })
             ->orderBy('appointment_time')
             ->get();
+
+        $todayActualCount = Appointment::whereDate('appointment_date', today())->count();
 
         $showAppointments = $user->hasRole('admin', 'receptionist', 'staff');
 
@@ -85,6 +103,10 @@ class DashboardController extends Controller
             'todaysPatients' => $todaysPatients,
             'monthsPatients' => $monthsPatients,
             'todaysAppointments' => $todaysAppointments,
+            'todayActualCount' => $todayActualCount,
+            'apptDate' => $apptDate,
+            'apptStatus' => $apptStatus,
+            'apptSearch' => $apptSearch,
 
             'period' => $period,
             'periodLabel' => $periodLabel,

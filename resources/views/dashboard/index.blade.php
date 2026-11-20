@@ -371,25 +371,85 @@
         </div>
     @endif
 
-    {{-- ==================== Today's appointments (admin, receptionist, staff) ==================== --}}
+    {{-- ==================== Appointments Schedule (admin, receptionist, staff) ==================== --}}
     @if ($showAppointments)
         <div class="card shadow-sm border-0 mb-4" style="border: 1px solid #e2e8f0 !important; border-radius: 1rem;">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4">
+            <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center py-3 px-4 gap-2">
                 <div class="d-flex align-items-center gap-2">
                     <div class="p-1 rounded-2 bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-calendar-check fs-5"></i>
                     </div>
-                    <h5 class="fw-bold mb-0 text-dark">
-                        Today's Appointments
-                        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill ms-2 px-2 py-1" style="font-size: 0.75rem;">
-                            {{ $todaysAppointments->count() }}
-                        </span>
-                    </h5>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            @if ($apptDate === today()->toDateString())
+                                Today's Appointments
+                            @else
+                                Appointments for {{ \Carbon\Carbon::parse($apptDate)->format('d M Y') }}
+                            @endif
+                            <span class="badge bg-primary text-white rounded-pill ms-2 px-2 py-1" style="font-size: 0.75rem;">
+                                {{ $todaysAppointments->count() }}
+                            </span>
+                        </h5>
+                    </div>
                 </div>
-                <a href="{{ route('appointments.index', ['date_filter' => 'today']) }}"
-                    class="btn btn-sm btn-outline-primary px-3 rounded-pill">
-                    View all <i class="bi bi-arrow-right ms-1"></i>
-                </a>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ route('appointments.create') }}" class="btn btn-sm btn-primary px-3 rounded-pill">
+                        <i class="bi bi-plus-lg me-1"></i> Book Appointment
+                    </a>
+                    <a href="{{ route('appointments.index', ['date_filter' => 'today']) }}"
+                        class="btn btn-sm btn-outline-primary px-3 rounded-pill">
+                        View All in Calendar <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Filter Bar for Dashboard Appointments --}}
+            <div class="px-4 py-2 bg-light border-bottom">
+                <form method="GET" action="{{ route('dashboard') }}" class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <span class="small fw-semibold text-secondary"><i class="bi bi-funnel me-1"></i> Filter By:</span>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white"><i class="bi bi-calendar-date"></i></span>
+                            <input type="date" name="appt_date" value="{{ $apptDate }}" class="form-control" title="Choose appointment date">
+                        </div>
+                    </div>
+                    <div class="col-auto d-none d-md-flex gap-1">
+                        <a href="{{ route('dashboard', ['appt_date' => today()->toDateString()]) }}"
+                            class="btn btn-sm {{ $apptDate === today()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }} py-1 px-2" style="font-size: 0.75rem;">
+                            Today
+                        </a>
+                        <a href="{{ route('dashboard', ['appt_date' => today()->addDay()->toDateString()]) }}"
+                            class="btn btn-sm {{ $apptDate === today()->addDay()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }} py-1 px-2" style="font-size: 0.75rem;">
+                            Tomorrow
+                        </a>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <select name="appt_status" class="form-select form-select-sm">
+                            <option value="">All Statuses</option>
+                            @foreach (\App\Models\Appointment::statuses() as $statusValue => $statusLabel)
+                                <option value="{{ $statusValue }}" {{ request('appt_status') === $statusValue ? 'selected' : '' }}>
+                                    {{ $statusLabel }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <input type="text" name="appt_search" value="{{ request('appt_search') }}" class="form-control form-control-sm"
+                            placeholder="Search patient name, MR#, or phone...">
+                    </div>
+                    <div class="col-auto d-flex gap-1">
+                        <button type="submit" class="btn btn-sm btn-primary py-1 px-3">
+                            <i class="bi bi-search me-1"></i> Apply
+                        </button>
+                        @if (request()->hasAny(['appt_date', 'appt_status', 'appt_search']))
+                            <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Reset Filters">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        @endif
+                    </div>
+                </form>
             </div>
 
             <div class="card-body p-0">
@@ -398,11 +458,18 @@
                         <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
                             <i class="bi bi-calendar2-check text-muted fs-2"></i>
                         </div>
-                        <h6 class="fw-semibold text-dark mb-1">No appointments scheduled for today</h6>
-                        <p class="small text-muted mb-3">All clear for today's schedule, or new patients can be booked anytime.</p>
-                        <a href="{{ route('appointments.create') }}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-plus-lg me-1"></i> Book New Appointment
-                        </a>
+                        <h6 class="fw-semibold text-dark mb-1">No appointments found for {{ \Carbon\Carbon::parse($apptDate)->format('d M Y') }}</h6>
+                        <p class="small text-muted mb-3">All clear for this schedule, or book new patients anytime.</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{{ route('appointments.create') }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus-lg me-1"></i> Book New Appointment
+                            </a>
+                            @if ($apptDate !== today()->toDateString())
+                                <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                                    Return to Today
+                                </a>
+                            @endif
+                        </div>
                     </div>
                 @else
                     <div class="table-responsive">
@@ -411,7 +478,7 @@
                                 <tr>
                                     <th class="ps-4">Time</th>
                                     <th>Patient</th>
-                                    <th>Treatment</th>
+                                    <th>Treatment(s)</th>
                                     <th>Status</th>
                                     <th class="text-end pe-4">Actions</th>
                                 </tr>
@@ -427,18 +494,30 @@
                                                 class="fw-semibold text-decoration-none text-primary">
                                                 {{ $appointment->patient->full_name }}
                                             </a>
+                                            <div class="small text-muted">{{ $appointment->patient->patient_number }} &bull; {{ $appointment->patient->phone ?: 'No phone' }}</div>
                                         </td>
                                         <td>
-                                            <span class="badge bg-light text-dark border">
-                                                {{ $appointment->treatment->name ?? '—' }}
-                                            </span>
+                                            <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}</div>
+                                            @if ($appointment->treatments->count() > 1)
+                                                <div class="mt-1 d-flex flex-wrap gap-1">
+                                                    @foreach ($appointment->treatments->skip(1) as $extraT)
+                                                        <span class="badge bg-light text-secondary border small">+ {{ $extraT->name }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </td>
                                         <td>
                                             <span class="badge text-bg-{{ $appointment->statusColor() }} rounded-pill">
                                                 {{ $appointment->statusLabel() }}
                                             </span>
                                         </td>
-                                        <td class="text-end pe-4">
+                                        <td class="text-end pe-4 text-nowrap">
+                                            @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED)
+                                                <a href="{{ route('patient-treatments.create', ['patient_id' => $appointment->patient_id, 'treatment_id' => $appointment->treatment_id, 'appointment_id' => $appointment->id]) }}"
+                                                    class="btn btn-sm btn-success me-1 py-0 px-2" title="Record Treatment">
+                                                    <i class="bi bi-bandaid me-1"></i> Record
+                                                </a>
+                                            @endif
                                             <div class="btn-group btn-group-sm">
                                                 <a href="{{ route('appointments.show', $appointment) }}"
                                                     class="btn btn-outline-secondary" title="View details">

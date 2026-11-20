@@ -116,6 +116,90 @@
             box-shadow: none !important;
         }
 
+        /* ---------------- Sidebar Dropdown Groups ---------------- */
+        .sidebar .group-toggle,
+        .mobile-sidebar-drawer .group-toggle {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #cbd5e1;
+            font-size: 0.84rem;
+            font-weight: 600;
+            padding: 0.52rem 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.18s ease-in-out;
+            background: transparent;
+            text-decoration: none;
+        }
+
+        .sidebar .group-toggle:hover,
+        .mobile-sidebar-drawer .group-toggle:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateX(2px);
+        }
+
+        .sidebar .group-toggle.active-group,
+        .mobile-sidebar-drawer .group-toggle.active-group {
+            color: #38bdf8;
+            background-color: rgba(56, 189, 248, 0.12);
+        }
+
+        .sidebar .group-toggle .submenu-arrow,
+        .mobile-sidebar-drawer .group-toggle .submenu-arrow {
+            font-size: 0.72rem;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.75;
+        }
+
+        .sidebar .group-toggle[aria-expanded="true"] .submenu-arrow,
+        .mobile-sidebar-drawer .group-toggle[aria-expanded="true"] .submenu-arrow {
+            transform: rotate(180deg);
+            opacity: 1;
+        }
+
+        .sidebar .submenu-list,
+        .mobile-sidebar-drawer .submenu-list {
+            list-style: none;
+            padding-left: 0.75rem;
+            margin: 0.2rem 0 0.35rem 0.75rem;
+            border-left: 1.5px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .sidebar .sub-nav-link,
+        .mobile-sidebar-drawer .sub-nav-link {
+            display: flex;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 0.815rem;
+            font-weight: 500;
+            padding: 0.38rem 0.65rem;
+            border-radius: 0.4rem;
+            text-decoration: none;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .sidebar .sub-nav-link:hover,
+        .mobile-sidebar-drawer .sub-nav-link:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateX(3px);
+        }
+
+        .sidebar .sub-nav-link.active,
+        .mobile-sidebar-drawer .sub-nav-link.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(2, 132, 199, 0.35);
+            transform: none;
+        }
+
         /* ---------------- Mobile Sidebar Drawer ---------------- */
         .mobile-sidebar-drawer {
             width: 310px !important;

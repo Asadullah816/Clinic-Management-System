@@ -359,7 +359,16 @@
                                             </div>
                                             <div class="text-muted small">{{ $appointment->appointment_time }}</div>
                                         </td>
-                                        <td>{{ $appointment->treatment->name ?? '—' }}</td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}</div>
+                                            @if ($appointment->treatments->count() > 1)
+                                                <div class="mt-1 d-flex flex-wrap gap-1">
+                                                    @foreach ($appointment->treatments->skip(1) as $extraT)
+                                                        <span class="badge bg-light text-secondary border small">+ {{ $extraT->name }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </td>
                                         <td>
                                             <span class="badge text-bg-{{ $appointment->statusColor() }}">
                                                 {{ $appointment->statusLabel() }}

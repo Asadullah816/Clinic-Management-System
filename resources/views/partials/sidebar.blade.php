@@ -13,7 +13,7 @@
         </div>
     </a>
 
-    @include('partials.sidebar-menu')
+    @include('partials.sidebar-menu', ['prefix' => 'desk'])
 </nav>
 
 {{-- Premium Mobile Sidebar Drawer --}}
@@ -98,7 +98,7 @@
 
         {{-- Navigation Menu --}}
         <div class="mobile-menu-wrapper flex-grow-1">
-            @include('partials.sidebar-menu')
+            @include('partials.sidebar-menu', ['prefix' => 'mob'])
         </div>
 
         {{-- Mobile Drawer Footer --}}

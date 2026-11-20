@@ -43,6 +43,15 @@
             'price'        => (float) ($price ?? ($matchedTreatment?->price ?? 0)),
             'notes'        => '',
         ];
+    } elseif ($initialAppt && !empty($initialAppt['treatments']) && count($initialAppt['treatments']) > 0) {
+        foreach ($initialAppt['treatments'] as $t) {
+            $initialProcedures[] = [
+                'treatment_id' => (int) $t['treatment_id'],
+                'name'         => $t['name'],
+                'price'        => (float) $t['price'],
+                'notes'        => '',
+            ];
+        }
     } elseif ($initialAppt && !empty($initialAppt['treatment_id'])) {
         $initialProcedures[] = [
             'treatment_id' => (int) $initialAppt['treatment_id'],
@@ -683,8 +692,16 @@
             bannerApptSubtitle.innerHTML = `Scheduled for <span class="fw-semibold text-dark">${appt.appointment_date || ''} (${appt.appointment_time || ''})</span>. Procedure and catalog price automatically pre-selected below.`;
             apptCalloutBanner.style.display = 'flex';
 
-            // Auto-select treatment in procedure row 0 if booked with a treatment
-            if (appt.treatment_id) {
+            // Auto-select treatment in procedure rows if booked
+            if (appt.treatments && appt.treatments.length > 0) {
+                selectedProcedures = appt.treatments.map(t => ({
+                    treatment_id: t.treatment_id,
+                    name: t.name,
+                    price: parseFloat(t.price) || 0,
+                    notes: 'Booked appointment on ' + (appt.appointment_date || ''),
+                }));
+                renderProcedures();
+            } else if (appt.treatment_id) {
                 const treatment = catalogTreatments.find(t => t.id === appt.treatment_id);
                 selectedProcedures = [{
                     treatment_id: appt.treatment_id,

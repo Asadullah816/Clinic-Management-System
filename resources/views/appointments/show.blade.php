@@ -22,11 +22,28 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>Treatment</th>
+                    <th>Treatment(s)</th>
                     <td>
-                        {{ $appointment->treatment->name ?? '—' }}
-                        @if ($appointment->treatment?->duration)
-                            <span class="text-muted">({{ $appointment->treatment->duration }} min)</span>
+                        @if ($appointment->treatments->isNotEmpty())
+                            <div class="d-flex flex-column gap-1">
+                                @foreach ($appointment->treatments as $idx => $t)
+                                    <div>
+                                        <span class="badge {{ $idx === 0 ? 'bg-primary' : 'bg-secondary' }} me-1">
+                                            {{ $idx === 0 ? 'Primary' : 'Additional' }}
+                                        </span>
+                                        <span class="fw-semibold text-dark">{{ $t->name }}</span>
+                                        <span class="text-muted small">&bull; PKR {{ number_format($t->price, 2) }}</span>
+                                        @if ($t->duration)
+                                            <span class="text-muted small">({{ $t->duration }} min)</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            {{ $appointment->treatment->name ?? '—' }}
+                            @if ($appointment->treatment?->duration)
+                                <span class="text-muted">({{ $appointment->treatment->duration }} min)</span>
+                            @endif
                         @endif
                     </td>
                 </tr>

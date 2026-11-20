@@ -85,6 +85,25 @@ class Appointment extends Model
         return $this->belongsTo(Treatment::class)->withTrashed();
     }
 
+    public function treatments()
+    {
+        return $this->belongsToMany(Treatment::class, 'appointment_treatments')
+            ->withPivot('is_primary')
+            ->withTimestamps();
+    }
+
+    public function getTreatmentNamesAttribute(): string
+    {
+        if ($this->relationLoaded('treatments') && $this->treatments->isNotEmpty()) {
+            return $this->treatments->pluck('name')->implode(', ');
+        }
+        if ($this->treatments()->exists()) {
+            return $this->treatments->pluck('name')->implode(', ');
+        }
+
+        return $this->treatment?->name ?? '—';
+    }
+
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
