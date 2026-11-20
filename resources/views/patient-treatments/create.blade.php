@@ -20,7 +20,9 @@
                     'treatments' => $treatments,
                     'patientId' => $patientId,
                     'treatmentId' => $treatmentId,
+                    'appointmentId' => $appointmentId ?? null,
                     'price' => $price,
+                    'patientAppointments' => $patientAppointments ?? [],
                 ])
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Save Treatment &amp; Billing</button>

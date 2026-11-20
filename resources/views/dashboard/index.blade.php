@@ -11,7 +11,7 @@
             <div class="text-muted small">
                 <i class="bi bi-calendar-event me-1"></i> {{ now()->format('l, d F Y') }}
                 <span class="mx-2">&middot;</span>
-                <i class="bi bi-geo-alt me-1"></i> {{ \App\Models\Setting::get('clinic_name', 'Mayar skin care & Aesthethic clinic') }}
+                <i class="bi bi-geo-alt me-1"></i> {{ \App\Models\Setting::get('clinic_name', 'Dr Badshah Afsar') }}
             </div>
         </div>
         <div class="mt-2 mt-sm-0">

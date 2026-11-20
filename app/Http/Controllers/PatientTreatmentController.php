@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Models\Medicine;
 use App\Models\MedicineUsage;
@@ -20,7 +21,14 @@ class PatientTreatmentController extends Controller
     {
         return [
             'patient_id' => 'required|exists:patients,id',
-            'treatment_id' => 'required|exists:treatments,id',
+            'treatment_id' => 'nullable|exists:treatments,id',
+            'procedure_name' => 'nullable|string|max:255',
+            'appointment_id' => 'nullable|exists:appointments,id',
+            'procedures' => 'nullable|array',
+            'procedures.*.treatment_id' => 'nullable|exists:treatments,id',
+            'procedures.*.name' => 'nullable|string|max:255',
+            'procedures.*.price' => 'nullable|numeric|min:0',
+            'procedures.*.notes' => 'nullable|string|max:255',
             'treatment_date' => 'required|date',
             'price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|in:fixed,percentage',
@@ -74,6 +82,34 @@ class PatientTreatmentController extends Controller
             });
     }
 
+    private function getPatientAppointmentsMap(): array
+    {
+        $appointments = Appointment::with('treatment')
+            ->whereIn('status', [Appointment::STATUS_SCHEDULED, Appointment::STATUS_COMPLETED])
+            ->orderByDesc('appointment_date')
+            ->orderByDesc('appointment_time')
+            ->get();
+
+        $patientAppointments = [];
+        foreach ($appointments as $appt) {
+            $pid = (int) $appt->patient_id;
+            // Prioritize scheduled appointments, otherwise record the latest appointment
+            if (! isset($patientAppointments[$pid]) || $appt->status === Appointment::STATUS_SCHEDULED) {
+                $patientAppointments[$pid] = [
+                    'appointment_id' => $appt->id,
+                    'treatment_id' => $appt->treatment_id,
+                    'treatment_name' => $appt->treatment?->name ?? 'Walk-in / Consultation',
+                    'treatment_price' => (float) ($appt->treatment?->price ?? 0),
+                    'appointment_date' => $appt->appointment_date?->format('d M Y'),
+                    'appointment_time' => $appt->appointment_time,
+                    'status' => $appt->status,
+                ];
+            }
+        }
+
+        return $patientAppointments;
+    }
+
     public function index(Request $request)
     {
         $patientTreatments = PatientTreatment::with(['patient', 'treatment', 'treatmentMedicines.medicine'])
@@ -96,17 +132,34 @@ class PatientTreatmentController extends Controller
 
     public function create(Request $request)
     {
-        $treatment = $request->filled('treatment_id')
-            ? Treatment::find($request->treatment_id)
-            : null;
+        $appointmentId = $request->query('appointment_id');
+        $patientId = $request->query('patient_id');
+        $treatmentId = $request->query('treatment_id');
+        $patientAppointments = $this->getPatientAppointmentsMap();
+
+        if ($appointmentId) {
+            $appointment = Appointment::with('treatment')->find($appointmentId);
+            if ($appointment) {
+                $patientId = $patientId ?: $appointment->patient_id;
+                $treatmentId = $treatmentId ?: $appointment->treatment_id;
+            }
+        } elseif ($patientId && ! $treatmentId && isset($patientAppointments[(int) $patientId])) {
+            $treatmentId = $patientAppointments[(int) $patientId]['treatment_id'];
+            $appointmentId = $patientAppointments[(int) $patientId]['appointment_id'];
+        }
+
+        $treatment = $treatmentId ? Treatment::find($treatmentId) : null;
+        $price = $treatment?->price ?? ($request->filled('price') ? (float) $request->price : null);
 
         return view('patient-treatments.create', [
             'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
             'treatments' => Treatment::where('status', Treatment::STATUS_ACTIVE)->orderBy('name')->get(),
             'medicines' => $this->getMedicinesPayload(),
-            'patientId' => $request->query('patient_id'),
-            'treatmentId' => $request->query('treatment_id'),
-            'price' => $treatment?->price,
+            'patientId' => $patientId,
+            'treatmentId' => $treatmentId,
+            'appointmentId' => $appointmentId,
+            'price' => $price,
+            'patientAppointments' => $patientAppointments,
         ]);
     }
 
@@ -114,7 +167,67 @@ class PatientTreatmentController extends Controller
     {
         $validated = $request->validate($this->rules());
 
+        if (empty($validated['treatment_id']) && empty($validated['procedure_name']) && empty($validated['procedures'])) {
+            return back()
+                ->withErrors(['treatment_id' => 'Please select a catalog treatment or enter a procedure description.'])
+                ->withInput();
+        }
+
+        // Resolve procedure names, primary treatment_id, and procedure notes
+        $procedureNames = [];
+        $procedureSummaries = [];
+        $primaryTreatmentId = $validated['treatment_id'] ?? null;
+        $calculatedProcedurePrice = 0.0;
+
+        if (! empty($validated['procedures']) && is_array($validated['procedures'])) {
+            foreach ($validated['procedures'] as $proc) {
+                $pName = trim($proc['name'] ?? '');
+                $pId = ! empty($proc['treatment_id']) ? (int) $proc['treatment_id'] : null;
+                $pPrice = isset($proc['price']) ? (float) $proc['price'] : 0.0;
+                $pNotes = trim($proc['notes'] ?? '');
+
+                if (! $pName && $pId) {
+                    $pName = Treatment::find($pId)?->name;
+                }
+
+                if ($pName) {
+                    $procedureNames[] = $pName;
+                    $calculatedProcedurePrice += $pPrice;
+                    if (! $primaryTreatmentId && $pId) {
+                        $primaryTreatmentId = $pId;
+                    }
+                    $summary = $pName.' (PKR '.number_format($pPrice, 2).')';
+                    if ($pNotes) {
+                        $summary .= ' ['.$pNotes.']';
+                    }
+                    $procedureSummaries[] = $summary;
+                }
+            }
+        }
+
+        $procedureTitle = ! empty($procedureNames)
+            ? implode(' + ', $procedureNames)
+            : ($validated['procedure_name'] ?? null);
+
+        if (! $procedureTitle && $primaryTreatmentId) {
+            $primaryTreatment = Treatment::find($primaryTreatmentId);
+            $procedureTitle = $primaryTreatment?->name;
+        }
+
+        if (! $procedureTitle) {
+            $procedureTitle = 'Dental Procedure';
+        }
+
         $treatmentPrice = (float) $validated['price'];
+        if (! empty($procedureSummaries) && $calculatedProcedurePrice > 0 && abs($treatmentPrice - $calculatedProcedurePrice) < 0.01) {
+            $treatmentPrice = $calculatedProcedurePrice;
+        }
+
+        $clinicalNotes = $validated['notes'] ?? '';
+        if (! empty($procedureSummaries) && count($procedureSummaries) > 1) {
+            $breakdownText = 'Procedures: '.implode(' | ', $procedureSummaries);
+            $clinicalNotes = $clinicalNotes ? ($breakdownText."\n".$clinicalNotes) : $breakdownText;
+        }
 
         $discountType = $validated['discount_type'] ?? 'fixed';
         if ($discountType === 'percentage' && isset($validated['discount_percentage']) && $validated['discount_percentage'] !== '') {
@@ -201,16 +314,15 @@ class PatientTreatmentController extends Controller
 
         DB::transaction(function () use (
             $validated, $treatmentPrice, $treatmentDiscount, $treatmentNet,
+            $primaryTreatmentId, $procedureTitle, $clinicalNotes,
             $medicinesData, $medicinesSubtotal, $medicineDiscount, $medicineTotal,
             $grandTotal, $paidAmount, $dueAmount, &$invoiceNumber
         ) {
-            $treatment = Treatment::find($validated['treatment_id']);
-            $treatmentName = $treatment?->name ?? 'Treatment';
-
             // 1. Create Patient Treatment record
             $patientTreatment = PatientTreatment::create([
                 'patient_id' => $validated['patient_id'],
-                'treatment_id' => $validated['treatment_id'],
+                'treatment_id' => $primaryTreatmentId,
+                'procedure_name' => $procedureTitle,
                 'treatment_date' => $validated['treatment_date'],
                 'price' => $treatmentPrice,
                 'discount' => $treatmentDiscount,
@@ -218,11 +330,21 @@ class PatientTreatmentController extends Controller
                 'medicine_discount' => $medicineDiscount,
                 'medicine_total' => $medicineTotal,
                 'total_amount' => $grandTotal,
-                'notes' => $validated['notes'] ?? null,
+                'notes' => $clinicalNotes ?: null,
                 'created_by' => auth()->id(),
             ]);
 
-            // 2. Deduct stock, create PatientTreatmentMedicine and MedicineUsage records
+            // 2. Complete appointment if linked
+            if (! empty($validated['appointment_id'])) {
+                $appointment = Appointment::where('id', $validated['appointment_id'])
+                    ->where('patient_id', $validated['patient_id'])
+                    ->first();
+                if ($appointment && $appointment->status === Appointment::STATUS_SCHEDULED) {
+                    $appointment->update(['status' => Appointment::STATUS_COMPLETED]);
+                }
+            }
+
+            // 3. Deduct stock, create PatientTreatmentMedicine and MedicineUsage records
             $medSummaryList = [];
             foreach ($medicinesData as $item) {
                 $med = $item['model'];
@@ -243,35 +365,35 @@ class PatientTreatmentController extends Controller
                 // Track in Medicine Usage ledger for clinic audit trail
                 MedicineUsage::create([
                     'patient_id' => $validated['patient_id'],
-                    'treatment_id' => $validated['treatment_id'],
+                    'treatment_id' => $primaryTreatmentId,
                     'medicine_id' => $med->id,
                     'quantity' => $qty,
                     'usage_date' => $validated['treatment_date'],
-                    'notes' => 'Treatment #'.$patientTreatment->id.' — '.$treatmentName,
+                    'notes' => 'Treatment #'.$patientTreatment->id.' — '.$procedureTitle,
                     'used_by' => auth()->id(),
                 ]);
 
                 $medSummaryList[] = $qty.'x '.$med->name;
             }
 
-            // 3. Generate unique invoice number
+            // 4. Generate unique invoice number
             $invoiceNumber = $this->generateInvoiceNumber();
 
-            // 4. Invoice status
+            // 5. Invoice status
             $invoiceStatus = $dueAmount <= 0
                 ? Invoice::STATUS_PAID
                 : ($paidAmount > 0 ? Invoice::STATUS_PARTIAL : Invoice::STATUS_PENDING);
 
             // Construct invoice notes detailing Treatment & Medicines breakdown
-            $invoiceNotes = 'Treatment: '.$treatmentName.' (Net: '.number_format($treatmentNet, 2).')';
+            $invoiceNotes = 'Treatment: '.$procedureTitle.' (Net: '.number_format($treatmentNet, 2).')';
             if (! empty($medSummaryList)) {
                 $invoiceNotes .= ' | Medicines: '.implode(', ', $medSummaryList).' (Net: '.number_format($medicineTotal, 2).')';
             }
-            if (! empty($validated['notes'])) {
-                $invoiceNotes .= ' — '.$validated['notes'];
+            if (! empty($clinicalNotes)) {
+                $invoiceNotes .= ' — '.$clinicalNotes;
             }
 
-            // 5. Create Invoice
+            // 6. Create Invoice
             $invoice = Invoice::create([
                 'patient_id' => $validated['patient_id'],
                 'invoice_number' => $invoiceNumber,
@@ -286,7 +408,7 @@ class PatientTreatmentController extends Controller
                 'created_by' => auth()->id(),
             ]);
 
-            // 6. Create Payment record if paid amount > 0
+            // 7. Create Payment record if paid amount > 0
             if ($paidAmount > 0) {
                 Payment::create([
                     'patient_id' => $validated['patient_id'],
@@ -295,7 +417,7 @@ class PatientTreatmentController extends Controller
                     'amount' => $paidAmount,
                     'payment_method' => $validated['payment_method'] ?? Payment::METHOD_CASH,
                     'reference' => $validated['payment_reference'] ?? null,
-                    'notes' => 'Payment for '.$treatmentName.' ('.$invoiceNumber.')',
+                    'notes' => 'Payment for '.$procedureTitle.' ('.$invoiceNumber.')',
                     'received_by' => auth()->id(),
                 ]);
             }
@@ -329,7 +451,9 @@ class PatientTreatmentController extends Controller
             'medicines' => $this->getMedicinesPayload(),
             'patientId' => null,
             'treatmentId' => null,
+            'appointmentId' => null,
             'price' => $patientTreatment->price,
+            'patientAppointments' => $this->getPatientAppointmentsMap(),
         ]);
     }
 
@@ -337,7 +461,13 @@ class PatientTreatmentController extends Controller
     {
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'treatment_id' => 'required|exists:treatments,id',
+            'treatment_id' => 'nullable|exists:treatments,id',
+            'procedure_name' => 'nullable|string|max:255',
+            'procedures' => 'nullable|array',
+            'procedures.*.treatment_id' => 'nullable|exists:treatments,id',
+            'procedures.*.name' => 'nullable|string|max:255',
+            'procedures.*.price' => 'nullable|numeric|min:0',
+            'procedures.*.notes' => 'nullable|string|max:255',
             'treatment_date' => 'required|date',
             'price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|in:fixed,percentage',
@@ -353,7 +483,67 @@ class PatientTreatmentController extends Controller
             'notes' => 'nullable|string|max:2000',
         ]);
 
+        if (empty($validated['treatment_id']) && empty($validated['procedure_name']) && empty($validated['procedures'])) {
+            return back()
+                ->withErrors(['treatment_id' => 'Please select a catalog treatment or enter a procedure description.'])
+                ->withInput();
+        }
+
+        // Resolve procedure names, primary treatment_id, and procedure notes
+        $procedureNames = [];
+        $procedureSummaries = [];
+        $primaryTreatmentId = $validated['treatment_id'] ?? null;
+        $calculatedProcedurePrice = 0.0;
+
+        if (! empty($validated['procedures']) && is_array($validated['procedures'])) {
+            foreach ($validated['procedures'] as $proc) {
+                $pName = trim($proc['name'] ?? '');
+                $pId = ! empty($proc['treatment_id']) ? (int) $proc['treatment_id'] : null;
+                $pPrice = isset($proc['price']) ? (float) $proc['price'] : 0.0;
+                $pNotes = trim($proc['notes'] ?? '');
+
+                if (! $pName && $pId) {
+                    $pName = Treatment::find($pId)?->name;
+                }
+
+                if ($pName) {
+                    $procedureNames[] = $pName;
+                    $calculatedProcedurePrice += $pPrice;
+                    if (! $primaryTreatmentId && $pId) {
+                        $primaryTreatmentId = $pId;
+                    }
+                    $summary = $pName.' (PKR '.number_format($pPrice, 2).')';
+                    if ($pNotes) {
+                        $summary .= ' ['.$pNotes.']';
+                    }
+                    $procedureSummaries[] = $summary;
+                }
+            }
+        }
+
+        $procedureTitle = ! empty($procedureNames)
+            ? implode(' + ', $procedureNames)
+            : ($validated['procedure_name'] ?? null);
+
+        if (! $procedureTitle && $primaryTreatmentId) {
+            $primaryTreatment = Treatment::find($primaryTreatmentId);
+            $procedureTitle = $primaryTreatment?->name;
+        }
+
+        if (! $procedureTitle) {
+            $procedureTitle = 'Dental Procedure';
+        }
+
         $treatmentPrice = (float) $validated['price'];
+        if (! empty($procedureSummaries) && $calculatedProcedurePrice > 0 && abs($treatmentPrice - $calculatedProcedurePrice) < 0.01) {
+            $treatmentPrice = $calculatedProcedurePrice;
+        }
+
+        $clinicalNotes = $validated['notes'] ?? '';
+        if (! empty($procedureSummaries) && count($procedureSummaries) > 1) {
+            $breakdownText = 'Procedures: '.implode(' | ', $procedureSummaries);
+            $clinicalNotes = $clinicalNotes ? ($breakdownText."\n".$clinicalNotes) : $breakdownText;
+        }
 
         $discountType = $validated['discount_type'] ?? 'fixed';
         if ($discountType === 'percentage' && isset($validated['discount_percentage']) && $validated['discount_percentage'] !== '') {
@@ -370,7 +560,10 @@ class PatientTreatmentController extends Controller
 
         $treatmentNet = max(0, $treatmentPrice - $treatmentDiscount);
 
-        DB::transaction(function () use ($validated, $patientTreatment, $treatmentPrice, $treatmentDiscount, $treatmentNet) {
+        DB::transaction(function () use (
+            $validated, $patientTreatment, $treatmentPrice, $treatmentDiscount, $treatmentNet,
+            $primaryTreatmentId, $procedureTitle, $clinicalNotes
+        ) {
             // 1. Restore previous stock for this treatment's medicines before applying new ones
             $patientTreatment->load(['treatmentMedicines.medicine']);
             foreach ($patientTreatment->treatmentMedicines as $tm) {
@@ -380,7 +573,6 @@ class PatientTreatmentController extends Controller
             }
             $patientTreatment->treatmentMedicines()->delete();
             MedicineUsage::where('patient_id', $patientTreatment->patient_id)
-                ->where('treatment_id', $patientTreatment->treatment_id)
                 ->where('notes', 'like', '%Treatment #'.$patientTreatment->id.'%')
                 ->delete();
 
@@ -438,9 +630,6 @@ class PatientTreatmentController extends Controller
             $medicineTotal = max(0, $medicinesSubtotal - $medicineDiscount);
             $grandTotal = max(0, $treatmentNet + $medicineTotal);
 
-            $treatment = Treatment::find($validated['treatment_id']);
-            $treatmentName = $treatment?->name ?? 'Treatment';
-
             // 3. Deduct stock and record treatment medicines + usage
             foreach ($medicinesData as $item) {
                 $med = $item['model'];
@@ -458,11 +647,11 @@ class PatientTreatmentController extends Controller
 
                 MedicineUsage::create([
                     'patient_id' => $validated['patient_id'],
-                    'treatment_id' => $validated['treatment_id'],
+                    'treatment_id' => $primaryTreatmentId,
                     'medicine_id' => $med->id,
                     'quantity' => $qty,
                     'usage_date' => $validated['treatment_date'],
-                    'notes' => 'Treatment #'.$patientTreatment->id.' — '.$treatmentName,
+                    'notes' => 'Treatment #'.$patientTreatment->id.' — '.$procedureTitle,
                     'used_by' => auth()->id(),
                 ]);
             }
@@ -470,7 +659,8 @@ class PatientTreatmentController extends Controller
             // 4. Update the PatientTreatment record
             $patientTreatment->update([
                 'patient_id' => $validated['patient_id'],
-                'treatment_id' => $validated['treatment_id'],
+                'treatment_id' => $primaryTreatmentId,
+                'procedure_name' => $procedureTitle,
                 'treatment_date' => $validated['treatment_date'],
                 'price' => $treatmentPrice,
                 'discount' => $treatmentDiscount,
@@ -478,7 +668,7 @@ class PatientTreatmentController extends Controller
                 'medicine_discount' => $medicineDiscount,
                 'medicine_total' => $medicineTotal,
                 'total_amount' => $grandTotal,
-                'notes' => $validated['notes'] ?? null,
+                'notes' => $clinicalNotes ?: null,
             ]);
         });
 
@@ -499,7 +689,6 @@ class PatientTreatmentController extends Controller
 
             // Clean up corresponding medicine usage records
             MedicineUsage::where('patient_id', $patientTreatment->patient_id)
-                ->where('treatment_id', $patientTreatment->treatment_id)
                 ->where('notes', 'like', '%Treatment #'.$patientTreatment->id.'%')
                 ->delete();
 

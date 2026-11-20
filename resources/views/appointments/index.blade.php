@@ -76,7 +76,13 @@
                                         {{ $appointment->statusLabel() }}
                                     </span>
                                 </td>
-                                <td class="text-end">
+                                <td class="text-end text-nowrap">
+                                    @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED)
+                                        <a href="{{ route('patient-treatments.create', ['patient_id' => $appointment->patient_id, 'treatment_id' => $appointment->treatment_id, 'appointment_id' => $appointment->id]) }}"
+                                            class="btn btn-sm btn-success me-1" title="Record Treatment">
+                                            <i class="bi bi-bandaid me-1"></i> Record
+                                        </a>
+                                    @endif
                                     <a href="{{ route('appointments.show', $appointment) }}"
                                         class="btn btn-sm btn-outline-secondary" title="View">
                                         <i class="bi bi-eye"></i>

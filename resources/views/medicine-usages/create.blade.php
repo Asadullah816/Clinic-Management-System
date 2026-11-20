@@ -100,7 +100,7 @@
                 <div class="mb-3">
                     <label for="notes" class="form-label">Notes</label>
                     <textarea id="notes" name="notes" rows="2" class="form-control @error('notes') is-invalid @enderror"
-                        placeholder="e.g. Applied to affected areas before laser session">{{ old('notes') }}</textarea>
+                        placeholder="e.g. Administered local anesthetic prior to tooth extraction / scaling">{{ old('notes') }}</textarea>
                     @error('notes')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

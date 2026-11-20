@@ -51,7 +51,7 @@
                                     <div class="small text-muted">{{ $patientTreatment->patient->patient_number }}</div>
                                 </td>
                                 <td>
-                                    <div class="fw-semibold text-dark">{{ $patientTreatment->treatment->name ?? '—' }}</div>
+                                    <div class="fw-semibold text-dark">{{ $patientTreatment->procedure_title }}</div>
                                     @if ($patientTreatment->treatmentMedicines->isNotEmpty())
                                         <div class="mt-1">
                                             @foreach ($patientTreatment->treatmentMedicines->take(3) as $tm)

@@ -143,7 +143,7 @@
             {{-- Header --}}
             <div class="text-center mb-2">
                 <div class="fw-bold fs-6 text-uppercase" style="letter-spacing: 0.5px;">
-                    {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar Skin Care & Aesthetic Clinic')) }}
+                    {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}
                 </div>
                 @if ($address = \App\Models\Setting::get('address'))
                     <div style="font-size: 11px;">{{ $address }}</div>
@@ -249,7 +249,7 @@
         {{-- ==================== Standard A4 Receipt ==================== --}}
         <div class="receipt-sheet mx-auto p-5 border rounded shadow-sm">
             <div class="text-center mb-4">
-                <h4 class="mb-0 fw-bold text-primary">{{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar Skin Care & Aesthetic Clinic')) }}</h4>
+                <h4 class="mb-0 fw-bold text-primary">{{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}</h4>
                 @if ($address = \App\Models\Setting::get('address'))
                     <div class="text-muted small">{{ $address }}</div>
                 @endif

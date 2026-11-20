@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
             InventorySeeder::class,
             ExpenseSeeder::class,
             SettingSeeder::class,
-            LaserSeeder::class,
         ]);
     }
 }

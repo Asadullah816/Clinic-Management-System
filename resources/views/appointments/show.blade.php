@@ -52,13 +52,14 @@
                 <a href="{{ route('appointments.edit', $appointment) }}" class="btn btn-primary">
                     <i class="bi bi-pencil me-1"></i> Edit
                 </a>
-                @if ($appointment->status === \App\Models\Appointment::STATUS_COMPLETED)
+                @if (in_array($appointment->status, [\App\Models\Appointment::STATUS_SCHEDULED, \App\Models\Appointment::STATUS_COMPLETED]))
                     <a href="{{ route('patient-treatments.create', [
                         'patient_id' => $appointment->patient_id,
                         'treatment_id' => $appointment->treatment_id,
+                        'appointment_id' => $appointment->id,
                     ]) }}"
                         class="btn btn-success">
-                        <i class="bi bi-bandaid me-1"></i> Record as Treatment
+                        <i class="bi bi-bandaid me-1"></i> Record Treatment
                     </a>
                 @endif
                 <form method="POST" action="{{ route('appointments.destroy', $appointment) }}"

@@ -12,6 +12,7 @@ class PatientTreatment extends Model
     protected $fillable = [
         'patient_id',
         'treatment_id',
+        'procedure_name',
         'treatment_date',
         'price',
         'discount',
@@ -58,6 +59,11 @@ class PatientTreatment extends Model
     public function treatmentMedicines()
     {
         return $this->hasMany(PatientTreatmentMedicine::class);
+    }
+
+    public function getProcedureTitleAttribute(): string
+    {
+        return $this->procedure_name ?: ($this->treatment?->name ?? 'Dental Procedure');
     }
 
     public function getTreatmentNetAttribute(): float

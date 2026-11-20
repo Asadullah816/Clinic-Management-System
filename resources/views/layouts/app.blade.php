@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Dashboard') | {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar skin care & Aesthethic clinic')) }}</title>
+    <title>@yield('title', 'Dashboard') | {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}</title>
 
     {{-- Favicon --}}
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
@@ -114,6 +114,98 @@
             background: transparent !important;
             transform: none !important;
             box-shadow: none !important;
+        }
+
+        /* ---------------- Mobile Sidebar Drawer ---------------- */
+        .mobile-sidebar-drawer {
+            width: 310px !important;
+            max-width: 86vw !important;
+            background: linear-gradient(180deg, #090e17 0%, #0d1527 50%, #111e38 100%) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-top-right-radius: 20px !important;
+            border-bottom-right-radius: 20px !important;
+            box-shadow: 12px 0 36px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .mobile-drawer-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #94a3b8;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-drawer-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .mobile-user-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .mobile-sidebar-drawer .offcanvas-body {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+        }
+
+        .mobile-sidebar-drawer .offcanvas-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .mobile-sidebar-drawer .offcanvas-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 9999px;
+        }
+
+        .mobile-sidebar-drawer .nav-link {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 0.625rem;
+            padding: 0.58rem 0.85rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.16s ease-in-out;
+        }
+
+        .mobile-sidebar-drawer a.nav-link:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateX(3px);
+        }
+
+        .mobile-sidebar-drawer a.nav-link.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+            transform: none;
+        }
+
+        .mobile-sidebar-drawer span.nav-link {
+            cursor: default;
+            color: #64748b !important;
+            font-size: 0.68rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.75rem 0.5rem 0.25rem 0.5rem;
+            margin-top: 0.4rem;
+            background: transparent !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .offcanvas-backdrop.show {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background-color: rgba(9, 14, 23, 0.68);
         }
 
         /* ---------------- Main Layout ---------------- */
@@ -302,8 +394,8 @@
         </main>
 
         <footer class="text-center text-muted py-3 mt-auto small">
-            &copy; {{ date('Y') }} {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar skin care & Aesthethic clinic')) }}
-            &middot; Aesthetic &amp; Care Clinic Management System
+            &copy; {{ date('Y') }} {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}
+            &middot; Dental Clinic Management System
         </footer>
     </div>
 

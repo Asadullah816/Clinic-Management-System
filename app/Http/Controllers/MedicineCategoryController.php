@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MedicineCategory;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class MedicineCategoryController extends Controller
@@ -73,14 +74,41 @@ class MedicineCategoryController extends Controller
 
     public function destroy(MedicineCategory $medicine_category)
     {
-        // Guard: never delete a category that still has products
+        // Guard: never delete a category that still has active products
         if ($medicine_category->medicines()->exists()) {
             return redirect()
                 ->route('medicine-categories.index')
-                ->with('error', 'This category has products and cannot be deleted. Set it to inactive instead.');
+                ->with('error', 'This category has active products and cannot be deleted. Set it to inactive instead.');
         }
 
-        $medicine_category->delete();
+        // If only soft-deleted (trashed) products exist, check if they have historical records
+        $trashedMedicines = $medicine_category->medicines()->onlyTrashed()->get();
+        if ($trashedMedicines->isNotEmpty()) {
+            $hasHistoricalRecords = $trashedMedicines->contains(function ($medicine) {
+                return $medicine->stockTransactions()->exists()
+                    || $medicine->medicineUsages()->exists()
+                    || $medicine->patientTreatmentMedicines()->exists();
+            });
+
+            if ($hasHistoricalRecords) {
+                return redirect()
+                    ->route('medicine-categories.index')
+                    ->with('error', 'This category is linked to past product records and cannot be deleted. Set it to inactive instead.');
+            }
+
+            // Safe to permanently purge the trashed records since they have no history
+            foreach ($trashedMedicines as $medicine) {
+                $medicine->forceDelete();
+            }
+        }
+
+        try {
+            $medicine_category->delete();
+        } catch (QueryException $e) {
+            return redirect()
+                ->route('medicine-categories.index')
+                ->with('error', 'Cannot delete this category because it is still referenced by database records. Set it to inactive instead.');
+        }
 
         return redirect()
             ->route('medicine-categories.index')

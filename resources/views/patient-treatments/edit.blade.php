@@ -18,7 +18,9 @@
                     'treatments' => $treatments,
                     'patientId' => null,
                     'treatmentId' => null,
+                    'appointmentId' => null,
                     'price' => $patientTreatment->price,
+                    'patientAppointments' => $patientAppointments ?? [],
                 ])
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Update Record</button>

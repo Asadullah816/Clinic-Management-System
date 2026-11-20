@@ -1,31 +1,17 @@
 <ul class="nav nav-pills flex-column gap-1">
 
-    {{-- Dashboard (all roles) --}}
+    {{-- Main / Dashboard (all roles) --}}
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
             <i class="bi bi-speedometer2 me-2"></i> Dashboard
         </a>
     </li>
 
-    {{-- Users (admin only) --}}
-    @if (auth()->user()->isAdmin())
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('users.index', 'users.create', 'users.edit') ? 'active' : '' }}"
-                href="{{ route('users.index') }}">
-                <i class="bi bi-people me-2"></i> Users
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('users.roles') ? 'active' : '' }}"
-                href="{{ route('users.roles') }}">
-                <i class="bi bi-shield-lock me-2"></i> Roles
-            </a>
-        </li>
-    @endif
-
-    {{-- Patients (all roles can view) --}}
+    {{-- Patients Group --}}
     <li class="nav-item">
-        <span class="nav-link text-uppercase small text-secondary px-2 pb-0">Patients</span>
+        <span class="nav-link text-uppercase small text-secondary px-2 pb-0">
+            <i class="bi bi-people me-1"></i> Patients &amp; Care
+        </span>
     </li>
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('patients.index', 'patients.show') ? 'active' : '' }} ps-4"
@@ -33,25 +19,33 @@
             <i class="bi bi-person-lines-fill me-2"></i> All Patients
         </a>
     </li>
-    {{-- Appointments (admin, receptionist, staff) --}}
     @if (auth()->user()->hasRole('admin', 'receptionist', 'staff'))
         <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
+            <a class="nav-link {{ request()->routeIs('patients.create') ? 'active' : '' }} ps-4"
+                href="{{ route('patients.create') }}">
+                <i class="bi bi-person-plus me-2"></i> Add Patient
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('appointments.*') ? 'active' : '' }} ps-4"
                 href="{{ route('appointments.index') }}">
                 <i class="bi bi-calendar-check me-2"></i> Appointments
             </a>
         </li>
     @endif
-    {{-- Treatments group --}}
+
+    {{-- Treatments Group --}}
     @if (auth()->user()->hasRole('admin', 'receptionist', 'staff'))
         <li class="nav-item">
-            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">Treatments</span>
+            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">
+                <i class="bi bi-bandaid me-1"></i> Dental Treatments
+            </span>
         </li>
         @if (auth()->user()->hasRole('admin', 'staff'))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('treatments.index', 'treatments.create', 'treatments.edit') ? 'active' : '' }} ps-4"
                     href="{{ route('treatments.index') }}">
-                    <i class="bi bi-bandaid me-2"></i> Treatments
+                    <i class="bi bi-card-checklist me-2"></i> Treatments Catalog
                 </a>
             </li>
         @endif
@@ -62,10 +56,13 @@
             </a>
         </li>
     @endif
-    {{-- Billing group (admin, accountant, receptionist) --}}
+
+    {{-- Billing Group --}}
     @if (auth()->user()->hasRole('admin', 'accountant', 'receptionist'))
         <li class="nav-item">
-            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">Billing</span>
+            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">
+                <i class="bi bi-credit-card me-1"></i> Billing &amp; Finance
+            </span>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }} ps-4"
@@ -73,153 +70,26 @@
                 <i class="bi bi-receipt me-2"></i> Invoices
             </a>
         </li>
-        {{-- Phase 8 adds: Payments + Outstanding Payments --}}
-    @endif
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('payments.index', 'payments.create', 'payments.edit') ? 'active' : '' }} ps-4"
-            href="{{ route('payments.index') }}">
-            <i class="bi bi-cash-coin me-2"></i> Payments
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('payments.outstanding') ? 'active' : '' }} ps-4"
-            href="{{ route('payments.outstanding') }}">
-            <i class="bi bi-exclamation-circle me-2"></i> Outstanding Payments
-        </a>
-    </li>
-    {{-- Add Patient (admin, receptionist, staff) --}}
-    @if (auth()->user()->hasRole('admin', 'receptionist', 'staff'))
         <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('patients.create') ? 'active' : '' }} ps-4"
-                href="{{ route('patients.create') }}">
-                <i class="bi bi-person-plus me-2"></i> Add Patient
+            <a class="nav-link {{ request()->routeIs('payments.index', 'payments.create', 'payments.edit') ? 'active' : '' }} ps-4"
+                href="{{ route('payments.index') }}">
+                <i class="bi bi-cash-coin me-2"></i> Payments
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('payments.outstanding') ? 'active' : '' }} ps-4"
+                href="{{ route('payments.outstanding') }}">
+                <i class="bi bi-exclamation-circle me-2"></i> Outstanding Dues
             </a>
         </li>
     @endif
 
-    {{-- ==================================================== --}}
-    {{-- Laser Unit (Shared Asset & Separate Ledger)         --}}
-    {{-- ==================================================== --}}
-    <li class="nav-item mt-2">
-        <div class="px-2 pb-1 d-flex align-items-center justify-content-between">
-            <span class="text-uppercase small fw-bold" style="color: #38bdf8; font-size: 0.72rem; letter-spacing: 0.05em;">
-                <i class="bi bi-lightning-charge-fill me-1"></i> Laser Unit
+    {{-- Expenses Group --}}
+    @if (auth()->user()->hasRole('admin', 'accountant'))
+        <li class="nav-item">
+            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">
+                <i class="bi bi-wallet2 me-1"></i> Expenses
             </span>
-            <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size: 0.6rem;">Shared</span>
-        </div>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('laser.dashboard') ? 'active' : '' }} ps-4"
-            href="{{ route('laser.dashboard') }}">
-            <i class="bi bi-speedometer2 me-2"></i> Laser Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('laser.patients.*') ? 'active' : '' }} ps-4"
-            href="{{ route('laser.patients.index') }}">
-            <i class="bi bi-person-badge me-2"></i> Laser Patients
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('laser.sessions.*') ? 'active' : '' }} ps-4"
-            href="{{ route('laser.sessions.index') }}">
-            <i class="bi bi-activity me-2"></i> Laser Sessions
-        </a>
-    </li>
-    @if (auth()->user()->hasRole('admin', 'staff'))
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('laser.treatments.*') ? 'active' : '' }} ps-4"
-                href="{{ route('laser.treatments.index') }}">
-                <i class="bi bi-card-checklist me-2"></i> Laser Catalog
-            </a>
-        </li>
-    @endif
-    @if (auth()->user()->hasRole('admin', 'accountant'))
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('laser.expenses.*', 'laser.expense-categories.*') ? 'active' : '' }} ps-4"
-                href="{{ route('laser.expenses.index') }}">
-                <i class="bi bi-wallet2 me-2"></i> Laser Expenses
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('laser.reports.*') ? 'active' : '' }} ps-4"
-                href="{{ route('laser.reports.financial') }}">
-                <i class="bi bi-graph-up-arrow me-2"></i> Laser Financials
-            </a>
-        </li>
-    @endif
-    {{-- Inventory (admin only; staff gains Medicine Usage in Phase 11) --}}
-    {{-- @if (auth()->user()->isAdmin())
-        <li class="nav-item">
-            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">Inventory</span>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('medicines.index', 'medicines.show', 'medicines.create', 'medicines.edit') ? 'active' : '' }} ps-4"
-                href="{{ route('medicines.index') }}">
-                <i class="bi bi-basket2 me-2"></i> Medicines &amp; Products
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('medicine-categories.index', 'medicine-categories.create', 'medicine-categories.edit') ? 'active' : '' }} ps-4"
-                href="{{ route('medicine-categories.index') }}">
-                <i class="bi bi-tags me-2"></i> Categories
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('suppliers.index', 'suppliers.create', 'suppliers.edit') ? 'active' : '' }} ps-4"
-                href="{{ route('suppliers.index') }}">
-                <i class="bi bi-truck me-2"></i> Suppliers
-            </a>
-        </li>
-        @endif --}}
-    {{-- Phase 10 adds Stock · Phase 11 adds Medicine Usage --}}
-    {{-- Inventory (admin only; staff gains Medicine Usage in Phase 11) --}}
-    {{-- Inventory: header + usage for admin & staff; stock-keeping pages admin only --}}
-    @if (auth()->user()->hasRole('admin', 'staff'))
-        <li class="nav-item">
-            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">Inventory</span>
-        </li>
-    @endif
-
-    @if (auth()->user()->isAdmin())
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('medicines.index', 'medicines.show', 'medicines.create', 'medicines.edit') ? 'active' : '' }} ps-4"
-                href="{{ route('medicines.index') }}">
-                <i class="bi bi-basket2 me-2"></i> Medicines &amp; Products
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('medicine-categories.index', 'medicine-categories.create', 'medicine-categories.edit') ? 'active' : '' }} ps-4"
-                href="{{ route('medicine-categories.index') }}">
-                <i class="bi bi-tags me-2"></i> Categories
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('suppliers.index', 'suppliers.create', 'suppliers.edit') ? 'active' : '' }} ps-4"
-                href="{{ route('suppliers.index') }}">
-                <i class="bi bi-truck me-2"></i> Suppliers
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('stock.index', 'stock.create') ? 'active' : '' }} ps-4"
-                href="{{ route('stock.index') }}">
-                <i class="bi bi-box-seam me-2"></i> Stock
-            </a>
-        </li>
-    @endif
-
-    @if (auth()->user()->hasRole('admin', 'staff'))
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('medicine-usages.*') ? 'active' : '' }} ps-4"
-                href="{{ route('medicine-usages.index') }}">
-                <i class="bi bi-capsule me-2"></i> Medicine Usage
-            </a>
-        </li>
-    @endif
-    {{-- Expenses (admin, accountant) --}}
-    @if (auth()->user()->hasRole('admin', 'accountant'))
-        <li class="nav-item">
-            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">Expenses</span>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('expenses.index', 'expenses.create', 'expenses.edit') ? 'active' : '' }} ps-4"
@@ -234,10 +104,56 @@
             </a>
         </li>
     @endif
-    {{-- Reports (admin, accountant) --}}
+
+    {{-- Dental Pharmacy & Inventory --}}
+    @if (auth()->user()->hasRole('admin', 'staff'))
+        <li class="nav-item">
+            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">
+                <i class="bi bi-capsule me-1"></i> Dental Pharmacy &amp; Stock
+            </span>
+        </li>
+    @endif
+    @if (auth()->user()->isAdmin())
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('medicines.index', 'medicines.show', 'medicines.create', 'medicines.edit') ? 'active' : '' }} ps-4"
+                href="{{ route('medicines.index') }}">
+                <i class="bi bi-basket2 me-2"></i> Medicines &amp; Materials
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('medicine-categories.index', 'medicine-categories.create', 'medicine-categories.edit') ? 'active' : '' }} ps-4"
+                href="{{ route('medicine-categories.index') }}">
+                <i class="bi bi-tags me-2"></i> Categories
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('stock.index', 'stock.create') ? 'active' : '' }} ps-4"
+                href="{{ route('stock.index') }}">
+                <i class="bi bi-box-seam me-2"></i> Stock Registry
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('suppliers.index', 'suppliers.create', 'suppliers.edit') ? 'active' : '' }} ps-4"
+                href="{{ route('suppliers.index') }}">
+                <i class="bi bi-truck me-2"></i> Dental Suppliers
+            </a>
+        </li>
+    @endif
+    @if (auth()->user()->hasRole('admin', 'staff'))
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('medicine-usages.*') ? 'active' : '' }} ps-4"
+                href="{{ route('medicine-usages.index') }}">
+                <i class="bi bi-capsule me-2"></i> Material Usage
+            </a>
+        </li>
+    @endif
+
+    {{-- Reports Group --}}
     @if (auth()->user()->hasRole('admin', 'accountant'))
         <li class="nav-item">
-            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">Reports</span>
+            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">
+                <i class="bi bi-graph-up me-1"></i> Reports &amp; Analytics
+            </span>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('reports.patients') ? 'active' : '' }} ps-4"
@@ -266,7 +182,7 @@
         <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('reports.usage') ? 'active' : '' }} ps-4"
                 href="{{ route('reports.usage') }}">
-                <i class="bi bi-capsule me-2"></i> Medicine Usage Report
+                <i class="bi bi-capsule me-2"></i> Usage Report
             </a>
         </li>
         <li class="nav-item">
@@ -277,15 +193,31 @@
         </li>
     @endif
 
-    {{-- ==================================================== --}}
-    {{-- Menu sections will be added here, phase by phase:    --}}
-    {{--   Phase 5   -> Appointments                          --}}
-    {{--   Phase 6   -> Treatments                            --}}
-    {{--   Phase 7+8 -> Billing (Invoices, Payments)          --}}
-    {{--   Phase 9-11-> Inventory (Medicines, Stock, Usage)   --}}
-    {{--   Phase 12  -> Expenses                              --}}
-    {{--   Phase 14  -> Reports                               --}}
-    {{--   Phase 15  -> Settings                              --}}
-    {{-- ==================================================== --}}
+    {{-- System / Administration (admin only) --}}
+    @if (auth()->user()->isAdmin())
+        <li class="nav-item">
+            <span class="nav-link text-uppercase small text-secondary px-2 pb-0">
+                <i class="bi bi-gear me-1"></i> Administration
+            </span>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('users.index', 'users.create', 'users.edit') ? 'active' : '' }} ps-4"
+                href="{{ route('users.index') }}">
+                <i class="bi bi-people me-2"></i> Users
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('users.roles') ? 'active' : '' }} ps-4"
+                href="{{ route('users.roles') }}">
+                <i class="bi bi-shield-lock me-2"></i> Roles
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }} ps-4"
+                href="{{ route('settings.index') }}">
+                <i class="bi bi-sliders me-2"></i> Clinic Settings
+            </a>
+        </li>
+    @endif
 
 </ul>

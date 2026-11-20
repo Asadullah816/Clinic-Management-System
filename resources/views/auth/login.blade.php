@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login | {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar skin care & Aesthethic clinic')) }}</title>
+    <title>Login | {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}</title>
 
     {{-- Favicon --}}
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
@@ -170,9 +170,9 @@
                     <i class="bi bi-heart-pulse text-white fs-3"></i>
                 </div>
                 <h4 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.02em;">
-                    {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar skin care & Aesthethic clinic')) }}
+                    {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}
                 </h4>
-                <p class="text-muted small mb-0">Clinic Management &amp; Aesthetic Care</p>
+                <p class="text-muted small mb-0">Dental Surgery &amp; Oral Healthcare</p>
             </div>
 
             {{-- Error Alerts --}}
@@ -237,9 +237,9 @@
 
     {{-- Footer Info --}}
     <div class="footer-text">
-        &copy; {{ date('Y') }} {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Mayar skin care & Aesthethic clinic')) }}
+        &copy; {{ date('Y') }} {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}
         <br>
-        <span class="opacity-75">Aesthetic &amp; Skin Care Clinic Management System</span>
+        <span class="opacity-75">Dental Clinic Management System</span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

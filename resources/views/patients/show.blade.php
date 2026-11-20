@@ -143,7 +143,7 @@
                     <h6 class="text-muted text-uppercase small">Medical</h6>
                     <table class="table table-sm">
                         <tr>
-                            <th class="w-25">Skin Type</th>
+                            <th class="w-25">Dental Notes</th>
                             <td>{{ $patient->skin_type ?? '—' }}</td>
                         </tr>
                         <tr>
@@ -366,7 +366,13 @@
                                             </span>
                                         </td>
                                         <td>{{ \Illuminate\Support\Str::limit($appointment->notes ?? '—', 30) }}</td>
-                                        <td class="text-end">
+                                        <td class="text-end text-nowrap">
+                                            @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED)
+                                                <a href="{{ route('patient-treatments.create', ['patient_id' => $appointment->patient_id, 'treatment_id' => $appointment->treatment_id, 'appointment_id' => $appointment->id, 'redirect' => 'patient']) }}"
+                                                    class="btn btn-sm btn-success me-1" title="Record Treatment">
+                                                    <i class="bi bi-bandaid me-1"></i> Record
+                                                </a>
+                                            @endif
                                             <a href="{{ route('appointments.show', $appointment) }}"
                                                 class="btn btn-sm btn-outline-secondary" title="View">
                                                 <i class="bi bi-eye"></i>
@@ -430,7 +436,7 @@
                                     <tr>
                                         <td>{{ $patientTreatment->treatment_date->format('d M Y') }}</td>
                                         <td>
-                                            <div class="fw-semibold">{{ $patientTreatment->treatment->name ?? '—' }}</div>
+                                            <div class="fw-semibold">{{ $patientTreatment->procedure_title }}</div>
                                             @if ($patientTreatment->treatmentMedicines->isNotEmpty())
                                                 <div class="mt-1">
                                                     @foreach ($patientTreatment->treatmentMedicines as $tm)

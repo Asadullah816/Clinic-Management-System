@@ -13,8 +13,8 @@
     <div class="container-fluid px-1">
 
         {{-- Mobile Hamburger --}}
-        <button class="btn btn-outline-secondary btn-sm d-lg-none me-2 shadow-none border-0" type="button" data-bs-toggle="offcanvas"
-            data-bs-target="#mobileSidebar" aria-label="Toggle navigation">
+        <button class="btn btn-light btn-sm d-lg-none me-2 shadow-sm border d-inline-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#mobileSidebar" aria-label="Open mobile menu" style="width: 38px; height: 38px; border-radius: 10px; background: #ffffff; color: #0284c7;">
             <i class="bi bi-list fs-4"></i>
         </button>
 

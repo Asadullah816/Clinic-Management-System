@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ExpenseCategory;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class ExpenseCategoryController extends Controller
@@ -79,7 +80,13 @@ class ExpenseCategoryController extends Controller
                 ->with('error', 'This category has expenses recorded and cannot be deleted. Set it to inactive instead.');
         }
 
-        $expense_category->delete();
+        try {
+            $expense_category->delete();
+        } catch (QueryException $e) {
+            return redirect()
+                ->route('expense-categories.index')
+                ->with('error', 'Cannot delete this category because it is still referenced by expense records. Set it to inactive instead.');
+        }
 
         return redirect()
             ->route('expense-categories.index')

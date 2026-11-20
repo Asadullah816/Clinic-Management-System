@@ -201,7 +201,7 @@ test('treatment recording fails validation if requested medicine quantity exceed
     ]);
 
     $treatment = Treatment::create([
-        'name' => 'Laser Resurfacing',
+        'name' => 'Root Canal Treatment',
         'price' => 300.00,
         'duration' => 60,
         'status' => 'active',

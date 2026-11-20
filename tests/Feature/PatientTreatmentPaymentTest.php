@@ -212,7 +212,7 @@ test('recording treatment with partial payment creates partial invoice with due 
     ]);
 
     $treatment = Treatment::create([
-        'name' => 'Laser Resurfacing',
+        'name' => 'Root Canal Treatment',
         'price' => 300.00,
         'duration' => 60,
         'status' => 'active',
@@ -360,7 +360,7 @@ test('payment receipt print route resolves business receipt numbers and suppress
     $response = $this->actingAs($user)->get($routeUrl);
     $response->assertOk();
     $response->assertSee($receiptNumber);
-    $response->assertSee('Mayar skin care &amp; Aesthethic clinic', false);
+    $response->assertSee('Dr Badshah Afsar', false);
     $response->assertSee('@page', false);
     $response->assertSee('margin: 0mm', false);
 });

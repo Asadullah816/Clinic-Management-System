@@ -99,11 +99,11 @@
     <label class="form-label fw-semibold">Medical Information</label>
     <div class="row">
         <div class="col-md-4 mb-3">
-            <label for="skin_type" class="form-label">Skin Type</label>
+            <label for="skin_type" class="form-label">Dental Condition / Notes</label>
             <input type="text" id="skin_type" name="skin_type"
                 value="{{ old('skin_type', $patient->skin_type ?? '') }}"
                 class="form-control @error('skin_type') is-invalid @enderror"
-                placeholder="e.g. Oily, Dry, Combination">
+                placeholder="e.g. Sensitivity, Gingivitis, Normal">
             @error('skin_type')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
