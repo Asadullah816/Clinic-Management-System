@@ -167,7 +167,7 @@
             {{-- Brand Header --}}
             <div class="text-center mb-4 pt-2">
                 <div class="brand-icon-box mb-3">
-                    <i class="bi bi-heart-pulse text-white fs-3"></i>
+                    @include('partials.dental-logo', ['width' => 32, 'height' => 32])
                 </div>
                 <h4 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.02em;">
                     {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}

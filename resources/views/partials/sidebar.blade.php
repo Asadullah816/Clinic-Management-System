@@ -3,7 +3,7 @@
     <a href="{{ route('dashboard') }}" class="d-flex align-items-center text-white text-decoration-none mb-3 px-1 py-1">
         <div class="brand-icon rounded-3 d-flex align-items-center justify-content-center me-2 flex-shrink-0"
             style="width: 38px; height: 38px; background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);">
-            <i class="bi bi-hospital text-white fs-5"></i>
+            @include('partials.dental-logo', ['width' => 22, 'height' => 22])
         </div>
         <div class="overflow-hidden">
             <span class="fs-6 fw-bold d-block text-white text-truncate lh-sm" title="{{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}">
@@ -34,7 +34,7 @@
         <div class="d-flex align-items-center overflow-hidden me-2">
             <div class="brand-icon rounded-3 d-flex align-items-center justify-content-center me-2 flex-shrink-0"
                 style="width: 38px; height: 38px; background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%); box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);">
-                <i class="bi bi-hospital text-white fs-5"></i>
+                @include('partials.dental-logo', ['width' => 22, 'height' => 22])
             </div>
             <div class="overflow-hidden">
                 <span id="mobileSidebarLabel" class="fs-6 fw-bold text-white d-block text-truncate lh-sm">

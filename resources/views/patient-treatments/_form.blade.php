@@ -68,43 +68,6 @@
         ];
     }
 
-    // Initial medicines
-    $initialSelectedMedicines = [];
-    if (old('medicines')) {
-        foreach (old('medicines') as $oldMed) {
-            $medId = (int) ($oldMed['id'] ?? 0);
-            $found = collect($medicines)->firstWhere('id', $medId);
-            if ($found) {
-                $initialSelectedMedicines[] = [
-                    'id'             => $medId,
-                    'name'           => $found['name'],
-                    'generic_name'   => $found['generic_name'],
-                    'category'       => $found['category'],
-                    'unit'           => $found['unit'] ?? 'unit',
-                    'image_url'      => $found['image_url'],
-                    'stock_quantity' => (int) $found['stock_quantity'],
-                    'unit_price'     => (float) ($oldMed['unit_price'] ?? $found['selling_price']),
-                    'quantity'       => (int) ($oldMed['quantity'] ?? 1),
-                ];
-            }
-        }
-    } elseif (isset($patientTreatment) && $patientTreatment && $patientTreatment->treatmentMedicines) {
-        foreach ($patientTreatment->treatmentMedicines as $tm) {
-            $medId = (int) $tm->medicine_id;
-            $found = collect($medicines)->firstWhere('id', $medId);
-            $initialSelectedMedicines[] = [
-                'id'             => $medId,
-                'name'           => $tm->medicine->name ?? ($found['name'] ?? 'Product #' . $medId),
-                'generic_name'   => $tm->medicine->generic_name ?? ($found['generic_name'] ?? ''),
-                'category'       => $tm->medicine->category->name ?? ($found['category'] ?? 'General'),
-                'unit'           => $tm->medicine->unit ?? ($found['unit'] ?? 'unit'),
-                'image_url'      => $tm->medicine->image_url ?? ($found['image_url'] ?? null),
-                'stock_quantity' => (int) (($tm->medicine->stock_quantity ?? 0) + $tm->quantity),
-                'unit_price'     => (float) $tm->unit_price,
-                'quantity'       => (int) $tm->quantity,
-            ];
-        }
-    }
 @endphp
 
 {{-- ================= ROW: PATIENT SEARCH DROPDOWN & TREATMENT DATE ================= --}}
@@ -282,157 +245,21 @@
     </div>
 </div>
 
-{{-- ================= SECTION 2: MEDICINES & PRODUCTS (SEPARATED) ================= --}}
-<div class="card mb-4 border shadow-sm">
-    <div class="card-header bg-success-subtle py-2 d-flex justify-content-between align-items-center">
-        <span class="fw-bold text-success">
-            <i class="bi bi-capsule me-1"></i> 2. Prescribed Products &amp; Medicines
-        </span>
-        <span class="badge bg-success text-white" id="selected-medicines-count-badge">0 items selected</span>
-    </div>
-    <div class="card-body">
-        @error('medicines')
-            <div class="alert alert-danger py-2 mb-3">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ $message }}
-            </div>
-        @enderror
-
-        <!-- Medicine Search with Dropdown -->
-        <div class="position-relative mb-3" id="medicine-search-wrapper">
-            <label class="form-label fw-semibold mb-1">
-                <i class="bi bi-search text-success me-1"></i> Search &amp; Add Products
-            </label>
-            <div class="input-group">
-                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" id="medicine-search-input" class="form-control"
-                    placeholder="Search by product name, generic name, or category..." autocomplete="off">
-                <button class="btn btn-outline-secondary" type="button" id="clear-search-btn" style="display: none;">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-            <div class="form-text small">Type product name to search catalog. Click on an item to add it to the treatment. Stock will be auto-calculated.</div>
-
-            <!-- Search Dropdown Results Menu -->
-            <div id="medicine-search-dropdown" class="list-group position-absolute w-100 shadow-lg rounded-3 border mt-1"
-                style="max-height: 320px; overflow-y: auto; z-index: 1050; display: none; background: #ffffff;">
-            </div>
-        </div>
-
-        <!-- Selected Medicines Table -->
-        <div class="table-responsive border rounded-3 bg-white mb-3">
-            <table class="table table-hover align-middle mb-0" id="selected-medicines-table">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 36%;">Product / Medicine</th>
-                        <th style="width: 14%;" class="text-center">Available Stock</th>
-                        <th style="width: 16%;">Unit Price (PKR)</th>
-                        <th style="width: 14%;">Quantity</th>
-                        <th style="width: 15%;" class="text-end">Line Total (PKR)</th>
-                        <th style="width: 5%;" class="text-center"><i class="bi bi-trash"></i></th>
-                    </tr>
-                </thead>
-                <tbody id="selected-medicines-tbody">
-                    <!-- Populated dynamically via JavaScript -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Medicines Pricing Sub-calculation (Separated Discount) -->
-        <div class="row align-items-center bg-light p-3 rounded border">
-            <div class="col-md-4 mb-2 mb-md-0">
-                <div class="small text-muted fw-semibold">Medicines Subtotal:</div>
-                <div class="fs-5 fw-bold text-dark" id="medicines-subtotal-preview">PKR 0.00</div>
-            </div>
-            <div class="col-md-4 mb-2 mb-md-0">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label small fw-semibold text-secondary mb-0">Medicines Discount</label>
-                    <div class="btn-group btn-group-sm" role="group" aria-label="Medicine Discount Mode">
-                        <input type="radio" class="btn-check" name="medicine_discount_type" id="mdt_type_fixed" value="fixed"
-                            {{ old('medicine_discount_type', 'fixed') === 'fixed' ? 'checked' : '' }} autocomplete="off">
-                        <label class="btn btn-outline-success py-0 px-2 small" for="mdt_type_fixed">Fixed (PKR)</label>
-
-                        <input type="radio" class="btn-check" name="medicine_discount_type" id="mdt_type_percentage" value="percentage"
-                            {{ old('medicine_discount_type') === 'percentage' ? 'checked' : '' }} autocomplete="off">
-                        <label class="btn btn-outline-success py-0 px-2 small" for="mdt_type_percentage">% Off</label>
-                    </div>
-                </div>
-
-                <!-- Fixed Price Medicine Discount Input -->
-                <div id="wrapper_med_discount_fixed">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white">PKR</span>
-                        <input type="number" step="0.01" min="0" id="medicine_discount" name="medicine_discount"
-                            value="{{ old('medicine_discount', $patientTreatment->medicine_discount ?? 0) }}"
-                            class="form-control @error('medicine_discount') is-invalid @enderror" placeholder="0.00">
-                    </div>
-                </div>
-
-                <!-- Percentage Medicine Discount Input -->
-                <div id="wrapper_med_discount_percentage" style="display: none;">
-                    <div class="input-group input-group-sm">
-                        <input type="number" step="0.01" min="0" max="100" id="medicine_discount_percentage" name="medicine_discount_percentage"
-                            value="{{ old('medicine_discount_percentage') }}"
-                            class="form-control @error('medicine_discount_percentage') is-invalid @enderror" placeholder="0 - 100">
-                        <span class="input-group-text bg-white">%</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
-                        <span class="badge bg-light text-success border" id="mdt_calc_badge">= PKR 0.00 off</span>
-                        <span class="text-muted small">0% &ndash; 100%</span>
-                    </div>
-                </div>
-
-                @error('medicine_discount')
-                    <div class="invalid-feedback d-block small">{{ $message }}</div>
-                @enderror
-                @error('medicine_discount_percentage')
-                    <div class="invalid-feedback d-block small">{{ $message }}</div>
-                @enderror
-                <div class="form-text small">Separated discount strictly for medicines.</div>
-            </div>
-            <div class="col-md-4 text-md-end">
-                <div class="small text-muted fw-semibold">Medicines Net Total:</div>
-                <div class="fs-5 fw-bold text-success" id="medicines-net-preview">PKR 0.00</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- ================= SECTION 3: BILLING & GRAND TOTAL SUMMARY ================= --}}
+{{-- ================= SECTION 2: BILLING & GRAND TOTAL SUMMARY ================= --}}
 <div class="card mb-4 border shadow-sm">
     <div class="card-header bg-dark text-white py-2 d-flex justify-content-between align-items-center">
         <span class="fw-bold">
-            <i class="bi bi-receipt me-1"></i> 3. Grand Total &amp; Billing Summary
+            <i class="bi bi-receipt me-1"></i> 2. Grand Total &amp; Billing Summary
         </span>
-        <span class="badge bg-light text-dark">Separated Breakdown</span>
+        <span class="badge bg-light text-dark">Invoice Settlement</span>
     </div>
     <div class="card-body">
-        <div class="row mb-3 g-3">
-            <div class="col-md-6">
-                <div class="border rounded p-3 h-100 bg-light">
-                    <h6 class="text-secondary fw-bold mb-2">Cost Breakdown</h6>
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span><i class="bi bi-activity text-primary me-1"></i> Procedure Net:</span>
-                        <span class="fw-bold text-primary" id="bd-t-net">PKR 0.00</span>
-                    </div>
-                    <div class="d-flex justify-content-between text-muted small ps-3 mb-2">
-                        <span>Fee: <span id="bd-t-price">PKR 0.00</span> &minus; Disc: <span id="bd-t-disc">PKR 0.00</span></span>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-1 border-top pt-2">
-                        <span><i class="bi bi-capsule text-success me-1"></i> Medicines Net:</span>
-                        <span class="fw-bold text-success" id="bd-m-net">PKR 0.00</span>
-                    </div>
-                    <div class="d-flex justify-content-between text-muted small ps-3">
-                        <span>Subtotal: <span id="bd-m-sub">PKR 0.00</span> &minus; Disc: <span id="bd-m-disc">PKR 0.00</span></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="border rounded p-3 h-100 bg-primary text-white text-center d-flex flex-column justify-content-center">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="border rounded-3 p-3 bg-primary text-white text-center d-flex flex-column justify-content-center">
                     <span class="text-white-50 text-uppercase fw-semibold small tracking-wide">Grand Total Payable</span>
                     <div class="display-6 fw-bold my-1" id="grand-total-preview">PKR 0.00</div>
-                    <div class="small text-white-50">Procedure Net + Medicines Net</div>
+                    <div class="small text-white-50">Procedure Net Total</div>
                 </div>
             </div>
         </div>
@@ -528,12 +355,10 @@
     // All available data passed from Laravel
     const catalogPatients = @json($patients);
     const catalogTreatments = @json($treatments);
-    const catalogMedicines = @json($medicines);
     const patientAppointmentsMap = @json($patientAppointments);
 
     // Initial state
     let selectedProcedures = @json($initialProcedures);
-    let selectedMedicines = @json($initialSelectedMedicines);
 
     // DOM Elements - Patient Search
     const patientSearchInput = document.getElementById('patient_search_input');
@@ -562,29 +387,7 @@
     const dtCalcBadge = document.getElementById('dt_calc_badge');
     const treatmentNetPreview = document.getElementById('treatment-net-preview');
 
-    // DOM Elements - Medicines
-    const medicineSearchInput = document.getElementById('medicine-search-input');
-    const medicineSearchDropdown = document.getElementById('medicine-search-dropdown');
-    const clearSearchBtn = document.getElementById('clear-search-btn');
-    const selectedMedicinesTbody = document.getElementById('selected-medicines-tbody');
-    const selectedMedicinesCountBadge = document.getElementById('selected-medicines-count-badge');
-    const medicinesSubtotalPreview = document.getElementById('medicines-subtotal-preview');
-    const medicineDiscountInput = document.getElementById('medicine_discount');
-    const mdtTypeFixed = document.getElementById('mdt_type_fixed');
-    const mdtTypePercentage = document.getElementById('mdt_type_percentage');
-    const wrapperMedDiscountFixed = document.getElementById('wrapper_med_discount_fixed');
-    const wrapperMedDiscountPercentage = document.getElementById('wrapper_med_discount_percentage');
-    const medDiscountPercentageInput = document.getElementById('medicine_discount_percentage');
-    const mdtCalcBadge = document.getElementById('mdt_calc_badge');
-    const medicinesNetPreview = document.getElementById('medicines-net-preview');
-
-    // DOM Elements - Cost Breakdown & Billing
-    const bdTPrice = document.getElementById('bd-t-price');
-    const bdTDisc = document.getElementById('bd-t-disc');
-    const bdTNet = document.getElementById('bd-t-net');
-    const bdMSub = document.getElementById('bd-m-sub');
-    const bdMDisc = document.getElementById('bd-m-disc');
-    const bdMNet = document.getElementById('bd-m-net');
+    // DOM Elements - Grand Total & Billing
     const grandTotalPreview = document.getElementById('grand-total-preview');
 
     const paidInput = document.getElementById('paid_amount');
@@ -929,269 +732,7 @@
     });
 
     // ==========================================
-    // 3. MEDICINES LOGIC & SELECTION
-    // ==========================================
-    function renderMedicinesTable() {
-        selectedMedicinesTbody.innerHTML = '';
-
-        if (selectedMedicines.length === 0) {
-            selectedMedicinesTbody.innerHTML = `
-                <tr id="no-medicines-row">
-                    <td colspan="6" class="text-center py-4 text-muted">
-                        <i class="bi bi-capsule fs-3 d-block text-secondary mb-1"></i>
-                        No medicines or products selected for this treatment.
-                        <div class="small">Use the search box above to add prescribed products.</div>
-                    </td>
-                </tr>
-            `;
-            selectedMedicinesCountBadge.textContent = '0 items selected';
-        } else {
-            selectedMedicinesCountBadge.textContent = selectedMedicines.length + ' ' + (selectedMedicines.length === 1 ? 'item' : 'items');
-
-            selectedMedicines.forEach((med, index) => {
-                const tr = document.createElement('tr');
-                const lineTotal = (med.quantity * med.unit_price).toFixed(2);
-
-                const imageHtml = med.image_url
-                    ? `<img src="${med.image_url}" alt="${med.name}" class="rounded border object-fit-cover me-2 flex-shrink-0" style="width: 38px; height: 38px;">`
-                    : `<div class="rounded border bg-light d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width: 38px; height: 38px;"><i class="bi bi-capsule text-primary"></i></div>`;
-
-                const stockBadgeClass = med.stock_quantity > 10 ? 'bg-success' : (med.stock_quantity > 0 ? 'bg-warning text-dark' : 'bg-danger');
-
-                tr.innerHTML = `
-                    <td>
-                        <div class="d-flex align-items-center">
-                            ${imageHtml}
-                            <div class="text-truncate" style="max-width: 250px;">
-                                <div class="fw-semibold text-dark text-truncate">${escapeHtml(med.name)}</div>
-                                <div class="small text-muted text-truncate">${escapeHtml(med.generic_name || med.category || '')}</div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="medicines[${index}][id]" value="${med.id}">
-                    </td>
-                    <td class="text-center">
-                        <span class="badge ${stockBadgeClass} px-2 py-1">
-                            ${med.stock_quantity} ${escapeHtml(med.unit || 'units')}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-white">PKR</span>
-                            <input type="number" step="0.01" min="0"
-                                class="form-control form-control-sm text-end med-price-input"
-                                name="medicines[${index}][unit_price]"
-                                value="${parseFloat(med.unit_price).toFixed(2)}"
-                                data-index="${index}">
-                        </div>
-                    </td>
-                    <td>
-                        <input type="number" min="1" max="${med.stock_quantity}"
-                            class="form-control form-control-sm text-center med-qty-input ${med.quantity > med.stock_quantity ? 'is-invalid' : ''}"
-                            name="medicines[${index}][quantity]"
-                            value="${med.quantity}"
-                            data-index="${index}">
-                    </td>
-                    <td class="text-end fw-bold text-dark">
-                        PKR <span id="line-total-${index}">${lineTotal}</span>
-                    </td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 remove-med-btn" data-index="${index}" title="Remove">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-
-                selectedMedicinesTbody.appendChild(tr);
-            });
-        }
-
-        document.querySelectorAll('.med-price-input').forEach(input => {
-            input.addEventListener('input', function() {
-                const idx = parseInt(this.dataset.index, 10);
-                const val = parseFloat(this.value) || 0;
-                selectedMedicines[idx].unit_price = Math.max(0, val);
-                document.getElementById('line-total-' + idx).textContent = (selectedMedicines[idx].quantity * selectedMedicines[idx].unit_price).toFixed(2);
-                recalculateAll();
-            });
-        });
-
-        document.querySelectorAll('.med-qty-input').forEach(input => {
-            input.addEventListener('input', function() {
-                const idx = parseInt(this.dataset.index, 10);
-                let val = parseInt(this.value, 10);
-                const maxStock = selectedMedicines[idx].stock_quantity;
-
-                if (isNaN(val) || val < 1) val = 1;
-                if (val > maxStock) {
-                    this.classList.add('is-invalid');
-                } else {
-                    this.classList.remove('is-invalid');
-                }
-
-                selectedMedicines[idx].quantity = val;
-                document.getElementById('line-total-' + idx).textContent = (selectedMedicines[idx].quantity * selectedMedicines[idx].unit_price).toFixed(2);
-                recalculateAll();
-            });
-        });
-
-        document.querySelectorAll('.remove-med-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const idx = parseInt(this.dataset.index, 10);
-                selectedMedicines.splice(idx, 1);
-                renderMedicinesTable();
-                recalculateAll();
-            });
-        });
-    }
-
-    function searchMedicines(query) {
-        if (!query || query.trim() === '') {
-            medicineSearchDropdown.style.display = 'none';
-            medicineSearchDropdown.innerHTML = '';
-            clearSearchBtn.style.display = 'none';
-            return;
-        }
-
-        clearSearchBtn.style.display = 'inline-block';
-        const q = query.toLowerCase().trim();
-
-        const filtered = catalogMedicines.filter(m => {
-            const nameMatch = m.name && m.name.toLowerCase().includes(q);
-            const genericMatch = m.generic_name && m.generic_name.toLowerCase().includes(q);
-            const catMatch = m.category && m.category.toLowerCase().includes(q);
-            return nameMatch || genericMatch || catMatch;
-        });
-
-        if (filtered.length === 0) {
-            medicineSearchDropdown.innerHTML = `
-                <div class="p-3 text-center text-muted">
-                    <i class="bi bi-search mb-1 d-block"></i>
-                    No products found matching "<strong>${escapeHtml(query)}</strong>"
-                </div>
-            `;
-            medicineSearchDropdown.style.display = 'block';
-            return;
-        }
-
-        let html = '';
-        filtered.forEach(med => {
-            const isSelected = selectedMedicines.some(sm => sm.id === med.id);
-            const isOutOfStock = med.stock_quantity <= 0;
-            const isExpired = med.is_expired;
-            const disabled = isOutOfStock || isExpired;
-
-            let badge = '';
-            if (isExpired) {
-                badge = '<span class="badge bg-danger">Expired</span>';
-            } else if (isOutOfStock) {
-                badge = '<span class="badge bg-danger">Out of Stock (0)</span>';
-            } else if (med.stock_quantity <= 10) {
-                badge = `<span class="badge bg-warning text-dark">${med.stock_quantity} ${med.unit} left</span>`;
-            } else {
-                badge = `<span class="badge bg-success-subtle text-success border border-success-subtle">${med.stock_quantity} ${med.unit}</span>`;
-            }
-
-            const imageHtml = med.image_url
-                ? `<img src="${med.image_url}" alt="${med.name}" class="rounded border object-fit-cover me-2 flex-shrink-0" style="width: 44px; height: 44px;">`
-                : `<div class="rounded border bg-light d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width: 44px; height: 44px;"><i class="bi bi-capsule text-primary fs-5"></i></div>`;
-
-            html += `
-                <a href="javascript:void(0)" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-2 search-result-item ${disabled ? 'opacity-50 text-muted disabled' : ''}"
-                    data-id="${med.id}">
-                    <div class="d-flex align-items-center flex-grow-1 overflow-hidden me-2">
-                        ${imageHtml}
-                        <div class="text-truncate">
-                            <div class="fw-bold text-dark text-truncate">${escapeHtml(med.name)}</div>
-                            <div class="small text-muted text-truncate">
-                                ${med.generic_name ? escapeHtml(med.generic_name) + ' &bull; ' : ''}<span class="badge bg-light text-secondary border">${escapeHtml(med.category)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-end flex-shrink-0">
-                        <div class="fw-bold text-primary mb-1">PKR ${med.selling_price.toFixed(2)}</div>
-                        <div class="d-flex align-items-center justify-content-end gap-1">
-                            ${badge}
-                            ${isSelected ? '<span class="badge bg-info text-white"><i class="bi bi-check-lg"></i> Added</span>' : ''}
-                        </div>
-                    </div>
-                </a>
-            `;
-        });
-
-        medicineSearchDropdown.innerHTML = html;
-        medicineSearchDropdown.style.display = 'block';
-
-        medicineSearchDropdown.querySelectorAll('.search-result-item:not(.disabled)').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const id = parseInt(this.dataset.id, 10);
-                addMedicineToTreatment(id);
-                medicineSearchInput.value = '';
-                medicineSearchDropdown.style.display = 'none';
-                clearSearchBtn.style.display = 'none';
-            });
-        });
-    }
-
-    function addMedicineToTreatment(medId) {
-        const med = catalogMedicines.find(m => m.id === medId);
-        if (!med) return;
-
-        if (med.is_expired) {
-            alert('Cannot add "' + med.name + '" because it is expired.');
-            return;
-        }
-
-        if (med.stock_quantity <= 0) {
-            alert('Cannot add "' + med.name + '" because it is out of stock.');
-            return;
-        }
-
-        const existing = selectedMedicines.find(sm => sm.id === medId);
-        if (existing) {
-            if (existing.quantity < existing.stock_quantity) {
-                existing.quantity += 1;
-            } else {
-                alert('Maximum available stock reached for "' + med.name + '" (' + existing.stock_quantity + ' ' + (existing.unit || 'units') + ').');
-            }
-        } else {
-            selectedMedicines.push({
-                id: med.id,
-                name: med.name,
-                generic_name: med.generic_name,
-                category: med.category,
-                unit: med.unit,
-                image_url: med.image_url,
-                stock_quantity: med.stock_quantity,
-                unit_price: med.selling_price,
-                quantity: 1,
-            });
-        }
-
-        renderMedicinesTable();
-        recalculateAll();
-    }
-
-    medicineSearchInput.addEventListener('input', function() { searchMedicines(this.value); });
-    medicineSearchInput.addEventListener('focus', function() {
-        if (this.value && this.value.trim() !== '') searchMedicines(this.value);
-    });
-    clearSearchBtn.addEventListener('click', function() {
-        medicineSearchInput.value = '';
-        medicineSearchDropdown.style.display = 'none';
-        clearSearchBtn.style.display = 'none';
-        medicineSearchInput.focus();
-    });
-
-    document.addEventListener('click', function(e) {
-        const wrapper = document.getElementById('medicine-search-wrapper');
-        if (wrapper && !wrapper.contains(e.target)) {
-            medicineSearchDropdown.style.display = 'none';
-        }
-    });
-
-    // ==========================================
-    // 4. DISCOUNT & TOTALS RECALCULATION
+    // 3. DISCOUNT & TOTALS RECALCULATION
     // ==========================================
     function escapeHtml(string) {
         const div = document.createElement('div');
@@ -1234,43 +775,6 @@
         });
     }
 
-    function syncMedicineDiscountMode() {
-        if (mdtTypePercentage && mdtTypePercentage.checked) {
-            wrapperMedDiscountFixed.style.display = 'none';
-            wrapperMedDiscountPercentage.style.display = 'block';
-        } else {
-            wrapperMedDiscountFixed.style.display = 'block';
-            wrapperMedDiscountPercentage.style.display = 'none';
-        }
-    }
-
-    if (mdtTypeFixed && mdtTypePercentage) {
-        mdtTypeFixed.addEventListener('change', function() {
-            if (this.checked) {
-                let mSub = 0;
-                selectedMedicines.forEach(m => { mSub += (m.quantity * m.unit_price); });
-                const pct = Math.max(0, parseFloat(medDiscountPercentageInput.value) || 0);
-                if (pct > 0 && mSub > 0) {
-                    medicineDiscountInput.value = Math.round(mSub * (pct / 100) * 100 / 100).toFixed(2);
-                }
-                syncMedicineDiscountMode();
-                recalculateAll(!userCustomizedPaid);
-            }
-        });
-        mdtTypePercentage.addEventListener('change', function() {
-            if (this.checked) {
-                let mSub = 0;
-                selectedMedicines.forEach(m => { mSub += (m.quantity * m.unit_price); });
-                const flat = Math.max(0, parseFloat(medicineDiscountInput.value) || 0);
-                if (flat > 0 && mSub > 0 && (!medDiscountPercentageInput.value || parseFloat(medDiscountPercentageInput.value) === 0)) {
-                    medDiscountPercentageInput.value = Math.min(100, Math.round((flat / mSub * 100) * 10) / 10);
-                }
-                syncMedicineDiscountMode();
-                recalculateAll(!userCustomizedPaid);
-            }
-        });
-    }
-
     function recalculateAll(syncPaid = false) {
         // 1. Treatment procedure pricing
         const tPrice = Math.max(0, parseFloat(priceInput.value) || 0);
@@ -1286,41 +790,13 @@
         }
 
         const tNet = Math.max(0, tPrice - tDisc);
-
         treatmentNetPreview.textContent = 'PKR ' + tNet.toFixed(2);
-        bdTPrice.textContent = 'PKR ' + tPrice.toFixed(2);
-        bdTDisc.textContent = 'PKR ' + tDisc.toFixed(2);
-        bdTNet.textContent = 'PKR ' + tNet.toFixed(2);
 
-        // 2. Medicines pricing
-        let mSubtotal = 0;
-        selectedMedicines.forEach(med => {
-            mSubtotal += (med.quantity * med.unit_price);
-        });
-
-        let mDisc = 0;
-        if (mdtTypePercentage && mdtTypePercentage.checked) {
-            const pct = Math.min(100, Math.max(0, parseFloat(medDiscountPercentageInput.value) || 0));
-            mDisc = Math.round(mSubtotal * (pct / 100) * 100) / 100;
-            if (mdtCalcBadge) mdtCalcBadge.textContent = '= PKR ' + mDisc.toFixed(2) + ' off';
-            if (medicineDiscountInput) medicineDiscountInput.value = mDisc.toFixed(2);
-        } else {
-            mDisc = Math.max(0, parseFloat(medicineDiscountInput.value) || 0);
-        }
-
-        const mNet = Math.max(0, mSubtotal - mDisc);
-
-        medicinesSubtotalPreview.textContent = 'PKR ' + mSubtotal.toFixed(2);
-        medicinesNetPreview.textContent = 'PKR ' + mNet.toFixed(2);
-        bdMSub.textContent = 'PKR ' + mSubtotal.toFixed(2);
-        bdMDisc.textContent = 'PKR ' + mDisc.toFixed(2);
-        bdMNet.textContent = 'PKR ' + mNet.toFixed(2);
-
-        // 3. Grand Total
-        const grandTotal = Math.max(0, tNet + mNet);
+        // 2. Grand Total is Procedure Net Total
+        const grandTotal = tNet;
         grandTotalPreview.textContent = 'PKR ' + grandTotal.toFixed(2);
 
-        // 4. Payment & Due calculations
+        // 3. Payment & Due calculations
         if (paidInput) {
             if (syncPaid || (!userCustomizedPaid && (!paidInput.value || paidInput.value === ''))) {
                 paidInput.value = grandTotal > 0 ? grandTotal.toFixed(2) : '0.00';
@@ -1359,13 +835,8 @@
     if (discountPercentageInput) {
         discountPercentageInput.addEventListener('input', function() { recalculateAll(!userCustomizedPaid); });
     }
-    medicineDiscountInput.addEventListener('input', function() { recalculateAll(!userCustomizedPaid); });
-    if (medDiscountPercentageInput) {
-        medDiscountPercentageInput.addEventListener('input', function() { recalculateAll(!userCustomizedPaid); });
-    }
 
     syncTreatmentDiscountMode();
-    syncMedicineDiscountMode();
 
     if (paidInput) {
         paidInput.addEventListener('input', function() {
@@ -1391,7 +862,6 @@
 
     // Initial renders
     renderProcedures();
-    renderMedicinesTable();
     syncProceduresSum();
     recalculateAll(false);
 </script>

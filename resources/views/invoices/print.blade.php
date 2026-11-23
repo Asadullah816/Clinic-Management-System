@@ -263,12 +263,18 @@
         <div class="invoice-sheet mx-auto p-5 border rounded shadow-sm">
             {{-- Header --}}
             <div class="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                    <h4 class="mb-0 fw-bold text-primary">{{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}</h4>
-                    @if ($address = \App\Models\Setting::get('address'))
-                        <div class="text-muted small">{{ $address }}</div>
-                    @endif
-                    <div class="text-muted small">Ph: {{ \App\Models\Setting::get('phone', '03489030035') }}</div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm"
+                        style="width: 44px; height: 44px; background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);">
+                        @include('partials.dental-logo', ['width' => 26, 'height' => 26])
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold text-primary">{{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}</h4>
+                        @if ($address = \App\Models\Setting::get('address'))
+                            <div class="text-muted small">{{ $address }}</div>
+                        @endif
+                        <div class="text-muted small">Ph: {{ \App\Models\Setting::get('phone', '03489030035') }}</div>
+                    </div>
                 </div>
                 <div class="text-end">
                     <h2 class="text-uppercase mb-0 fw-bold">Invoice</h2>

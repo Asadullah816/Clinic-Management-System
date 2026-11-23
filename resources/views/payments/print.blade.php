@@ -27,6 +27,7 @@
             .no-print {
                 display: none !important;
             }
+
             body {
                 background: #fff !important;
                 margin: 0 !important;
@@ -122,11 +123,11 @@
 
             <div class="btn-group" role="group">
                 <a href="{{ request()->fullUrlWithQuery(['format' => 'pos']) }}"
-                   class="btn btn-sm {{ $format === 'pos' ? 'btn-dark' : 'btn-outline-secondary' }}">
+                    class="btn btn-sm {{ $format === 'pos' ? 'btn-dark' : 'btn-outline-secondary' }}">
                     <i class="bi bi-receipt me-1"></i> 80mm Receipt (POS)
                 </a>
                 <a href="{{ request()->fullUrlWithQuery(['format' => 'a4']) }}"
-                   class="btn btn-sm {{ $format === 'a4' ? 'btn-dark' : 'btn-outline-secondary' }}">
+                    class="btn btn-sm {{ $format === 'a4' ? 'btn-dark' : 'btn-outline-secondary' }}">
                     <i class="bi bi-file-earmark-text me-1"></i> A4 Full Page
                 </a>
             </div>
@@ -242,14 +243,20 @@
             <div class="text-center mt-2" style="font-size: 11px;">
                 <div>Thank you for your payment!</div>
                 <div>Please keep this receipt for verification.</div>
-                <div class="text-muted mt-1" style="font-size: 10px;">Printed: {{ now()->format('d M Y, h:i A') }}</div>
+                <div class="text-muted mt-1" style="font-size: 10px;">Printed: {{ now()->format('d M Y, h:i A') }}
+                </div>
             </div>
         </div>
     @else
         {{-- ==================== Standard A4 Receipt ==================== --}}
         <div class="receipt-sheet mx-auto p-5 border rounded shadow-sm">
             <div class="text-center mb-4">
-                <h4 class="mb-0 fw-bold text-primary">{{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}</h4>
+                <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-2 shadow-sm"
+                    style="width: 44px; height: 44px; background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);">
+                    @include('partials.dental-logo', ['width' => 26, 'height' => 26])
+                </div>
+                <h4 class="mb-0 fw-bold text-primary">
+                    {{ \App\Models\Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar')) }}</h4>
                 @if ($address = \App\Models\Setting::get('address'))
                     <div class="text-muted small">{{ $address }}</div>
                 @endif
@@ -263,7 +270,8 @@
             <table class="table table-sm align-middle mb-4">
                 <tr>
                     <th class="w-25 bg-light">Received From</th>
-                    <td class="fw-semibold">{{ $payment->patient->full_name }} ({{ $payment->patient->patient_number }})</td>
+                    <td class="fw-semibold">{{ $payment->patient->full_name }}
+                        ({{ $payment->patient->patient_number }})</td>
                 </tr>
                 <tr>
                     <th class="bg-light">Invoice</th>
@@ -297,7 +305,8 @@
                 </tr>
                 <tr>
                     <th class="bg-light">Total Paid (including this payment)</th>
-                    <td class="text-end text-success fw-semibold">PKR {{ number_format($payment->invoice->paid_amount, 2) }}</td>
+                    <td class="text-end text-success fw-semibold">PKR
+                        {{ number_format($payment->invoice->paid_amount, 2) }}</td>
                 </tr>
                 <tr>
                     <th class="bg-light">Remaining Balance</th>
@@ -313,7 +322,8 @@
                         {{ $payment->receivedBy->name ?? '—' }}</div>
                 </div>
                 <div class="col-6 text-end">
-                    <div class="border-top pt-1 small text-muted d-inline-block" style="width: 200px;">Patient Signature</div>
+                    <div class="border-top pt-1 small text-muted d-inline-block" style="width: 200px;">Patient
+                        Signature</div>
                 </div>
             </div>
 

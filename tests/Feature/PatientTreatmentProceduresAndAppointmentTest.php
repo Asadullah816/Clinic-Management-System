@@ -212,3 +212,47 @@ test('recording treatment linked to scheduled appointment automatically marks ap
     $appointment->refresh();
     expect($appointment->status)->toBe(Appointment::STATUS_COMPLETED);
 });
+
+test('pharmacy & stock section and inventory cards are hidden from sidebar and dashboard', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+
+    $response = $this->actingAs($user)->get(route('dashboard'));
+    $response->assertOk();
+    $response->assertDontSee('Inventory & Stock', false);
+    $response->assertDontSee('Total Products', false);
+    $response->assertDontSee('Pharmacy &amp; Stock', false);
+    $response->assertDontSee('Dental Pharmacy & Stock', false);
+});
+
+test('record treatment form hides prescribed medicines and cost breakdown while keeping grand total payable', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+
+    $response = $this->actingAs($user)->get(route('patient-treatments.create'));
+    $response->assertOk();
+
+    // Section 2 Prescribed Medicines removed
+    $response->assertDontSee('2. Prescribed Products & Medicines', false);
+    $response->assertDontSee('Prescribed Products &amp; Medicines', false);
+    $response->assertDontSee('id="selected-medicines-table"', false);
+    $response->assertDontSee('id="medicine-search-input"', false);
+
+    // Cost Breakdown removed
+    $response->assertDontSee('Cost Breakdown', false);
+    $response->assertDontSee('Procedure Net + Medicines Net', false);
+
+    // Grand Total Payable and Billing intact
+    $response->assertSee('Grand Total Payable', false);
+    $response->assertSee('Immediate Payment Settlement', false);
+    $response->assertSee('paid_amount', false);
+});
+
+test('sidebar and login page display dental tooth logo', function () {
+    $loginResponse = $this->get(route('login'));
+    $loginResponse->assertOk();
+    $loginResponse->assertSee('dental-tooth-logo', false);
+
+    $user = User::factory()->create(['role' => 'admin']);
+    $dashResponse = $this->actingAs($user)->get(route('dashboard'));
+    $dashResponse->assertOk();
+    $dashResponse->assertSee('dental-tooth-logo', false);
+});

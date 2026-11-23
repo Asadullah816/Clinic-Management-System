@@ -82,13 +82,13 @@ class DashboardController extends Controller
             $totalOutstanding = Invoice::where('due_amount', '>', 0)->sum('due_amount');
         }
 
-        // ================= Inventory (admin, staff) =================
-        $showInventory = $user->hasRole('admin', 'staff');
+        // ================= Inventory (admin, staff) - Hidden for now =================
+        $showInventory = false;
         $totalProducts = 0;
         $lowStockCount = 0;
         $expiredCount = 0;
 
-        if ($showInventory) {
+        if ($showInventory && $user->hasRole('admin', 'staff')) {
             $totalProducts = Medicine::count();
             $lowStockCount = Medicine::whereColumn('stock_quantity', '<=', 'minimum_stock')->count();
             $expiredCount = Medicine::whereDate('expiry_date', '<', today())->count();

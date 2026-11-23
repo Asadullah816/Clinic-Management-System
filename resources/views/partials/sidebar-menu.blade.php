@@ -17,9 +17,7 @@
     @endphp
     <li class="nav-item">
         <a class="group-toggle {{ $isPatientsActive ? 'active-group' : 'collapsed' }}"
-            href="#{{ $prefix }}-patients-group"
-            data-bs-toggle="collapse"
-            role="button"
+            href="#{{ $prefix }}-patients-group" data-bs-toggle="collapse" role="button"
             aria-expanded="{{ $isPatientsActive ? 'true' : 'false' }}"
             aria-controls="{{ $prefix }}-patients-group">
             <span class="d-flex align-items-center">
@@ -60,9 +58,7 @@
         @endphp
         <li class="nav-item">
             <a class="group-toggle {{ $isTreatmentsActive ? 'active-group' : 'collapsed' }}"
-                href="#{{ $prefix }}-treatments-group"
-                data-bs-toggle="collapse"
-                role="button"
+                href="#{{ $prefix }}-treatments-group" data-bs-toggle="collapse" role="button"
                 aria-expanded="{{ $isTreatmentsActive ? 'true' : 'false' }}"
                 aria-controls="{{ $prefix }}-treatments-group">
                 <span class="d-flex align-items-center">
@@ -98,9 +94,7 @@
         @endphp
         <li class="nav-item">
             <a class="group-toggle {{ $isBillingActive ? 'active-group' : 'collapsed' }}"
-                href="#{{ $prefix }}-billing-group"
-                data-bs-toggle="collapse"
-                role="button"
+                href="#{{ $prefix }}-billing-group" data-bs-toggle="collapse" role="button"
                 aria-expanded="{{ $isBillingActive ? 'true' : 'false' }}"
                 aria-controls="{{ $prefix }}-billing-group">
                 <span class="d-flex align-items-center">
@@ -140,9 +134,7 @@
         @endphp
         <li class="nav-item">
             <a class="group-toggle {{ $isExpensesActive ? 'active-group' : 'collapsed' }}"
-                href="#{{ $prefix }}-expenses-group"
-                data-bs-toggle="collapse"
-                role="button"
+                href="#{{ $prefix }}-expenses-group" data-bs-toggle="collapse" role="button"
                 aria-expanded="{{ $isExpensesActive ? 'true' : 'false' }}"
                 aria-controls="{{ $prefix }}-expenses-group">
                 <span class="d-flex align-items-center">
@@ -169,16 +161,23 @@
         </li>
     @endif
 
-    {{-- 6. Dental Pharmacy & Stock (Dropdown Group) --}}
-    @if (auth()->user()->hasRole('admin', 'staff'))
+    {{-- 6. Dental Pharmacy & Stock (Dropdown Group - Hidden for now) --}}
+    @php
+        $showPharmacyStock = false;
+    @endphp
+    @if ($showPharmacyStock && auth()->user()->hasRole('admin', 'staff'))
         @php
-            $isInventoryActive = request()->routeIs('medicines.*', 'medicine-categories.*', 'stock.*', 'suppliers.*', 'medicine-usages.*');
+            $isInventoryActive = request()->routeIs(
+                'medicines.*',
+                'medicine-categories.*',
+                'stock.*',
+                'suppliers.*',
+                'medicine-usages.*',
+            );
         @endphp
         <li class="nav-item">
             <a class="group-toggle {{ $isInventoryActive ? 'active-group' : 'collapsed' }}"
-                href="#{{ $prefix }}-inventory-group"
-                data-bs-toggle="collapse"
-                role="button"
+                href="#{{ $prefix }}-inventory-group" data-bs-toggle="collapse" role="button"
                 aria-expanded="{{ $isInventoryActive ? 'true' : 'false' }}"
                 aria-controls="{{ $prefix }}-inventory-group">
                 <span class="d-flex align-items-center">
@@ -232,9 +231,7 @@
         @endphp
         <li class="nav-item">
             <a class="group-toggle {{ $isReportsActive ? 'active-group' : 'collapsed' }}"
-                href="#{{ $prefix }}-reports-group"
-                data-bs-toggle="collapse"
-                role="button"
+                href="#{{ $prefix }}-reports-group" data-bs-toggle="collapse" role="button"
                 aria-expanded="{{ $isReportsActive ? 'true' : 'false' }}"
                 aria-controls="{{ $prefix }}-reports-group">
                 <span class="d-flex align-items-center">
@@ -262,7 +259,7 @@
                             <i class="bi bi-wallet2 me-2"></i> Expense Report
                         </a>
                     </li>
-                    <li>
+                    {{-- <li>
                         <a class="sub-nav-link {{ request()->routeIs('reports.inventory') ? 'active' : '' }}"
                             href="{{ route('reports.inventory') }}">
                             <i class="bi bi-basket2 me-2"></i> Inventory Report
@@ -273,7 +270,7 @@
                             href="{{ route('reports.usage') }}">
                             <i class="bi bi-capsule me-2"></i> Usage Report
                         </a>
-                    </li>
+                    </li> --}}
                     <li>
                         <a class="sub-nav-link {{ request()->routeIs('reports.financial') ? 'active' : '' }}"
                             href="{{ route('reports.financial') }}">
@@ -292,9 +289,7 @@
         @endphp
         <li class="nav-item">
             <a class="group-toggle {{ $isAdminActive ? 'active-group' : 'collapsed' }}"
-                href="#{{ $prefix }}-admin-group"
-                data-bs-toggle="collapse"
-                role="button"
+                href="#{{ $prefix }}-admin-group" data-bs-toggle="collapse" role="button"
                 aria-expanded="{{ $isAdminActive ? 'true' : 'false' }}"
                 aria-controls="{{ $prefix }}-admin-group">
                 <span class="d-flex align-items-center">
