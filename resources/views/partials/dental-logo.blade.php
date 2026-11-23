@@ -1,8 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="{{ $width ?? 24 }}" height="{{ $height ?? 24 }}" class="dental-tooth-logo {{ $class ?? '' }}" fill="none" style="display: inline-block; vertical-align: middle;">
-    <!-- Dental Tooth Molar SVG -->
-    <path d="M12 3.5C9.8 1.8 7.2 2 5.6 3.6C3.5 5.6 3 9 4 12.3C5.2 16 7.2 19.3 8.3 21C8.8 21.8 9.7 22 10.4 21.2C11.1 20.3 11.5 18.2 12 16.5C12.5 18.2 12.9 20.3 13.6 21.2C14.3 22 15.2 21.8 15.7 21C16.8 19.3 18.8 16 20 12.3C21 9 20.5 5.6 18.4 3.6C16.8 2 14.2 1.8 12 3.5Z" fill="{{ $color ?? '#ffffff' }}"/>
-    <!-- Enamel highlight reflection -->
-    <path d="M6.2 6.5C5.2 7.8 5 9.5 5.5 11.2" stroke="{{ $highlight ?? '#bae6fd' }}" stroke-width="1.3" stroke-linecap="round"/>
-    <!-- Healthy bright sparkle -->
-    <path d="M19 2l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="{{ $sparkle ?? '#fef08a' }}"/>
+@php
+    $toothFill = $color ?? '#ffffff';
+    $isDarkFill = ($toothFill !== '#ffffff' && $toothFill !== '#fff');
+    $grooveStroke = $groove ?? ($isDarkFill ? '#bae6fd' : '#0284c7');
+    $enamelHighlight = $highlight ?? ($isDarkFill ? 'rgba(255, 255, 255, 0.45)' : '#ffffff');
+    $sparkleFill = $sparkle ?? ($isDarkFill ? '#f59e0b' : '#fef08a');
+@endphp
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="{{ $width ?? 28 }}" height="{{ $height ?? 28 }}" class="dental-tooth-logo {{ $class ?? '' }}" fill="none" style="display: inline-block; vertical-align: middle;">
+    <!-- Real Anatomical Dental Molar: Distinct Cusp Crests, Central Sulcus, Cervical Neck, and Tapering Bifurcated Roots -->
+    <path d="M 50 20 C 43 14, 30 11, 22 20 C 12 31, 9 44, 15 58 C 19 66, 23 74, 27 88 C 29 93, 35 94, 38 88 C 42 79, 44 63, 50 54 C 56 63, 58 79, 62 88 C 65 94, 71 93, 73 88 C 77 74, 81 66, 85 58 C 91 44, 88 31, 78 20 C 70 11, 57 14, 50 20 Z" fill="{{ $toothFill }}"/>
+    <!-- Anatomical Occlusal Groove / Cusps separation -->
+    <path d="M 34 26 C 43 33, 57 33, 66 26" stroke="{{ $grooveStroke }}" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+    <!-- Inter-radicular root bifurcation contour -->
+    <path d="M 50 54 L 50 40" stroke="{{ $grooveStroke }}" stroke-width="2" stroke-linecap="round" opacity="0.45"/>
+    <!-- Enamel highlight contour -->
+    <path d="M 23 28 C 17 38, 16 48, 21 57" stroke="{{ $enamelHighlight }}" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+    @if(($showSparkle ?? true) !== false)
+    <!-- Clean Clinic Sparkle -->
+    <path d="M 82 8 L 83.5 12 L 87.5 13.5 L 83.5 15 L 82 19 L 80.5 15 L 76.5 13.5 L 80.5 12 Z" fill="{{ $sparkleFill }}"/>
+    @endif
 </svg>
