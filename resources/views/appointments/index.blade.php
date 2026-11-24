@@ -98,7 +98,7 @@
                             <tr>
                                 <td>
                                     <div class="fw-semibold text-dark">{{ $appointment->appointment_date->format('d M Y') }}</div>
-                                    <div class="text-muted small"><i class="bi bi-clock me-1"></i>{{ $appointment->appointment_time }}</div>
+                                    <div class="text-muted small"><i class="bi bi-clock me-1"></i>{{ $appointment->formatted_time }}</div>
                                 </td>
                                 <td>
                                     <a href="{{ route('patients.show', $appointment->patient) }}"

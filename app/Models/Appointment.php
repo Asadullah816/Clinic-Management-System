@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -40,6 +41,23 @@ class Appointment extends Model
     public function getTimeAttribute($value)
     {
         return substr($value, 0, 5);
+    }
+
+    /**
+     * Return appointment time in 12-hour format with AM/PM (e.g. "08:00 PM").
+     */
+    public function getFormattedTimeAttribute(): string
+    {
+        $time = $this->attributes['appointment_time'] ?? null;
+        if (empty($time)) {
+            return '';
+        }
+
+        try {
+            return Carbon::parse($time)->format('h:i A');
+        } catch (\Throwable $e) {
+            return substr($time, 0, 5);
+        }
     }
 
     /**

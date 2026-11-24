@@ -37,7 +37,7 @@ class AppointmentController extends Controller
         $excludeId = $request->query('exclude_id');
 
         $slots = Appointment::whereDate('appointment_date', $date)
-            ->whereIn('status', [Appointment::STATUS_SCHEDULED, Appointment::STATUS_COMPLETED])
+            ->where('status', Appointment::STATUS_SCHEDULED)
             ->when($excludeId, function ($q) use ($excludeId) {
                 $q->where('id', '!=', $excludeId);
             })
@@ -132,11 +132,11 @@ class AppointmentController extends Controller
             }
         }
 
-        // 3. Prevent double-booking slot conflict on the same date and time
+        // 3. Prevent double-booking slot conflict on the same date and time (only active scheduled appointments)
         $apptTimeFormatted = substr($validated['appointment_time'], 0, 5);
         $conflict = Appointment::whereDate('appointment_date', $apptDateStr)
             ->where('appointment_time', 'like', $apptTimeFormatted.'%')
-            ->whereIn('status', [Appointment::STATUS_SCHEDULED, Appointment::STATUS_COMPLETED])
+            ->where('status', Appointment::STATUS_SCHEDULED)
             ->with('patient')
             ->first();
 
@@ -234,11 +234,11 @@ class AppointmentController extends Controller
             }
         }
 
-        // 2. Prevent double booking slot conflict
+        // 2. Prevent double booking slot conflict (only active scheduled appointments)
         $apptTimeFormatted = substr($validated['appointment_time'], 0, 5);
         $conflict = Appointment::whereDate('appointment_date', $apptDateStr)
             ->where('appointment_time', 'like', $apptTimeFormatted.'%')
-            ->whereIn('status', [Appointment::STATUS_SCHEDULED, Appointment::STATUS_COMPLETED])
+            ->where('status', Appointment::STATUS_SCHEDULED)
             ->where('id', '!=', $appointment->id)
             ->with('patient')
             ->first();

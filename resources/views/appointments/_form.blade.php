@@ -175,8 +175,20 @@
                     <input type="time" id="appointment_time" name="appointment_time"
                         value="{{ old('appointment_time', $appointment ? substr($appointment->appointment_time, 0, 5) : '') }}"
                         class="form-control @error('appointment_time') is-invalid @enderror" required>
+                    <span class="input-group-text bg-primary-subtle text-primary fw-bold" id="time_12hr_badge" style="min-width: 95px; text-align: center;">
+                        @if (old('appointment_time'))
+                            {{ \Carbon\Carbon::parse(old('appointment_time'))->format('h:i A') }}
+                        @elseif ($appointment && $appointment->appointment_time)
+                            {{ $appointment->formatted_time }}
+                        @else
+                            --:-- --
+                        @endif
+                    </span>
                 </div>
-                <div class="form-text small">Standard 24-hr format (e.g. 15:00 for 03:00 PM).</div>
+                <div class="form-text small d-flex justify-content-between align-items-center mt-1">
+                    <span>12-hour AM / PM schedule</span>
+                    <span class="text-muted">Pick a time or click quick slots below</span>
+                </div>
                 @error('appointment_time')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
@@ -475,11 +487,41 @@
         bookedSlotsBadges.innerHTML = html;
     }
 
+    function format12Hour(timeStr) {
+        if (!timeStr) return '';
+        const parts = timeStr.split(':');
+        if (parts.length < 2) return timeStr;
+        let hours = parseInt(parts[0], 10);
+        const minutes = parts[1].substring(0, 2);
+        if (isNaN(hours)) return timeStr;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const strHours = String(hours).padStart(2, '0');
+        return `${strHours}:${minutes} ${ampm}`;
+    }
+
+    function update12HourBadge(timeStr) {
+        const badge = document.getElementById('time_12hr_badge');
+        if (!badge) return;
+        if (!timeStr) {
+            badge.textContent = '--:-- --';
+            badge.className = 'input-group-text bg-light text-muted';
+        } else {
+            badge.textContent = format12Hour(timeStr);
+            badge.className = 'input-group-text bg-primary-subtle fw-bold text-primary border-primary-subtle';
+        }
+    }
+
     function validateCurrentTimeSlot(timeStr, slots) {
+        update12HourBadge(timeStr);
+
         if (!timeStr) {
             slotConflictAlert.style.display = 'none';
             return;
         }
+
+        const formatted12 = format12Hour(timeStr);
 
         // Check if selected time is in the past for today
         const todayStr = (new Date()).toISOString().split('T')[0];
@@ -492,7 +534,7 @@
             if (timeStr < currentTimeStr) {
                 slotConflictAlert.className = 'alert alert-danger py-2 px-3 mb-2 small d-flex align-items-center justify-content-between';
                 slotAlertIcon.className = 'bi bi-x-circle-fill text-danger fs-5 me-2';
-                slotAlertText.innerHTML = `<strong>Past Time:</strong> ${timeStr} has already passed today. Please pick a future time slot.`;
+                slotAlertText.innerHTML = `<strong>Past Time:</strong> ${formatted12} has already passed today. Please pick a future time slot.`;
                 slotConflictAlert.style.display = 'flex';
                 return;
             }
@@ -508,7 +550,7 @@
         } else {
             slotConflictAlert.className = 'alert alert-success py-2 px-3 mb-2 small d-flex align-items-center justify-content-between';
             slotAlertIcon.className = 'bi bi-check-circle-fill text-success fs-5 me-2';
-            slotAlertText.innerHTML = `<strong>Slot Available:</strong> ${timeStr} is open and ready to book.`;
+            slotAlertText.innerHTML = `<strong>Slot Available:</strong> ${formatted12} is open and ready to book.`;
             slotConflictAlert.style.display = 'flex';
         }
     }

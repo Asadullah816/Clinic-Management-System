@@ -199,20 +199,56 @@ test('appointments index and dashboard can filter appointments by date and statu
     // Test Dashboard today filter
     $dashRes = $this->actingAs($user)->get(route('dashboard', ['appt_date' => $todayDate]));
     $dashRes->assertOk();
-    $dashRes->assertSee('17:30');
-    $dashRes->assertDontSee('11:00');
+    $dashRes->assertSee('05:30 PM');
+    $dashRes->assertDontSee('11:00 AM');
 
     // Test Dashboard tomorrow filter
     $dashTomorrowRes = $this->actingAs($user)->get(route('dashboard', ['appt_date' => $tomorrowDate]));
     $dashTomorrowRes->assertOk();
-    $dashTomorrowRes->assertSee('11:00');
-    $dashTomorrowRes->assertDontSee('17:30');
+    $dashTomorrowRes->assertSee('11:00 AM');
+    $dashTomorrowRes->assertDontSee('05:30 PM');
 
     // Test Appointments index date filter
     $indexToday = $this->actingAs($user)->get(route('appointments.index', ['date_filter' => 'today']));
     $indexToday->assertOk();
-    $indexToday->assertSee('17:30');
-    $indexToday->assertDontSee('11:00');
+    $indexToday->assertSee('05:30 PM');
+    $indexToday->assertDontSee('11:00 AM');
+});
+
+test('appointments schedule displays time in 12-hour AM and PM format', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+    $patient = Patient::create([
+        'patient_number' => 'P-0088',
+        'first_name' => 'Tariq',
+        'last_name' => 'Jamil',
+        'gender' => 'male',
+        'phone' => '03001234567',
+        'status' => 'active',
+    ]);
+    $treatment = Treatment::create(['name' => 'Scaling', 'price' => 2500.00, 'duration' => 30, 'status' => 'active']);
+
+    $appointment = Appointment::create([
+        'patient_id' => $patient->id,
+        'treatment_id' => $treatment->id,
+        'appointment_date' => today()->toDateString(),
+        'appointment_time' => '20:00',
+        'status' => Appointment::STATUS_SCHEDULED,
+        'created_by' => $user->id,
+    ]);
+
+    expect($appointment->formatted_time)->toBe('08:00 PM');
+
+    $dashRes = $this->actingAs($user)->get(route('dashboard'));
+    $dashRes->assertOk();
+    $dashRes->assertSee('08:00 PM');
+
+    $indexRes = $this->actingAs($user)->get(route('appointments.index'));
+    $indexRes->assertOk();
+    $indexRes->assertSee('08:00 PM');
+
+    $showRes = $this->actingAs($user)->get(route('appointments.show', $appointment));
+    $showRes->assertOk();
+    $showRes->assertSee('08:00 PM');
 });
 
 test('booked slots endpoint returns booked times for the given date', function () {
@@ -244,4 +280,55 @@ test('booked slots endpoint returns booked times for the given date', function (
         'time' => '15:00',
         'patient_name' => 'Kamran Akmal',
     ]);
+});
+
+test('new appointment can be booked at a time slot if previous appointment is completed', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+    $patient1 = Patient::create([
+        'patient_number' => 'P-0010',
+        'first_name' => 'Ali',
+        'last_name' => 'Khan',
+        'gender' => 'male',
+        'phone' => '03001112233',
+        'status' => 'active',
+    ]);
+    $patient2 = Patient::create([
+        'patient_number' => 'P-0011',
+        'first_name' => 'Hamza',
+        'last_name' => 'Shah',
+        'gender' => 'male',
+        'phone' => '03004445566',
+        'status' => 'active',
+    ]);
+    $treatment = Treatment::create(['name' => 'Tooth Cleaning', 'price' => 2000.00, 'duration' => 30, 'status' => 'active']);
+    $futureDate = Carbon::tomorrow()->toDateString();
+
+    // Create an appointment at 08:00 that is already completed
+    Appointment::create([
+        'patient_id' => $patient1->id,
+        'treatment_id' => $treatment->id,
+        'appointment_date' => $futureDate,
+        'appointment_time' => '08:00',
+        'status' => Appointment::STATUS_COMPLETED,
+        'created_by' => $user->id,
+    ]);
+
+    // Booked slots endpoint should not treat completed appointments as blocking
+    $slotsRes = $this->actingAs($user)->get(route('appointments.booked-slots', ['date' => $futureDate]));
+    $slotsRes->assertOk();
+    $slotsRes->assertJsonMissing(['time' => '08:00']);
+
+    // Another patient can book at 08:00
+    $bookRes = $this->actingAs($user)->post(route('appointments.store'), [
+        'patient_id' => $patient2->id,
+        'treatment_ids' => [$treatment->id],
+        'appointment_date' => $futureDate,
+        'appointment_time' => '08:00',
+        'status' => 'scheduled',
+    ]);
+
+    $bookRes->assertSessionHasNoErrors();
+    $bookRes->assertRedirect(route('appointments.index'));
+
+    expect(Appointment::whereDate('appointment_date', $futureDate)->where('appointment_time', 'like', '08:00%')->count())->toBe(2);
 });

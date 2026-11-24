@@ -165,7 +165,8 @@
                     <div class="card bg-light border-0">
                         <div class="card-body py-3">
                             <div class="text-muted small">Total Treatment Cost</div>
-                            <div class="fs-5 fw-semibold text-primary">PKR {{ number_format($totalTreatmentCost, 2) }}</div>
+                            <div class="fs-5 fw-semibold text-primary">PKR {{ number_format($totalTreatmentCost, 2) }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -357,14 +358,16 @@
                                         <td>
                                             <div class="fw-semibold">{{ $appointment->appointment_date->format('d M Y') }}
                                             </div>
-                                            <div class="text-muted small">{{ $appointment->appointment_time }}</div>
+                                            <div class="text-muted small"><i class="bi bi-clock me-1"></i>{{ $appointment->formatted_time }}</div>
                                         </td>
                                         <td>
-                                            <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}</div>
+                                            <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}
+                                            </div>
                                             @if ($appointment->treatments->count() > 1)
                                                 <div class="mt-1 d-flex flex-wrap gap-1">
                                                     @foreach ($appointment->treatments->skip(1) as $extraT)
-                                                        <span class="badge bg-light text-secondary border small">+ {{ $extraT->name }}</span>
+                                                        <span class="badge bg-light text-secondary border small">+
+                                                            {{ $extraT->name }}</span>
                                                     @endforeach
                                                 </div>
                                             @endif
@@ -450,7 +453,9 @@
                                                 <div class="mt-1">
                                                     @foreach ($patientTreatment->treatmentMedicines as $tm)
                                                         <span class="badge bg-light text-dark border me-1 small">
-                                                            <i class="bi bi-capsule text-success me-1"></i>{{ $tm->quantity }}x {{ $tm->medicine->name ?? 'Product' }}
+                                                            <i
+                                                                class="bi bi-capsule text-success me-1"></i>{{ $tm->quantity }}x
+                                                            {{ $tm->medicine->name ?? 'Product' }}
                                                         </span>
                                                     @endforeach
                                                 </div>
@@ -459,19 +464,24 @@
                                         <td>
                                             <div>PKR {{ number_format($patientTreatment->price, 2) }}</div>
                                             @if ((float) $patientTreatment->medicine_price > 0)
-                                                <div class="small text-muted">+ Meds: PKR {{ number_format($patientTreatment->medicine_price, 2) }}</div>
+                                                <div class="small text-muted">+ Meds: PKR
+                                                    {{ number_format($patientTreatment->medicine_price, 2) }}</div>
                                             @endif
                                         </td>
                                         <td>
                                             <div>PKR {{ number_format($patientTreatment->discount, 2) }}</div>
                                             @if ((float) $patientTreatment->medicine_discount > 0)
-                                                <div class="small text-muted">+ Meds: PKR {{ number_format($patientTreatment->medicine_discount, 2) }}</div>
+                                                <div class="small text-muted">+ Meds: PKR
+                                                    {{ number_format($patientTreatment->medicine_discount, 2) }}</div>
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="fw-semibold">PKR {{ number_format($patientTreatment->total_amount, 2) }}</div>
+                                            <div class="fw-semibold">PKR
+                                                {{ number_format($patientTreatment->total_amount, 2) }}</div>
                                             @if ((float) $patientTreatment->medicine_total > 0)
-                                                <div class="small text-muted">Proc: PKR {{ number_format($patientTreatment->treatment_net, 2) }} | Med: PKR {{ number_format($patientTreatment->medicine_net, 2) }}</div>
+                                                <div class="small text-muted">Proc: PKR
+                                                    {{ number_format($patientTreatment->treatment_net, 2) }} | Med: PKR
+                                                    {{ number_format($patientTreatment->medicine_net, 2) }}</div>
                                             @endif
                                         </td>
                                         <td>{{ \Illuminate\Support\Str::limit($patientTreatment->notes ?? '—', 25) }}</td>
@@ -582,7 +592,8 @@
                                     <tr>
                                         <td>{{ $payment->payment_date->format('d M Y') }}</td>
                                         <td>{{ $payment->invoice->invoice_number }}</td>
-                                        <td class="fw-semibold text-success">PKR {{ number_format($payment->amount, 2) }}</td>
+                                        <td class="fw-semibold text-success">PKR {{ number_format($payment->amount, 2) }}
+                                        </td>
                                         <td>{{ $payment->methodLabel() }}</td>
                                         <td>{{ $payment->receivedBy->name ?? '—' }}</td>
                                         <td class="text-end">

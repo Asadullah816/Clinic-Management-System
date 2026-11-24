@@ -117,7 +117,7 @@ class PatientTreatmentController extends Controller
                     'treatment_name' => $appt->treatment_names,
                     'treatment_price' => (float) ($appt->treatment?->price ?? 0),
                     'appointment_date' => $appt->appointment_date?->format('d M Y'),
-                    'appointment_time' => $appt->appointment_time,
+                    'appointment_time' => $appt->formatted_time,
                     'status' => $appt->status,
                     'treatments' => $treatmentsList,
                 ];

@@ -7,7 +7,8 @@
     {{-- Welcome Banner / Header --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.02em;">Welcome back, {{ auth()->user()->name }} 👋</h4>
+            <h4 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.02em;">Welcome back, {{ auth()->user()->name }}
+                👋</h4>
             <div class="text-muted small">
                 <i class="bi bi-calendar-event me-1"></i> {{ now()->format('l, d F Y') }}
                 <span class="mx-2">&middot;</span>
@@ -15,7 +16,8 @@
             </div>
         </div>
         <div class="mt-2 mt-sm-0">
-            <span class="badge bg-primary-subtle text-primary-emphasis px-3 py-2 rounded-pill text-capitalize fw-semibold" style="font-size: 0.8rem;">
+            <span class="badge bg-primary-subtle text-primary-emphasis px-3 py-2 rounded-pill text-capitalize fw-semibold"
+                style="font-size: 0.8rem;">
                 <i class="bi bi-shield-check me-1"></i> {{ auth()->user()->role }}
             </span>
         </div>
@@ -28,7 +30,8 @@
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                            <span class="text-muted fw-semibold small text-uppercase"
+                                style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                 Total Patients
                             </span>
                             <div class="stat-icon-box" style="background-color: #eff6ff; color: #2563eb;">
@@ -40,7 +43,8 @@
                                 {{ number_format($totalPatients) }}
                             </h3>
                         </div>
-                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                            style="border-color: #f1f5f9 !important;">
                             <span class="text-truncate">All registered records</span>
                             <i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i>
                         </div>
@@ -54,7 +58,8 @@
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                            <span class="text-muted fw-semibold small text-uppercase"
+                                style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                 New Today
                             </span>
                             <div class="stat-icon-box" style="background-color: #ecfeff; color: #0891b2;">
@@ -66,7 +71,8 @@
                                 {{ number_format($todaysPatients) }}
                             </h3>
                         </div>
-                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                            style="border-color: #f1f5f9 !important;">
                             <span class="text-truncate">Joined today</span>
                             <i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i>
                         </div>
@@ -80,7 +86,8 @@
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                            <span class="text-muted fw-semibold small text-uppercase"
+                                style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                 New This Month
                             </span>
                             <div class="stat-icon-box" style="background-color: #f5f3ff; color: #7c3aed;">
@@ -92,7 +99,8 @@
                                 {{ number_format($monthsPatients) }}
                             </h3>
                         </div>
-                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                            style="border-color: #f1f5f9 !important;">
                             <span class="text-truncate">Current month</span>
                             <i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i>
                         </div>
@@ -103,11 +111,13 @@
 
         @if ($showAppointments)
             <div class="col-6 col-lg-3">
-                <a href="{{ route('appointments.index', ['date_filter' => 'today']) }}" class="text-decoration-none text-dark d-block h-100">
+                <a href="{{ route('appointments.index', ['date_filter' => 'today']) }}"
+                    class="text-decoration-none text-dark d-block h-100">
                     <div class="card stat-card shadow-sm h-100">
                         <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                                <span class="text-muted fw-semibold small text-uppercase"
+                                    style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                     Appointments Today
                                 </span>
                                 <div class="stat-icon-box" style="background-color: #fefce8; color: #ca8a04;">
@@ -119,7 +129,8 @@
                                     {{ number_format($todaysAppointments->count()) }}
                                 </h3>
                             </div>
-                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                                style="border-color: #f1f5f9 !important;">
                                 <span class="text-truncate">Scheduled for today</span>
                                 <i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i>
                             </div>
@@ -141,7 +152,8 @@
             </div>
 
             <form method="GET" action="{{ route('dashboard') }}" class="mb-0">
-                <select name="period" class="form-select form-select-sm shadow-none" style="min-width: 140px; border-color: #cbd5e1;" onchange="this.form.submit()">
+                <select name="period" class="form-select form-select-sm shadow-none"
+                    style="min-width: 140px; border-color: #cbd5e1;" onchange="this.form.submit()">
                     @foreach ($periods as $value => $label)
                         <option value="{{ $value }}" {{ $period === $value ? 'selected' : '' }}>
                             {{ $label }}
@@ -157,7 +169,8 @@
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                            <span class="text-muted fw-semibold small text-uppercase"
+                                style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                 Revenue
                             </span>
                             <div class="stat-icon-box" style="background-color: #ecfdf5; color: #059669;">
@@ -172,7 +185,8 @@
                                 </h3>
                             </div>
                         </div>
-                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                            style="border-color: #f1f5f9 !important;">
                             <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-2">Collected</span>
                             <span class="text-truncate" style="font-size: 0.75rem;">{{ $periodLabel }}</span>
                         </div>
@@ -186,7 +200,8 @@
                     <div class="card stat-card shadow-sm h-100">
                         <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                                <span class="text-muted fw-semibold small text-uppercase"
+                                    style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                     Expenses
                                 </span>
                                 <div class="stat-icon-box" style="background-color: #fef2f2; color: #dc2626;">
@@ -201,7 +216,8 @@
                                     </h3>
                                 </div>
                             </div>
-                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                                style="border-color: #f1f5f9 !important;">
                                 <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill px-2">Spent</span>
                                 <span class="text-truncate" style="font-size: 0.75rem;">{{ $periodLabel }}</span>
                             </div>
@@ -216,7 +232,8 @@
                     <div class="card stat-card shadow-sm h-100">
                         <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                                <span class="text-muted fw-semibold small text-uppercase"
+                                    style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                     Outstanding
                                 </span>
                                 <div class="stat-icon-box" style="background-color: #fffbeb; color: #d97706;">
@@ -226,13 +243,16 @@
                             <div>
                                 <div class="d-flex align-items-baseline gap-1">
                                     <span class="text-muted small fw-semibold">PKR</span>
-                                    <h3 class="fw-bold mb-0 {{ $totalOutstanding > 0 ? 'text-danger' : 'text-dark' }}" style="letter-spacing: -0.02em;">
+                                    <h3 class="fw-bold mb-0 {{ $totalOutstanding > 0 ? 'text-danger' : 'text-dark' }}"
+                                        style="letter-spacing: -0.02em;">
                                         {{ number_format($totalOutstanding, 2) }}
                                     </h3>
                                 </div>
                             </div>
-                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
-                                <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-2">Due Balance</span>
+                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                                style="border-color: #f1f5f9 !important;">
+                                <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-2">Due
+                                    Balance</span>
                                 <span class="text-truncate" style="font-size: 0.75rem;">All time pending</span>
                             </div>
                         </div>
@@ -245,23 +265,28 @@
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                            <span class="text-muted fw-semibold small text-uppercase"
+                                style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                 Net Profit
                             </span>
-                            <div class="stat-icon-box" style="background-color: {{ $periodProfit >= 0 ? '#f0fdf4' : '#fef2f2' }}; color: {{ $periodProfit >= 0 ? '#16a34a' : '#dc2626' }};">
+                            <div class="stat-icon-box"
+                                style="background-color: {{ $periodProfit >= 0 ? '#f0fdf4' : '#fef2f2' }}; color: {{ $periodProfit >= 0 ? '#16a34a' : '#dc2626' }};">
                                 <i class="bi {{ $periodProfit >= 0 ? 'bi-piggy-bank' : 'bi-graph-down-arrow' }} fs-5"></i>
                             </div>
                         </div>
                         <div>
                             <div class="d-flex align-items-baseline gap-1">
                                 <span class="text-muted small fw-semibold">PKR</span>
-                                <h3 class="fw-bold mb-0 {{ $periodProfit >= 0 ? 'text-success' : 'text-danger' }}" style="letter-spacing: -0.02em;">
+                                <h3 class="fw-bold mb-0 {{ $periodProfit >= 0 ? 'text-success' : 'text-danger' }}"
+                                    style="letter-spacing: -0.02em;">
                                     {{ number_format($periodProfit, 2) }}
                                 </h3>
                             </div>
                         </div>
-                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
-                            <span class="badge {{ $periodProfit >= 0 ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger-emphasis' }} rounded-pill px-2">
+                        <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                            style="border-color: #f1f5f9 !important;">
+                            <span
+                                class="badge {{ $periodProfit >= 0 ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger-emphasis' }} rounded-pill px-2">
                                 {{ $periodProfit >= 0 ? 'Net Return' : 'Loss' }}
                             </span>
                             <span class="text-truncate" style="font-size: 0.75rem;">{{ $periodLabel }}</span>
@@ -281,7 +306,8 @@
                 </div>
                 <h6 class="fw-bold text-dark mb-0">Inventory &amp; Stock</h6>
             </div>
-            <a href="{{ route('medicines.index') }}" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 0.8rem;">
+            <a href="{{ route('medicines.index') }}" class="btn btn-sm btn-outline-secondary py-1 px-2"
+                style="font-size: 0.8rem;">
                 View All Items <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
@@ -292,7 +318,8 @@
                     <div class="card stat-card shadow-sm h-100">
                         <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                                <span class="text-muted fw-semibold small text-uppercase"
+                                    style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                     Total Products
                                 </span>
                                 <div class="stat-icon-box" style="background-color: #f0f9ff; color: #0284c7;">
@@ -304,7 +331,8 @@
                                     {{ number_format($totalProducts) }}
                                 </h3>
                             </div>
-                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                                style="border-color: #f1f5f9 !important;">
                                 <span>Medicines &amp; items in catalog</span>
                                 <i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i>
                             </div>
@@ -314,11 +342,13 @@
             </div>
 
             <div class="col-md-4">
-                <a href="{{ route('medicines.index', ['low_stock' => 1]) }}" class="text-decoration-none text-dark d-block h-100">
+                <a href="{{ route('medicines.index', ['low_stock' => 1]) }}"
+                    class="text-decoration-none text-dark d-block h-100">
                     <div class="card stat-card shadow-sm h-100">
                         <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                                <span class="text-muted fw-semibold small text-uppercase"
+                                    style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                     Low Stock Alerts
                                 </span>
                                 <div class="stat-icon-box" style="background-color: #fffbeb; color: #d97706;">
@@ -326,11 +356,13 @@
                                 </div>
                             </div>
                             <div>
-                                <h3 class="fw-bold mb-0 {{ $lowStockCount > 0 ? 'text-warning' : 'text-dark' }}" style="letter-spacing: -0.02em;">
+                                <h3 class="fw-bold mb-0 {{ $lowStockCount > 0 ? 'text-warning' : 'text-dark' }}"
+                                    style="letter-spacing: -0.02em;">
                                     {{ number_format($lowStockCount) }}
                                 </h3>
                             </div>
-                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                                style="border-color: #f1f5f9 !important;">
                                 <span class="{{ $lowStockCount > 0 ? 'text-warning fw-semibold' : '' }}">
                                     {{ $lowStockCount > 0 ? 'Needs reordering' : 'Stock levels healthy' }}
                                 </span>
@@ -342,11 +374,13 @@
             </div>
 
             <div class="col-md-4">
-                <a href="{{ route('medicines.index', ['expired' => 1]) }}" class="text-decoration-none text-dark d-block h-100">
+                <a href="{{ route('medicines.index', ['expired' => 1]) }}"
+                    class="text-decoration-none text-dark d-block h-100">
                     <div class="card stat-card shadow-sm h-100">
                         <div class="card-body p-3 p-xl-4 d-flex flex-column justify-content-between">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                                <span class="text-muted fw-semibold small text-uppercase"
+                                    style="letter-spacing: 0.05em; font-size: 0.72rem;">
                                     Expired Products
                                 </span>
                                 <div class="stat-icon-box" style="background-color: #fef2f2; color: #dc2626;">
@@ -354,11 +388,13 @@
                                 </div>
                             </div>
                             <div>
-                                <h3 class="fw-bold mb-0 {{ $expiredCount > 0 ? 'text-danger' : 'text-dark' }}" style="letter-spacing: -0.02em;">
+                                <h3 class="fw-bold mb-0 {{ $expiredCount > 0 ? 'text-danger' : 'text-dark' }}"
+                                    style="letter-spacing: -0.02em;">
                                     {{ number_format($expiredCount) }}
                                 </h3>
                             </div>
-                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted" style="border-color: #f1f5f9 !important;">
+                            <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between small text-muted"
+                                style="border-color: #f1f5f9 !important;">
                                 <span class="{{ $expiredCount > 0 ? 'text-danger fw-semibold' : '' }}">
                                     {{ $expiredCount > 0 ? 'Action required: disposal' : 'No expired items' }}
                                 </span>
@@ -386,7 +422,8 @@
                             @else
                                 Appointments for {{ \Carbon\Carbon::parse($apptDate)->format('d M Y') }}
                             @endif
-                            <span class="badge bg-primary text-white rounded-pill ms-2 px-2 py-1" style="font-size: 0.75rem;">
+                            <span class="badge bg-primary text-white rounded-pill ms-2 px-2 py-1"
+                                style="font-size: 0.75rem;">
                                 {{ $todaysAppointments->count() }}
                             </span>
                         </h5>
@@ -412,16 +449,19 @@
                     <div class="col-md-3 col-sm-6">
                         <div class="input-group input-group-sm">
                             <span class="input-group-text bg-white"><i class="bi bi-calendar-date"></i></span>
-                            <input type="date" name="appt_date" value="{{ $apptDate }}" class="form-control" title="Choose appointment date">
+                            <input type="date" name="appt_date" value="{{ $apptDate }}" class="form-control"
+                                title="Choose appointment date">
                         </div>
                     </div>
                     <div class="col-auto d-none d-md-flex gap-1">
                         <a href="{{ route('dashboard', ['appt_date' => today()->toDateString()]) }}"
-                            class="btn btn-sm {{ $apptDate === today()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }} py-1 px-2" style="font-size: 0.75rem;">
+                            class="btn btn-sm {{ $apptDate === today()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }} py-1 px-2"
+                            style="font-size: 0.75rem;">
                             Today
                         </a>
                         <a href="{{ route('dashboard', ['appt_date' => today()->addDay()->toDateString()]) }}"
-                            class="btn btn-sm {{ $apptDate === today()->addDay()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }} py-1 px-2" style="font-size: 0.75rem;">
+                            class="btn btn-sm {{ $apptDate === today()->addDay()->toDateString() ? 'btn-primary' : 'btn-outline-secondary' }} py-1 px-2"
+                            style="font-size: 0.75rem;">
                             Tomorrow
                         </a>
                     </div>
@@ -429,22 +469,24 @@
                         <select name="appt_status" class="form-select form-select-sm">
                             <option value="">All Statuses</option>
                             @foreach (\App\Models\Appointment::statuses() as $statusValue => $statusLabel)
-                                <option value="{{ $statusValue }}" {{ request('appt_status') === $statusValue ? 'selected' : '' }}>
+                                <option value="{{ $statusValue }}"
+                                    {{ request('appt_status') === $statusValue ? 'selected' : '' }}>
                                     {{ $statusLabel }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3 col-sm-6">
-                        <input type="text" name="appt_search" value="{{ request('appt_search') }}" class="form-control form-control-sm"
-                            placeholder="Search patient name, MR#, or phone...">
+                        <input type="text" name="appt_search" value="{{ request('appt_search') }}"
+                            class="form-control form-control-sm" placeholder="Search patient name, MR#, or phone...">
                     </div>
                     <div class="col-auto d-flex gap-1">
                         <button type="submit" class="btn btn-sm btn-primary py-1 px-3">
                             <i class="bi bi-search me-1"></i> Apply
                         </button>
                         @if (request()->hasAny(['appt_date', 'appt_status', 'appt_search']))
-                            <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Reset Filters">
+                            <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary py-1 px-2"
+                                title="Reset Filters">
                                 <i class="bi bi-x-circle"></i>
                             </a>
                         @endif
@@ -455,10 +497,12 @@
             <div class="card-body p-0">
                 @if ($todaysAppointments->isEmpty())
                     <div class="text-center text-muted py-5">
-                        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 64px; height: 64px;">
                             <i class="bi bi-calendar2-check text-muted fs-2"></i>
                         </div>
-                        <h6 class="fw-semibold text-dark mb-1">No appointments found for {{ \Carbon\Carbon::parse($apptDate)->format('d M Y') }}</h6>
+                        <h6 class="fw-semibold text-dark mb-1">No appointments found for
+                            {{ \Carbon\Carbon::parse($apptDate)->format('d M Y') }}</h6>
                         <p class="small text-muted mb-3">All clear for this schedule, or book new patients anytime.</p>
                         <div class="d-flex justify-content-center gap-2">
                             <a href="{{ route('appointments.create') }}" class="btn btn-sm btn-primary">
@@ -487,21 +531,24 @@
                                 @foreach ($todaysAppointments as $appointment)
                                     <tr>
                                         <td class="ps-4 fw-semibold text-dark">
-                                            <i class="bi bi-clock text-muted me-1"></i> {{ $appointment->appointment_time }}
+                                            <i class="bi bi-clock text-muted me-1"></i> {{ $appointment->formatted_time }}
                                         </td>
                                         <td>
                                             <a href="{{ route('patients.show', $appointment->patient) }}"
                                                 class="fw-semibold text-decoration-none text-primary">
                                                 {{ $appointment->patient->full_name }}
                                             </a>
-                                            <div class="small text-muted">{{ $appointment->patient->patient_number }} &bull; {{ $appointment->patient->phone ?: 'No phone' }}</div>
+                                            <div class="small text-muted">{{ $appointment->patient->patient_number }}
+                                                &bull; {{ $appointment->patient->phone ?: 'No phone' }}</div>
                                         </td>
                                         <td>
-                                            <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}</div>
+                                            <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}
+                                            </div>
                                             @if ($appointment->treatments->count() > 1)
                                                 <div class="mt-1 d-flex flex-wrap gap-1">
                                                     @foreach ($appointment->treatments->skip(1) as $extraT)
-                                                        <span class="badge bg-light text-secondary border small">+ {{ $extraT->name }}</span>
+                                                        <span class="badge bg-light text-secondary border small">+
+                                                            {{ $extraT->name }}</span>
                                                     @endforeach
                                                 </div>
                                             @endif
@@ -514,7 +561,8 @@
                                         <td class="text-end pe-4 text-nowrap">
                                             @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED)
                                                 <a href="{{ route('patient-treatments.create', ['patient_id' => $appointment->patient_id, 'treatment_id' => $appointment->treatment_id, 'appointment_id' => $appointment->id]) }}"
-                                                    class="btn btn-sm btn-success me-1 py-0 px-2" title="Record Treatment">
+                                                    class="btn btn-sm btn-success me-1 py-0 px-2"
+                                                    title="Record Treatment">
                                                     <i class="bi bi-bandaid me-1"></i> Record
                                                 </a>
                                             @endif

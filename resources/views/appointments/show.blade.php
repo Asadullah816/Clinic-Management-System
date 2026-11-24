@@ -53,7 +53,7 @@
                 </tr>
                 <tr>
                     <th>Time</th>
-                    <td>{{ $appointment->appointment_time }}</td>
+                    <td><i class="bi bi-clock me-1 text-muted"></i>{{ $appointment->formatted_time }}</td>
                 </tr>
                 <tr>
                     <th>Notes</th>
