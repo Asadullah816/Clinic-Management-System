@@ -26,15 +26,15 @@
 
 <div class="row mb-3">
     <!-- Searchable Patient Selection -->
-    <div class="col-md-6 mb-3 mb-md-0 position-relative" id="appt-patient-search-wrapper">
+    <div class="col-md-5 mb-3 mb-md-0 position-relative" id="appt-patient-search-wrapper">
         <label for="appt_patient_search_input" class="form-label fw-semibold">
             Patient <span class="text-danger">*</span>
-            <span class="text-muted fw-normal small ms-1">(Instant search by Name, MR #, or Phone)</span>
+            <span class="text-muted fw-normal small ms-1">(Instant search)</span>
         </label>
         <div class="input-group">
             <span class="input-group-text bg-white text-primary"><i class="bi bi-person-search"></i></span>
             <input type="text" id="appt_patient_search_input" class="form-control @error('patient_id') is-invalid @enderror"
-                placeholder="Search patient by name, MR # (P-0001), or phone..."
+                placeholder="Search patient by name, MR #, or phone..."
                 autocomplete="off" value="{{ $selectedPatientText }}">
             <button class="btn btn-outline-secondary" type="button" id="clear_appt_patient_btn"
                 style="{{ $selectedPatient ? '' : 'display:none;' }}" title="Change patient">
@@ -53,9 +53,39 @@
         </div>
     </div>
 
+    <!-- Attending Doctor Assignment -->
+    <div class="col-md-4 mb-3 mb-md-0">
+        <label for="doctor_id" class="form-label fw-semibold">
+            Attending Doctor <span class="text-danger">*</span>
+        </label>
+        @if (auth()->user()->isDoctor())
+            <input type="hidden" name="doctor_id" id="doctor_id" value="{{ auth()->id() }}">
+            <div class="input-group">
+                <span class="input-group-text bg-white text-primary"><i class="bi bi-person-badge"></i></span>
+                <input type="text" class="form-control bg-light fw-semibold" value="{{ auth()->user()->name }} (You)" readonly>
+            </div>
+        @else
+            <div class="input-group">
+                <span class="input-group-text bg-white text-primary"><i class="bi bi-person-badge"></i></span>
+                <select name="doctor_id" id="doctor_id" class="form-select @error('doctor_id') is-invalid @enderror">
+                    <option value="">-- General / Any Doctor --</option>
+                    @foreach ($doctors as $doc)
+                        <option value="{{ $doc->id }}"
+                            {{ (string) old('doctor_id', $appointment->doctor_id ?? '') === (string) $doc->id ? 'selected' : '' }}>
+                            {{ $doc->name }} ({{ $doc->role === 'admin' ? 'Super Admin / Lead' : 'Doctor' }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+        @error('doctor_id')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
+
     <!-- Appointment Status -->
-    <div class="col-md-6">
-        <label for="status" class="form-label fw-semibold">Appointment Status <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <label for="status" class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
         <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
             @foreach (\App\Models\Appointment::statuses() as $statusValue => $statusLabel)
                 <option value="{{ $statusValue }}"
@@ -455,6 +485,10 @@
         if (appointmentId) {
             url += `&exclude_id=${encodeURIComponent(appointmentId)}`;
         }
+        const doctorSelect = document.getElementById('doctor_id');
+        if (doctorSelect && doctorSelect.value) {
+            url += `&doctor_id=${encodeURIComponent(doctorSelect.value)}`;
+        }
 
         fetch(url)
             .then(res => res.json())
@@ -478,9 +512,10 @@
 
         let html = '';
         slots.forEach(s => {
+            const docInfo = s.doctor_name ? ` &bull; ${escapeHtml(s.doctor_name)}` : '';
             html += `
-                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1" title="Booked for ${escapeHtml(s.patient_name)}">
-                    <i class="bi bi-lock-fill me-1"></i>${escapeHtml(s.formatted_time)} (${escapeHtml(s.patient_name)})
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1" title="Booked for ${escapeHtml(s.patient_name)}${s.doctor_name ? ' with ' + escapeHtml(s.doctor_name) : ''}">
+                    <i class="bi bi-lock-fill me-1"></i>${escapeHtml(s.formatted_time)} (${escapeHtml(s.patient_name)}${docInfo})
                 </span>
             `;
         });
@@ -543,9 +578,10 @@
         // Check if conflict with an existing appointment
         const conflict = slots.find(s => s.time === timeStr);
         if (conflict) {
+            const docInfo = conflict.doctor_name ? ` with <strong>${escapeHtml(conflict.doctor_name)}</strong>` : '';
             slotConflictAlert.className = 'alert alert-danger py-2 px-3 mb-2 small d-flex align-items-center justify-content-between';
             slotAlertIcon.className = 'bi bi-exclamation-octagon-fill text-danger fs-5 me-2';
-            slotAlertText.innerHTML = `<strong>Slot Taken:</strong> ${conflict.formatted_time} is already booked for <strong>${escapeHtml(conflict.patient_name)}</strong> (#${escapeHtml(conflict.patient_number)}). Double booking prohibited.`;
+            slotAlertText.innerHTML = `<strong>Slot Taken:</strong> ${conflict.formatted_time} is already booked for <strong>${escapeHtml(conflict.patient_name)}</strong> (#${escapeHtml(conflict.patient_number)})${docInfo}. Double booking prohibited.`;
             slotConflictAlert.style.display = 'flex';
         } else {
             slotConflictAlert.className = 'alert alert-success py-2 px-3 mb-2 small d-flex align-items-center justify-content-between';
@@ -556,6 +592,10 @@
     }
 
     dateInput.addEventListener('change', checkSlotAvailability);
+    const doctorInputEl = document.getElementById('doctor_id');
+    if (doctorInputEl && doctorInputEl.tagName === 'SELECT') {
+        doctorInputEl.addEventListener('change', checkSlotAvailability);
+    }
     timeInput.addEventListener('input', function() {
         validateCurrentTimeSlot(this.value ? this.value.substring(0, 5) : '', currentDayBookedSlots);
     });

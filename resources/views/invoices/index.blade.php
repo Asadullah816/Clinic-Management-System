@@ -71,6 +71,13 @@
                                     </span>
                                 </td>
                                 <td class="text-end">
+                                    @if ($invoice->due_amount > 0 && $invoice->whatsappReminderUrl())
+                                        <a href="{{ $invoice->whatsappReminderUrl() }}" target="_blank"
+                                            class="btn btn-sm btn-success me-1" style="background-color: #25D366; border-color: #25D366;"
+                                            title="Send WhatsApp Reminder">
+                                            <i class="bi bi-whatsapp"></i>
+                                        </a>
+                                    @endif
                                     <a href="{{ route('invoices.show', $invoice) }}"
                                         class="btn btn-sm btn-outline-secondary" title="View"><i
                                             class="bi bi-eye"></i></a>

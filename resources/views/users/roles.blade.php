@@ -20,7 +20,8 @@
                     <thead class="table-light">
                         <tr>
                             <th class="text-start">Module</th>
-                            <th>Administrator</th>
+                            <th>Administrator (Super Admin)</th>
+                            <th>Doctor / Dentist</th>
                             <th>Accountant</th>
                             <th>Receptionist</th>
                             <th>Staff</th>
@@ -30,6 +31,7 @@
                         <tr>
                             <td class="text-start">Dashboard</td>
                             <td>&#10004;</td>
+                            <td>&#10004; (Scoped)</td>
                             <td>&#10004;</td>
                             <td>&#10004;</td>
                             <td>&#10004;</td>
@@ -37,6 +39,7 @@
                         <tr>
                             <td class="text-start">Patients (view)</td>
                             <td>&#10004;</td>
+                            <td>&#10004; (Own Patients)</td>
                             <td>&#10004;</td>
                             <td>&#10004;</td>
                             <td>&#10004;</td>
@@ -44,12 +47,14 @@
                         <tr>
                             <td class="text-start">Patients (manage)</td>
                             <td>&#10004;</td>
+                            <td>&#10004; (Own Patients)</td>
                             <td>&mdash;</td>
                             <td>&#10004;</td>
                             <td>&#10004;</td>
                         </tr>
                         <tr>
                             <td class="text-start">Medical History</td>
+                            <td>&#10004;</td>
                             <td>&#10004;</td>
                             <td>&mdash;</td>
                             <td>&mdash;</td>
@@ -58,6 +63,7 @@
                         <tr>
                             <td class="text-start">Appointments</td>
                             <td>&#10004;</td>
+                            <td>&#10004; (Own Schedule)</td>
                             <td>&mdash;</td>
                             <td>&#10004;</td>
                             <td>&#10004;</td>
@@ -65,6 +71,7 @@
                         <tr>
                             <td class="text-start">Treatments &amp; Patient Treatments</td>
                             <td>&#10004;</td>
+                            <td>&#10004; (Own Treatments)</td>
                             <td>&mdash;</td>
                             <td>&#10004;</td>
                             <td>&#10004;</td>
@@ -72,9 +79,18 @@
                         <tr>
                             <td class="text-start">Invoices &amp; Payments</td>
                             <td>&#10004;</td>
+                            <td>&mdash;</td>
                             <td>&#10004;</td>
                             <td>&#10004;</td>
                             <td>&mdash;</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start">Dental Implants (External Sales &amp; Stock)</td>
+                            <td>&#10004;</td>
+                            <td>&mdash;</td>
+                            <td>&#10004;</td>
+                            <td>&mdash;</td>
+                            <td>&#10004;</td>
                         </tr>
                         <tr>
                             <td class="text-start">Inventory (Products, Stock, Suppliers)</td>
@@ -82,9 +98,11 @@
                             <td>&mdash;</td>
                             <td>&mdash;</td>
                             <td>&mdash;</td>
+                            <td>&mdash;</td>
                         </tr>
                         <tr>
                             <td class="text-start">Medicine/Product Usage</td>
+                            <td>&#10004;</td>
                             <td>&#10004;</td>
                             <td>&mdash;</td>
                             <td>&mdash;</td>
@@ -93,6 +111,7 @@
                         <tr>
                             <td class="text-start">Expenses</td>
                             <td>&#10004;</td>
+                            <td>&mdash;</td>
                             <td>&#10004;</td>
                             <td>&mdash;</td>
                             <td>&mdash;</td>
@@ -100,6 +119,7 @@
                         <tr>
                             <td class="text-start">Reports</td>
                             <td>&#10004;</td>
+                            <td>&mdash;</td>
                             <td>&#10004;</td>
                             <td>&mdash;</td>
                             <td>&mdash;</td>
@@ -107,6 +127,7 @@
                         <tr>
                             <td class="text-start">Users &amp; Settings</td>
                             <td>&#10004;</td>
+                            <td>&mdash;</td>
                             <td>&mdash;</td>
                             <td>&mdash;</td>
                             <td>&mdash;</td>

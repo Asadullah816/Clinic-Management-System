@@ -4,6 +4,24 @@
 
 @section('content')
 
+    {{-- Top Action and Cross-Navigation Header --}}
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-exclamation-circle text-danger me-2"></i>Outstanding Invoice Payments</h4>
+            <div class="text-muted small">Current invoices with unpaid or partially paid balances</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('patient-histories.outstanding') }}" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-clock-history me-1"></i> Pre-App Patient Outstandings
+            </a>
+            @if (auth()->user()->hasRole('admin', 'accountant', 'staff'))
+                <a href="{{ route('implant-sales.outstanding') }}" class="btn btn-outline-info btn-sm">
+                    <i class="bi bi-pin-angle me-1"></i> Doctor Implant Outstandings
+                </a>
+            @endif
+        </div>
+    </div>
+
     {{-- Summary card --}}
     <div class="card shadow-sm mb-3 border-start border-danger border-4">
         <div class="card-body d-flex justify-content-between align-items-center">
@@ -54,6 +72,13 @@
                                         class="badge text-bg-{{ $invoice->statusColor() }}">{{ $invoice->statusLabel() }}</span>
                                 </td>
                                 <td class="text-end">
+                                    @if ($invoice->due_amount > 0 && $invoice->whatsappReminderUrl())
+                                        <a href="{{ $invoice->whatsappReminderUrl() }}" target="_blank"
+                                            class="btn btn-sm btn-success me-1" style="background-color: #25D366; border-color: #25D366;"
+                                            title="Send WhatsApp Reminder">
+                                            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                                        </a>
+                                    @endif
                                     <a href="{{ route('payments.create', ['invoice_id' => $invoice->id]) }}"
                                         class="btn btn-sm btn-success" title="Receive payment">
                                         <i class="bi bi-cash-coin me-1"></i> Receive

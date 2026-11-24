@@ -45,7 +45,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,accountant,receptionist,staff',
+            'role' => 'required|in:admin,doctor,accountant,receptionist,staff',
         ]);
 
         User::create([
@@ -76,7 +76,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$user->id,
             'password' => 'nullable|string|min:8', // optional: leave blank to keep current
-            'role' => $isSelf ? 'nullable|in:admin,accountant,receptionist,staff' : 'required|in:admin,accountant,receptionist,staff',
+            'role' => $isSelf ? 'nullable|in:admin,doctor,accountant,receptionist,staff' : 'required|in:admin,doctor,accountant,receptionist,staff',
         ];
 
         $validated = $request->validate($rules);

@@ -22,6 +22,18 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>Attending Doctor</th>
+                    <td>
+                        @if ($appointment->doctor)
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                <i class="bi bi-person-badge me-1"></i> {{ $appointment->doctor->name }}
+                            </span>
+                        @else
+                            <span class="text-muted">— (General)</span>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
                     <th>Treatment(s)</th>
                     <td>
                         @if ($appointment->treatments->isNotEmpty())

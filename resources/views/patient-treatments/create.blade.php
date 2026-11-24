@@ -18,6 +18,7 @@
                     'patientTreatment' => null,
                     'patients' => $patients,
                     'treatments' => $treatments,
+                    'doctors' => $doctors ?? [],
                     'patientId' => $patientId,
                     'treatmentId' => $treatmentId,
                     'appointmentId' => $appointmentId ?? null,

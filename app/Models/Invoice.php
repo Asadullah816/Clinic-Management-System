@@ -114,4 +114,49 @@ class Invoice extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    /**
+     * Generate a WhatsApp reminder link using wa.me with prefilled message details.
+     */
+    public function whatsappReminderUrl(): ?string
+    {
+        $phone = $this->patient?->phone;
+        if (empty($phone)) {
+            return null;
+        }
+
+        // Clean phone number for wa.me international format
+        $clean = preg_replace('/[^0-9]/', '', $phone);
+        if (str_starts_with($clean, '03') && strlen($clean) === 11) {
+            $clean = '92'.substr($clean, 1);
+        } elseif (str_starts_with($clean, '0092')) {
+            $clean = substr($clean, 2);
+        }
+
+        if (empty($clean)) {
+            return null;
+        }
+
+        $clinicName = Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar'));
+        $clinicPhone = Setting::get('phone', '03489030035');
+        $patientName = $this->patient?->full_name ?? 'Valued Patient';
+        $invoiceNo = $this->invoice_number;
+        $invoiceDate = $this->invoice_date?->format('d M Y') ?? '';
+        $total = number_format((float) $this->total_amount, 2);
+        $paid = number_format((float) $this->paid_amount, 2);
+        $due = number_format((float) $this->due_amount, 2);
+
+        $message = "Dear {$patientName},\n\n"
+            ."This is a gentle payment reminder from *{$clinicName}* regarding your dental treatment invoice *#{$invoiceNo}* ({$invoiceDate}).\n\n"
+            ."📋 *Invoice Summary:*\n"
+            ."• Total Amount: PKR {$total}\n"
+            ."• Paid Amount: PKR {$paid}\n"
+            ."• *Outstanding Balance Due: PKR {$due}*\n\n"
+            ."Kindly arrange to clear the outstanding dues at your earliest convenience. If you have already paid, please ignore this message.\n\n"
+            ."For queries or assistance, contact: {$clinicPhone}.\n\n"
+            ."Thank you,\n"
+            ."*{$clinicName}*";
+
+        return 'https://wa.me/'.$clean.'?text='.rawurlencode($message);
+    }
 }

@@ -476,7 +476,20 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3 col-sm-6">
+                    @if (! auth()->user()->isDoctor() && isset($doctors))
+                        <div class="col-md-2 col-sm-6">
+                            <select name="appt_doctor_id" class="form-select form-select-sm">
+                                <option value="">All Doctors</option>
+                                @foreach ($doctors as $doc)
+                                    <option value="{{ $doc->id }}"
+                                        {{ (string) request('appt_doctor_id', $apptDoctorId ?? '') === (string) $doc->id ? 'selected' : '' }}>
+                                        {{ $doc->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                    <div class="{{ auth()->user()->isDoctor() ? 'col-md-3' : 'col-md-2' }} col-sm-6">
                         <input type="text" name="appt_search" value="{{ request('appt_search') }}"
                             class="form-control form-control-sm" placeholder="Search patient name, MR#, or phone...">
                     </div>
@@ -484,7 +497,7 @@
                         <button type="submit" class="btn btn-sm btn-primary py-1 px-3">
                             <i class="bi bi-search me-1"></i> Apply
                         </button>
-                        @if (request()->hasAny(['appt_date', 'appt_status', 'appt_search']))
+                        @if (request()->hasAny(['appt_date', 'appt_status', 'appt_search', 'appt_doctor_id']))
                             <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary py-1 px-2"
                                 title="Reset Filters">
                                 <i class="bi bi-x-circle"></i>
@@ -522,6 +535,7 @@
                                 <tr>
                                     <th class="ps-4">Time</th>
                                     <th>Patient</th>
+                                    <th>Doctor</th>
                                     <th>Treatment(s)</th>
                                     <th>Status</th>
                                     <th class="text-end pe-4">Actions</th>
@@ -540,6 +554,15 @@
                                             </a>
                                             <div class="small text-muted">{{ $appointment->patient->patient_number }}
                                                 &bull; {{ $appointment->patient->phone ?: 'No phone' }}</div>
+                                        </td>
+                                        <td>
+                                            @if ($appointment->doctor)
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                                    <i class="bi bi-person-badge me-1"></i> {{ $appointment->doctor->name }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted small">—</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}

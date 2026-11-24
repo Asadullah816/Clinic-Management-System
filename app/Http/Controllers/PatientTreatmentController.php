@@ -11,6 +11,7 @@ use App\Models\PatientTreatment;
 use App\Models\PatientTreatmentMedicine;
 use App\Models\Payment;
 use App\Models\Treatment;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +22,7 @@ class PatientTreatmentController extends Controller
     {
         return [
             'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'nullable|exists:users,id',
             'treatment_id' => 'nullable|exists:treatments,id',
             'procedure_name' => 'nullable|string|max:255',
             'appointment_id' => 'nullable|exists:appointments,id',
@@ -129,7 +131,17 @@ class PatientTreatmentController extends Controller
 
     public function index(Request $request)
     {
-        $patientTreatments = PatientTreatment::with(['patient', 'treatment', 'treatmentMedicines.medicine'])
+        $user = auth()->user();
+
+        $patientTreatments = PatientTreatment::with(['patient', 'treatment', 'treatmentMedicines.medicine', 'doctor'])
+            // Doctor scoping: doctors see only treatments they performed
+            ->when($user && $user->isDoctor(), function ($query) use ($user) {
+                $query->where('doctor_id', $user->id);
+            })
+            // Admin/staff can filter by doctor
+            ->when($user && ! $user->isDoctor() && $request->filled('doctor_id'), function ($query) use ($request) {
+                $query->where('doctor_id', $request->doctor_id);
+            })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->search;
                 $query->whereHas('patient', function ($q) use ($search) {
@@ -142,8 +154,11 @@ class PatientTreatmentController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $doctors = User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get();
+
         return view('patient-treatments.index', [
             'patientTreatments' => $patientTreatments,
+            'doctors' => $doctors,
         ]);
     }
 
@@ -171,6 +186,7 @@ class PatientTreatmentController extends Controller
         return view('patient-treatments.create', [
             'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
             'treatments' => Treatment::where('status', Treatment::STATUS_ACTIVE)->orderBy('name')->get(),
+            'doctors' => User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get(),
             'medicines' => $this->getMedicinesPayload(),
             'patientId' => $patientId,
             'treatmentId' => $treatmentId,
@@ -329,15 +345,29 @@ class PatientTreatmentController extends Controller
         $dueAmount = max(0, $grandTotal - $paidAmount);
         $invoiceNumber = null;
 
+        // Resolve attending doctor
+        $doctorId = null;
+        if (auth()->user()->isDoctor()) {
+            $doctorId = auth()->id();
+        } elseif (! empty($validated['doctor_id'])) {
+            $doctorId = (int) $validated['doctor_id'];
+        } elseif (! empty($validated['appointment_id'])) {
+            $doctorId = Appointment::find($validated['appointment_id'])?->doctor_id;
+        }
+        if (! $doctorId) {
+            $doctorId = Patient::find($validated['patient_id'])?->assigned_doctor_id;
+        }
+
         DB::transaction(function () use (
             $validated, $treatmentPrice, $treatmentDiscount, $treatmentNet,
-            $primaryTreatmentId, $procedureTitle, $clinicalNotes,
+            $primaryTreatmentId, $procedureTitle, $clinicalNotes, $doctorId,
             $medicinesData, $medicinesSubtotal, $medicineDiscount, $medicineTotal,
             $grandTotal, $paidAmount, $dueAmount, &$invoiceNumber
         ) {
             // 1. Create Patient Treatment record
             $patientTreatment = PatientTreatment::create([
                 'patient_id' => $validated['patient_id'],
+                'doctor_id' => $doctorId,
                 'treatment_id' => $primaryTreatmentId,
                 'procedure_name' => $procedureTitle,
                 'treatment_date' => $validated['treatment_date'],
@@ -350,6 +380,14 @@ class PatientTreatmentController extends Controller
                 'notes' => $clinicalNotes ?: null,
                 'created_by' => auth()->id(),
             ]);
+
+            // Auto-link doctor to patient if not already assigned
+            if ($doctorId) {
+                $patient = Patient::find($validated['patient_id']);
+                if ($patient && (! $patient->assigned_doctor_id || $patient->assigned_doctor_id != $doctorId)) {
+                    $patient->update(['assigned_doctor_id' => $doctorId]);
+                }
+            }
 
             // 2. Complete appointment if linked
             if (! empty($validated['appointment_id'])) {
@@ -459,12 +497,17 @@ class PatientTreatmentController extends Controller
 
     public function edit(PatientTreatment $patientTreatment)
     {
-        $patientTreatment->load(['treatmentMedicines.medicine']);
+        if (auth()->user()->isDoctor() && $patientTreatment->doctor_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this treatment record.');
+        }
+
+        $patientTreatment->load(['treatmentMedicines.medicine', 'doctor']);
 
         return view('patient-treatments.edit', [
             'patientTreatment' => $patientTreatment,
             'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
             'treatments' => Treatment::where('status', Treatment::STATUS_ACTIVE)->orderBy('name')->get(),
+            'doctors' => User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get(),
             'medicines' => $this->getMedicinesPayload(),
             'patientId' => null,
             'treatmentId' => null,
@@ -476,8 +519,13 @@ class PatientTreatmentController extends Controller
 
     public function update(Request $request, PatientTreatment $patientTreatment)
     {
+        if (auth()->user()->isDoctor() && $patientTreatment->doctor_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this treatment record.');
+        }
+
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'nullable|exists:users,id',
             'treatment_id' => 'nullable|exists:treatments,id',
             'procedure_name' => 'nullable|string|max:255',
             'procedures' => 'nullable|array',
@@ -676,6 +724,7 @@ class PatientTreatmentController extends Controller
             // 4. Update the PatientTreatment record
             $patientTreatment->update([
                 'patient_id' => $validated['patient_id'],
+                'doctor_id' => $validated['doctor_id'] ?? $patientTreatment->doctor_id,
                 'treatment_id' => $primaryTreatmentId,
                 'procedure_name' => $procedureTitle,
                 'treatment_date' => $validated['treatment_date'],
@@ -696,6 +745,10 @@ class PatientTreatmentController extends Controller
 
     public function destroy(Request $request, PatientTreatment $patientTreatment)
     {
+        if (auth()->user()->isDoctor() && $patientTreatment->doctor_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this treatment record.');
+        }
+
         DB::transaction(function () use ($patientTreatment) {
             // Restore stock for all medicines used in this treatment
             foreach ($patientTreatment->treatmentMedicines as $tm) {

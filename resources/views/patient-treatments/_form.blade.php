@@ -73,10 +73,10 @@
 {{-- ================= ROW: PATIENT SEARCH DROPDOWN & TREATMENT DATE ================= --}}
 <div class="row mb-3">
     <!-- Searchable Patient Dropdown -->
-    <div class="col-md-8 mb-3 mb-md-0 position-relative" id="patient-search-wrapper">
+    <div class="col-md-5 mb-3 mb-md-0 position-relative" id="patient-search-wrapper">
         <label for="patient_search_input" class="form-label fw-semibold">
             Patient <span class="text-danger">*</span>
-            <span class="text-muted fw-normal small ms-1">(Instant search by Name, MR Number, or Phone)</span>
+            <span class="text-muted fw-normal small ms-1">(Instant search)</span>
         </label>
         <div class="input-group">
             <span class="input-group-text bg-white text-primary"><i class="bi bi-person-search"></i></span>
@@ -101,8 +101,38 @@
         </div>
     </div>
 
+    <!-- Attending Doctor Selection -->
+    <div class="col-md-4 mb-3 mb-md-0">
+        <label for="doctor_id" class="form-label fw-semibold">Attending Doctor</label>
+        @if (auth()->user()->isDoctor())
+            <input type="hidden" name="doctor_id" value="{{ auth()->id() }}">
+            <div class="input-group">
+                <span class="input-group-text bg-white text-primary"><i class="bi bi-person-badge"></i></span>
+                <input type="text" class="form-control bg-light fw-semibold" value="{{ auth()->user()->name }} (You)" readonly>
+            </div>
+        @else
+            <div class="input-group">
+                <span class="input-group-text bg-white text-primary"><i class="bi bi-person-badge"></i></span>
+                <select name="doctor_id" id="doctor_id" class="form-select @error('doctor_id') is-invalid @enderror">
+                    <option value="">-- General / Assign Doctor --</option>
+                    @if (isset($doctors))
+                        @foreach ($doctors as $doc)
+                            <option value="{{ $doc->id }}"
+                                {{ (string) old('doctor_id', $patientTreatment->doctor_id ?? '') === (string) $doc->id ? 'selected' : '' }}>
+                                {{ $doc->name }} ({{ $doc->role === 'admin' ? 'Super Admin / Lead' : 'Doctor' }})
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
+        @endif
+        @error('doctor_id')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
+
     <!-- Treatment Date -->
-    <div class="col-md-4">
+    <div class="col-md-3">
         <label for="treatment_date" class="form-label fw-semibold">Treatment Date <span class="text-danger">*</span></label>
         <input type="date" id="treatment_date" name="treatment_date"
             value="{{ old('treatment_date', $patientTreatment?->treatment_date?->format('Y-m-d') ?? now()->toDateString()) }}"

@@ -25,8 +25,24 @@ class MedicalHistoryController extends Controller
         ];
     }
 
+    private function authorizeDoctorForPatient(Patient $patient): void
+    {
+        if (auth()->user() && auth()->user()->isDoctor()) {
+            $doctorId = auth()->id();
+            $isAssigned = $patient->assigned_doctor_id === $doctorId;
+            $hasAppointment = $patient->appointments()->where('doctor_id', $doctorId)->exists();
+            $hasTreatment = $patient->patientTreatments()->where('doctor_id', $doctorId)->exists();
+
+            if (! $isAssigned && ! $hasAppointment && ! $hasTreatment) {
+                abort(403, 'Unauthorized action for this patient.');
+            }
+        }
+    }
+
     public function create(Patient $patient)
     {
+        $this->authorizeDoctorForPatient($patient);
+
         return view('medical-histories.create', [
             'patient' => $patient,
         ]);
@@ -34,6 +50,8 @@ class MedicalHistoryController extends Controller
 
     public function store(Request $request, Patient $patient)
     {
+        $this->authorizeDoctorForPatient($patient);
+
         $validated = $request->validate($this->rules());
 
         // create() through the relationship sets patient_id automatically
@@ -49,6 +67,8 @@ class MedicalHistoryController extends Controller
 
     public function edit(MedicalHistory $medicalHistory)
     {
+        $this->authorizeDoctorForPatient($medicalHistory->patient);
+
         return view('medical-histories.edit', [
             'medicalHistory' => $medicalHistory,
             'patient' => $medicalHistory->patient,
@@ -57,6 +77,8 @@ class MedicalHistoryController extends Controller
 
     public function update(Request $request, MedicalHistory $medicalHistory)
     {
+        $this->authorizeDoctorForPatient($medicalHistory->patient);
+
         $validated = $request->validate($this->rules());
 
         $medicalHistory->update($validated);
@@ -68,6 +90,8 @@ class MedicalHistoryController extends Controller
 
     public function destroy(MedicalHistory $medicalHistory)
     {
+        $this->authorizeDoctorForPatient($medicalHistory->patient);
+
         $patientId = $medicalHistory->patient_id;
 
         $medicalHistory->delete();

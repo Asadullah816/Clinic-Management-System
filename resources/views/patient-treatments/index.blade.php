@@ -6,7 +6,12 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0 fw-bold">Patient Treatments</h5>
+            <div>
+                <h5 class="mb-0 fw-bold">{{ auth()->user()->isDoctor() ? 'My Patient Treatments' : 'Patient Treatments' }}</h5>
+                @if (auth()->user()->isDoctor())
+                    <span class="text-muted small">Showing treatments performed by you</span>
+                @endif
+            </div>
             <a href="{{ route('patient-treatments.create') }}" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg me-1"></i> Record Treatment
             </a>
@@ -15,10 +20,22 @@
         <div class="card-body">
 
             <form method="GET" action="{{ route('patient-treatments.index') }}" class="row g-2 mb-3">
-                <div class="col-md-6">
+                <div class="{{ auth()->user()->isDoctor() ? 'col-md-9' : 'col-md-5' }}">
                     <input type="text" name="search" value="{{ request('search') }}" class="form-control"
                         placeholder="Search patient name or #...">
                 </div>
+                @if (! auth()->user()->isDoctor() && isset($doctors))
+                    <div class="col-md-4">
+                        <select name="doctor_id" class="form-select">
+                            <option value="">All Doctors</option>
+                            @foreach ($doctors as $doc)
+                                <option value="{{ $doc->id }}" {{ (string) request('doctor_id') === (string) $doc->id ? 'selected' : '' }}>
+                                    {{ $doc->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search me-1"></i>
                         Filter</button>
@@ -49,6 +66,13 @@
                                         {{ $patientTreatment->patient->full_name }}
                                     </a>
                                     <div class="small text-muted">{{ $patientTreatment->patient->patient_number }}</div>
+                                    @if ($patientTreatment->doctor)
+                                        <div class="mt-1">
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-1 py-0" style="font-size: 0.7rem;">
+                                                <i class="bi bi-person-badge"></i> {{ $patientTreatment->doctor->name }}
+                                            </span>
+                                        </div>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="fw-semibold text-dark">{{ $patientTreatment->procedure_title }}</div>

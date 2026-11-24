@@ -7,6 +7,7 @@
     @php
         $roleColors = [
             \App\Models\User::ROLE_ADMIN => 'danger',
+            \App\Models\User::ROLE_DOCTOR => 'primary',
             \App\Models\User::ROLE_ACCOUNTANT => 'warning',
             \App\Models\User::ROLE_RECEPTIONIST => 'info',
             \App\Models\User::ROLE_STAFF => 'secondary',

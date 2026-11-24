@@ -8,11 +8,12 @@
         $user = auth()->user();
 
         // Tab visibility follows the Roles & Access matrix
-        $showMedicalHistory = $user->hasRole('admin', 'staff');
-        $showAppointments = $user->hasRole('admin', 'receptionist', 'staff');
-        $showTreatments = $user->hasRole('admin', 'receptionist', 'staff');
+        $showMedicalHistory = $user->hasRole('admin', 'doctor', 'staff');
+        $showAppointments = $user->hasRole('admin', 'doctor', 'receptionist', 'staff');
+        $showTreatments = $user->hasRole('admin', 'doctor', 'receptionist', 'staff');
         $showBilling = $user->hasRole('admin', 'accountant', 'receptionist');
-        $showUsage = $user->hasRole('admin', 'staff');
+        $showUsage = $user->hasRole('admin', 'doctor', 'staff');
+        $showHistory = $user->hasRole('admin', 'doctor', 'accountant', 'receptionist', 'staff');
     @endphp
 
     {{-- Patient header card --}}
@@ -111,6 +112,15 @@
                 </button>
             </li>
         @endif
+
+        @if ($showHistory)
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#patient-history" type="button" role="tab">
+                    <i class="bi bi-clock-history me-1"></i> Pre-App History
+                    <span class="badge text-bg-secondary ms-1">{{ $patient->patientHistories->count() }}</span>
+                </button>
+            </li>
+        @endif
     </ul>
 
     <div class="tab-content bg-white border border-top-0 rounded-bottom shadow-sm p-4">
@@ -173,7 +183,7 @@
                 <div class="col-md-3">
                     <div class="card bg-light border-0">
                         <div class="card-body py-3">
-                            <div class="text-muted small">Total Invoiced</div>
+                            <div class="text-muted small">Total Invoiced (Current)</div>
                             <div class="fs-5 fw-semibold text-dark">PKR {{ number_format($totalInvoiced, 2) }}</div>
                         </div>
                     </div>
@@ -181,7 +191,7 @@
                 <div class="col-md-3">
                     <div class="card bg-light border-0">
                         <div class="card-body py-3">
-                            <div class="text-muted small">Total Paid</div>
+                            <div class="text-muted small">Total Paid (Current)</div>
                             <div class="fs-5 fw-semibold text-success">PKR {{ number_format($totalPaid, 2) }}</div>
                         </div>
                     </div>
@@ -189,7 +199,7 @@
                 <div class="col-md-3">
                     <div class="card bg-light border-0">
                         <div class="card-body py-3">
-                            <div class="text-muted small">Outstanding Due</div>
+                            <div class="text-muted small">Current Due</div>
                             <div class="fs-5 fw-semibold {{ $totalOutstanding > 0 ? 'text-danger' : 'text-success' }}">
                                 PKR {{ number_format($totalOutstanding, 2) }}
                             </div>
@@ -197,6 +207,48 @@
                     </div>
                 </div>
             </div>
+
+            @if ($patient->patientHistories->isNotEmpty())
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-2">
+                                <div class="text-muted small">Pre-App Past Total</div>
+                                <div class="fs-6 fw-semibold text-secondary">PKR {{ number_format($historicalTotal, 2) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-2">
+                                <div class="text-muted small">Pre-App Recovered / Paid</div>
+                                <div class="fs-6 fw-semibold text-success">PKR {{ number_format($historicalPaid, 2) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0 border-start border-danger border-3">
+                            <div class="card-body py-2">
+                                <div class="text-muted small">Pre-App Remaining Due</div>
+                                <div class="fs-6 fw-bold text-danger">PKR {{ number_format($historicalDue, 2) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if ($combinedDue > 0)
+                    <div class="alert alert-warning d-flex justify-content-between align-items-center mt-3 py-2 px-3 mb-0">
+                        <div>
+                            <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+                            <strong>Total Combined Balance Due:</strong>
+                            Current Invoices (PKR {{ number_format($totalOutstanding, 2) }}) + Pre-App History (PKR {{ number_format($historicalDue, 2) }})
+                        </div>
+                        <div class="fs-5 fw-bold text-danger">
+                            PKR {{ number_format($combinedDue, 2) }}
+                        </div>
+                    </div>
+                @endif
+            @endif
         </div>
 
         {{-- ================= MEDICAL HISTORY ================= --}}
@@ -661,6 +713,200 @@
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        {{-- ================= PRE-APP PATIENT HISTORY ================= --}}
+        @if ($showHistory)
+            <div class="tab-pane fade" id="patient-history" role="tabpanel">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                    <div>
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history me-1 text-primary"></i>Pre-App Historical Treatment Records</h6>
+                        <div class="text-muted small">Treatments, diagnoses, and financial records for visits conducted before this system was launched.</div>
+                    </div>
+                    @if ($user->hasRole('admin', 'doctor', 'receptionist', 'staff'))
+                        <a href="{{ route('patient-histories.create', ['patient_id' => $patient->id]) }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Add Pre-App Record
+                        </a>
+                    @endif
+                </div>
+
+                @if ($patient->patientHistories->isEmpty())
+                    <div class="text-center text-muted py-5 border rounded-3 bg-light bg-opacity-50">
+                        <i class="bi bi-clock-history fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                        <p class="mb-2">No pre-app historical treatment records on file for this patient.</p>
+                        @if ($user->hasRole('admin', 'doctor', 'receptionist', 'staff'))
+                            <a href="{{ route('patient-histories.create', ['patient_id' => $patient->id]) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i> Add Past Treatment Record
+                            </a>
+                        @endif
+                    </div>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Record #</th>
+                                    <th>Visit Date</th>
+                                    <th>Attending Doctor</th>
+                                    <th>Tooth #</th>
+                                    <th>Procedures</th>
+                                    <th>Total (PKR)</th>
+                                    <th>Paid (PKR)</th>
+                                    <th>Due (PKR)</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($patient->patientHistories as $hist)
+                                    <tr>
+                                        <td class="fw-bold">
+                                            <a href="{{ route('patient-histories.show', $hist) }}" class="text-decoration-none">
+                                                {{ $hist->record_number }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $hist->visit_date ? $hist->visit_date->format('d M Y') : '—' }}</td>
+                                        <td>
+                                            @if ($hist->doctor)
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                                    Dr. {{ $hist->doctor->name }}
+                                                </span>
+                                            @elseif ($hist->doctor_name)
+                                                <span class="text-secondary small">{{ $hist->doctor_name }}</span>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($hist->tooth_numbers)
+                                                <span class="badge bg-light text-dark border">{{ $hist->tooth_numbers }}</span>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="text-truncate" style="max-width: 200px;" title="{{ $hist->procedures }}">
+                                                {{ $hist->procedures }}
+                                            </div>
+                                        </td>
+                                        <td>PKR {{ number_format($hist->total_cost, 2) }}</td>
+                                        <td class="text-success">PKR {{ number_format($hist->paid_amount, 2) }}</td>
+                                        <td class="{{ $hist->due_amount > 0 ? 'text-danger fw-bold' : 'text-success' }}">
+                                            PKR {{ number_format($hist->due_amount, 2) }}
+                                        </td>
+                                        <td>
+                                            <span class="badge text-bg-{{ $hist->statusColor() }}">
+                                                {{ $hist->statusLabel() }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm">
+                                                @if ($hist->due_amount > 0 && $hist->whatsappReminderUrl())
+                                                    <a href="{{ $hist->whatsappReminderUrl() }}" target="_blank"
+                                                        class="btn btn-success" style="background-color: #25D366; border-color: #25D366;"
+                                                        title="Send WhatsApp Reminder">
+                                                        <i class="bi bi-whatsapp"></i>
+                                                    </a>
+                                                @endif
+
+                                                @if ($hist->due_amount > 0 && $user->hasRole('admin', 'doctor', 'accountant', 'receptionist', 'staff'))
+                                                    <button type="button" class="btn btn-success"
+                                                        data-bs-toggle="modal" data-bs-target="#receiveModal{{ $hist->id }}"
+                                                        title="Receive Payment">
+                                                        <i class="bi bi-cash-coin me-1"></i> Pay
+                                                    </button>
+                                                @endif
+
+                                                <a href="{{ route('patient-histories.show', $hist) }}"
+                                                    class="btn btn-outline-secondary" title="View details">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+
+                                                @if ($user->hasRole('admin', 'doctor', 'receptionist', 'staff'))
+                                                    <a href="{{ route('patient-histories.edit', $hist) }}"
+                                                        class="btn btn-outline-primary" title="Edit record">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                @endif
+                                            </div>
+
+                                            @if ($hist->due_amount > 0)
+                                                {{-- Payment Modal --}}
+                                                <div class="modal fade" id="receiveModal{{ $hist->id }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <form method="POST" action="{{ route('patient-histories.record-payment', $hist) }}">
+                                                                @csrf
+                                                                <input type="hidden" name="redirect_url" value="{{ route('patients.show', $patient) }}#patient-history">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title fs-6">
+                                                                        <i class="bi bi-cash-coin text-success me-1"></i> Receive Pre-App Payment
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body text-start">
+                                                                    <div class="alert alert-light border small mb-3">
+                                                                        <div>Historical Record: <strong>{{ $hist->record_number }}</strong></div>
+                                                                        <div>Visit Date: <strong>{{ $hist->visit_date ? $hist->visit_date->format('d M Y') : '—' }}</strong></div>
+                                                                        <div>Procedures: <strong>{{ $hist->procedures }}</strong></div>
+                                                                        <div class="text-danger fw-bold mt-1">Pending Due Balance: PKR {{ number_format($hist->due_amount, 2) }}</div>
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label fw-semibold">Payment Amount <span class="text-danger">*</span></label>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-text">PKR</span>
+                                                                            <input type="number" step="0.01" min="1" max="{{ $hist->due_amount }}"
+                                                                                name="amount" value="{{ $hist->due_amount }}"
+                                                                                class="form-control fw-bold" required>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label fw-semibold">Payment Date <span class="text-danger">*</span></label>
+                                                                        <input type="date" name="payment_date" value="{{ today()->toDateString() }}" class="form-control" required>
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label fw-semibold">Payment Method <span class="text-danger">*</span></label>
+                                                                        <select name="payment_method" class="form-select" required>
+                                                                            <option value="cash">Cash</option>
+                                                                            <option value="bank">Bank Transfer</option>
+                                                                            <option value="card">Credit / Debit Card</option>
+                                                                            <option value="online">Online / EasyPaisa / JazzCash</option>
+                                                                            <option value="other">Other</option>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">Reference / Receipt Number</label>
+                                                                        <input type="text" name="reference" class="form-control" placeholder="e.g. Receipt #123, Slip ID">
+                                                                    </div>
+
+                                                                    <div class="mb-0">
+                                                                        <label class="form-label">Notes</label>
+                                                                        <textarea name="notes" rows="2" class="form-control" placeholder="Optional notes..."></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-success">
+                                                                        <i class="bi bi-check-lg me-1"></i> Save Payment
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

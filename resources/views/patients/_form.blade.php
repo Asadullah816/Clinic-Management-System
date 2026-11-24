@@ -109,6 +109,28 @@
             @enderror
         </div>
         <div class="col-md-4 mb-3">
+            <label for="assigned_doctor_id" class="form-label">Assigned Doctor</label>
+            @if (auth()->user()->isDoctor())
+                <input type="hidden" name="assigned_doctor_id" value="{{ auth()->id() }}">
+                <input type="text" class="form-control bg-light" value="{{ auth()->user()->name }} (You)" readonly>
+            @else
+                <select name="assigned_doctor_id" id="assigned_doctor_id" class="form-select @error('assigned_doctor_id') is-invalid @enderror">
+                    <option value="">-- General / Any Doctor --</option>
+                    @if (isset($doctors))
+                        @foreach ($doctors as $doc)
+                            <option value="{{ $doc->id }}"
+                                {{ (string) old('assigned_doctor_id', $patient->assigned_doctor_id ?? '') === (string) $doc->id ? 'selected' : '' }}>
+                                {{ $doc->name }} ({{ $doc->role === 'admin' ? 'Super Admin / Lead' : 'Doctor' }})
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            @endif
+            @error('assigned_doctor_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+        <div class="col-md-4 mb-3">
             <label for="referred_by" class="form-label">Referred By</label>
             <input type="text" id="referred_by" name="referred_by"
                 value="{{ old('referred_by', $patient->referred_by ?? '') }}"

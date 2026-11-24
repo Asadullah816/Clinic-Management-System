@@ -8,7 +8,12 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0">All Patients</h5>
+            <div>
+                <h5 class="mb-0">{{ auth()->user()->isDoctor() ? 'My Patients' : 'All Patients' }}</h5>
+                @if (auth()->user()->isDoctor())
+                    <span class="text-muted small">Showing patients assigned to or treated by you</span>
+                @endif
+            </div>
             @if ($canManage)
                 <a href="{{ route('patients.create') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg me-1"></i> Add Patient
@@ -20,10 +25,22 @@
 
             {{-- Search & status filter --}}
             <form method="GET" action="{{ route('patients.index') }}" class="row g-2 mb-3">
-                <div class="col-md-4">
+                <div class="{{ auth()->user()->isDoctor() ? 'col-md-4' : 'col-md-3' }}">
                     <input type="text" name="search" value="{{ request('search') }}" class="form-control"
                         placeholder="Search by patient #, name, or phone...">
                 </div>
+                @if (! auth()->user()->isDoctor() && isset($doctors))
+                    <div class="col-md-2">
+                        <select name="doctor_id" class="form-select">
+                            <option value="">All Doctors</option>
+                            @foreach ($doctors as $doc)
+                                <option value="{{ $doc->id }}" {{ (string) request('doctor_id') === (string) $doc->id ? 'selected' : '' }}>
+                                    {{ $doc->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div class="col-md-2">
                     <select name="status" class="form-select">
                         <option value="">All statuses</option>
@@ -31,7 +48,7 @@
                         <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="{{ auth()->user()->isDoctor() ? 'col-md-3' : 'col-md-2' }}">
                     <select name="period" class="form-select" onchange="this.form.submit()">
                         @foreach ($periods as $value => $label)
                             <option value="{{ $value }}" {{ request('period', 'all') === $value ? 'selected' : '' }}>
@@ -40,8 +57,8 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-outline-secondary">
+                <div class="{{ auth()->user()->isDoctor() ? 'col-md-2' : 'col-md-3' }} d-flex gap-1">
+                    <button type="submit" class="btn btn-outline-secondary w-100">
                         <i class="bi bi-search me-1"></i> Filter
                     </button>
                     <a href="{{ route('patients.index') }}" class="btn btn-outline-secondary">Reset</a>
@@ -54,6 +71,7 @@
                         <tr>
                             <th>Patient #</th>
                             <th>Name</th>
+                            <th>Doctor</th>
                             <th>Gender</th>
                             <th>Phone</th>
                             <th>Status</th>
@@ -69,6 +87,15 @@
                                     <a href="{{ route('patients.show', $patient) }}" class="text-decoration-none">
                                         {{ $patient->full_name }}
                                     </a>
+                                </td>
+                                <td>
+                                    @if ($patient->assignedDoctor)
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                            <i class="bi bi-person-badge me-1"></i> {{ $patient->assignedDoctor->name }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted small">—</span>
+                                    @endif
                                 </td>
                                 <td class="text-capitalize">{{ $patient->gender }}</td>
                                 <td>{{ $patient->phone }}</td>

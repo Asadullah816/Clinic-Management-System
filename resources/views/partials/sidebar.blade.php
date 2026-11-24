@@ -21,6 +21,7 @@
     $role = auth()->user()->role;
     $roleBadgeClass = match($role) {
         'admin' => 'bg-danger-subtle text-danger border border-danger-subtle',
+        'doctor' => 'bg-primary-subtle text-primary border border-primary-subtle',
         'accountant' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
         'receptionist' => 'bg-info-subtle text-info-emphasis border border-info-subtle',
         default => 'bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle',
@@ -79,7 +80,7 @@
         </div>
 
         {{-- Quick Mobile Shortcuts --}}
-        @if (auth()->user()->hasRole('admin', 'receptionist', 'staff'))
+        @if (auth()->user()->hasRole('admin', 'doctor', 'receptionist', 'staff'))
             <div class="row g-2 mb-3">
                 <div class="col-6">
                     <a href="{{ route('patients.create') }}" class="btn btn-sm btn-primary w-100 d-flex align-items-center justify-content-center gap-1 py-2 rounded-3 shadow-sm" style="font-size: 0.8rem;">

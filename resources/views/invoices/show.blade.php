@@ -110,10 +110,17 @@
             @endif
 
             @if ($invoice->due_amount > 0)
-                <a href="{{ route('payments.create', ['invoice_id' => $invoice->id]) }}" class="btn btn-success mb-3">
-                    <i class="bi bi-cash-coin me-1"></i> Receive Payment (Due:
-                    PKR {{ number_format($invoice->due_amount, 2) }})
-                </a>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <a href="{{ route('payments.create', ['invoice_id' => $invoice->id]) }}" class="btn btn-success">
+                        <i class="bi bi-cash-coin me-1"></i> Receive Payment (Due:
+                        PKR {{ number_format($invoice->due_amount, 2) }})
+                    </a>
+                    @if ($invoice->whatsappReminderUrl())
+                        <a href="{{ $invoice->whatsappReminderUrl() }}" target="_blank" class="btn btn-success" style="background-color: #25D366; border-color: #25D366;">
+                            <i class="bi bi-whatsapp me-1"></i> Send WhatsApp Reminder
+                        </a>
+                    @endif
+                </div>
             @else
                 <div class="alert alert-success py-2 mb-3">
                     <i class="bi bi-check-circle me-1"></i> This invoice is fully paid.

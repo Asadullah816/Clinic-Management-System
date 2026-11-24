@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Treatment;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -14,6 +15,7 @@ class AppointmentController extends Controller
     {
         $rules = [
             'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => 'nullable|exists:users,id',
             'treatment_id' => 'nullable|exists:treatments,id',
             'treatment_ids' => 'nullable|array',
             'treatment_ids.0' => 'required_without:treatment_id|nullable|exists:treatments,id',
@@ -35,15 +37,23 @@ class AppointmentController extends Controller
     {
         $date = $request->query('date', today()->toDateString());
         $excludeId = $request->query('exclude_id');
+        $doctorId = $request->query('doctor_id');
+
+        if (auth()->check() && auth()->user()->isDoctor()) {
+            $doctorId = auth()->id();
+        }
 
         $slots = Appointment::whereDate('appointment_date', $date)
             ->where('status', Appointment::STATUS_SCHEDULED)
             ->when($excludeId, function ($q) use ($excludeId) {
                 $q->where('id', '!=', $excludeId);
             })
-            ->with('patient:id,first_name,last_name,patient_number')
+            ->when($doctorId, function ($q) use ($doctorId) {
+                $q->where('doctor_id', $doctorId);
+            })
+            ->with(['patient:id,first_name,last_name,patient_number', 'doctor:id,name'])
             ->orderBy('appointment_time')
-            ->get(['id', 'patient_id', 'appointment_date', 'appointment_time'])
+            ->get(['id', 'patient_id', 'doctor_id', 'appointment_date', 'appointment_time'])
             ->map(function ($appt) {
                 $timePart = substr($appt->appointment_time, 0, 5);
 
@@ -53,6 +63,7 @@ class AppointmentController extends Controller
                     'formatted_time' => Carbon::createFromFormat('H:i', $timePart)->format('h:i A'),
                     'patient_name' => $appt->patient?->full_name ?? 'Booked Patient',
                     'patient_number' => $appt->patient?->patient_number ?? '',
+                    'doctor_name' => $appt->doctor?->name ?? 'Any Doctor',
                 ];
             });
 
@@ -61,7 +72,17 @@ class AppointmentController extends Controller
 
     public function index(Request $request)
     {
-        $appointments = Appointment::with(['patient', 'treatment', 'treatments'])
+        $user = auth()->user();
+
+        $appointments = Appointment::with(['patient', 'treatment', 'treatments', 'doctor'])
+            // Scoping: Doctors only see their own appointments
+            ->when($user && $user->isDoctor(), function ($query) use ($user) {
+                $query->where('doctor_id', $user->id);
+            })
+            // Admin/receptionist can filter by doctor
+            ->when($user && ! $user->isDoctor() && $request->filled('doctor_id'), function ($query) use ($request) {
+                $query->where('doctor_id', $request->doctor_id);
+            })
             // Search by patient name, patient number, or phone
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->search;
@@ -94,8 +115,11 @@ class AppointmentController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        $doctors = User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get();
+
         return view('appointments.index', [
             'appointments' => $appointments,
+            'doctors' => $doctors,
         ]);
     }
 
@@ -104,6 +128,7 @@ class AppointmentController extends Controller
         return view('appointments.create', [
             'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
             'treatments' => Treatment::where('status', Treatment::STATUS_ACTIVE)->orderBy('name')->get(),
+            'doctors' => User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get(),
             'patientId' => $request->query('patient_id'),
         ]);
     }
@@ -111,6 +136,11 @@ class AppointmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate($this->rules());
+
+        // If authenticated as a doctor, enforce doctor_id to the logged-in doctor
+        if (auth()->user()->isDoctor()) {
+            $validated['doctor_id'] = auth()->id();
+        }
 
         $apptDateStr = Carbon::parse($validated['appointment_date'])->toDateString();
 
@@ -134,22 +164,35 @@ class AppointmentController extends Controller
 
         // 3. Prevent double-booking slot conflict on the same date and time (only active scheduled appointments)
         $apptTimeFormatted = substr($validated['appointment_time'], 0, 5);
-        $conflict = Appointment::whereDate('appointment_date', $apptDateStr)
+        $conflictQuery = Appointment::whereDate('appointment_date', $apptDateStr)
             ->where('appointment_time', 'like', $apptTimeFormatted.'%')
-            ->where('status', Appointment::STATUS_SCHEDULED)
-            ->with('patient')
-            ->first();
+            ->where('status', Appointment::STATUS_SCHEDULED);
+
+        if (! empty($validated['doctor_id'])) {
+            $conflictQuery->where('doctor_id', $validated['doctor_id']);
+        }
+
+        $conflict = $conflictQuery->with(['patient', 'doctor'])->first();
 
         if ($conflict) {
             $patientName = $conflict->patient->full_name ?? 'another patient';
+            $doctorName = $conflict->doctor ? ' with '.$conflict->doctor->name : '';
             $timeDisplay = Carbon::createFromFormat('H:i', $apptTimeFormatted)->format('h:i A');
             $dateDisplay = Carbon::parse($apptDateStr)->format('d M Y');
 
             return back()
                 ->withErrors([
-                    'appointment_time' => "Time slot {$timeDisplay} on {$dateDisplay} is already booked for {$patientName} (#{$conflict->patient->patient_number}). Please select a different time or date.",
+                    'appointment_time' => "Time slot {$timeDisplay} on {$dateDisplay} is already booked for {$patientName} (#{$conflict->patient->patient_number}){$doctorName}. Please select a different time or date.",
                 ])
                 ->withInput();
+        }
+
+        // Auto-assign patient to the doctor if not already assigned
+        if (! empty($validated['doctor_id'])) {
+            $patient = Patient::find($validated['patient_id']);
+            if ($patient && (! $patient->assigned_doctor_id || $patient->assigned_doctor_id != $validated['doctor_id'])) {
+                $patient->update(['assigned_doctor_id' => $validated['doctor_id']]);
+            }
         }
 
         // 4. Resolve multiple treatments: first is required, others are optional
@@ -190,7 +233,11 @@ class AppointmentController extends Controller
 
     public function show(Appointment $appointment)
     {
-        $appointment->load(['patient', 'treatment', 'treatments', 'createdBy']);
+        if (auth()->user()->isDoctor() && $appointment->doctor_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this appointment.');
+        }
+
+        $appointment->load(['patient', 'treatment', 'treatments', 'createdBy', 'doctor']);
 
         return view('appointments.show', [
             'appointment' => $appointment,
@@ -199,18 +246,31 @@ class AppointmentController extends Controller
 
     public function edit(Appointment $appointment)
     {
-        $appointment->load(['treatments', 'patient']);
+        if (auth()->user()->isDoctor() && $appointment->doctor_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this appointment.');
+        }
+
+        $appointment->load(['treatments', 'patient', 'doctor']);
 
         return view('appointments.edit', [
             'appointment' => $appointment,
             'patients' => Patient::orderBy('first_name')->orderBy('last_name')->get(),
             'treatments' => Treatment::where('status', Treatment::STATUS_ACTIVE)->orderBy('name')->get(),
+            'doctors' => User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get(),
         ]);
     }
 
     public function update(Request $request, Appointment $appointment)
     {
+        if (auth()->user()->isDoctor() && $appointment->doctor_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this appointment.');
+        }
+
         $validated = $request->validate($this->rules($appointment));
+
+        if (auth()->user()->isDoctor()) {
+            $validated['doctor_id'] = auth()->id();
+        }
 
         $apptDateStr = Carbon::parse($validated['appointment_date'])->toDateString();
 
@@ -236,23 +296,36 @@ class AppointmentController extends Controller
 
         // 2. Prevent double booking slot conflict (only active scheduled appointments)
         $apptTimeFormatted = substr($validated['appointment_time'], 0, 5);
-        $conflict = Appointment::whereDate('appointment_date', $apptDateStr)
+        $conflictQuery = Appointment::whereDate('appointment_date', $apptDateStr)
             ->where('appointment_time', 'like', $apptTimeFormatted.'%')
             ->where('status', Appointment::STATUS_SCHEDULED)
-            ->where('id', '!=', $appointment->id)
-            ->with('patient')
-            ->first();
+            ->where('id', '!=', $appointment->id);
+
+        if (! empty($validated['doctor_id'])) {
+            $conflictQuery->where('doctor_id', $validated['doctor_id']);
+        }
+
+        $conflict = $conflictQuery->with(['patient', 'doctor'])->first();
 
         if ($conflict) {
             $patientName = $conflict->patient->full_name ?? 'another patient';
+            $doctorName = $conflict->doctor ? ' with '.$conflict->doctor->name : '';
             $timeDisplay = Carbon::createFromFormat('H:i', $apptTimeFormatted)->format('h:i A');
             $dateDisplay = Carbon::parse($apptDateStr)->format('d M Y');
 
             return back()
                 ->withErrors([
-                    'appointment_time' => "Time slot {$timeDisplay} on {$dateDisplay} is already booked for {$patientName} (#{$conflict->patient->patient_number}). Please select a different time or date.",
+                    'appointment_time' => "Time slot {$timeDisplay} on {$dateDisplay} is already booked for {$patientName} (#{$conflict->patient->patient_number}){$doctorName}. Please select a different time or date.",
                 ])
                 ->withInput();
+        }
+
+        // Auto-assign patient to the doctor if not already assigned
+        if (! empty($validated['doctor_id'])) {
+            $patient = Patient::find($validated['patient_id']);
+            if ($patient && (! $patient->assigned_doctor_id || $patient->assigned_doctor_id != $validated['doctor_id'])) {
+                $patient->update(['assigned_doctor_id' => $validated['doctor_id']]);
+            }
         }
 
         // 3. Resolve multiple treatments
@@ -290,6 +363,10 @@ class AppointmentController extends Controller
 
     public function destroy(Request $request, Appointment $appointment)
     {
+        if (auth()->user()->isDoctor() && $appointment->doctor_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this appointment.');
+        }
+
         $appointment->delete();
 
         // When deleted from the patient profile tab, go back to that profile

@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Medicine;
 use App\Models\Patient;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Http\Request;   // ← THIS was missing
 
 class DashboardController extends Controller
@@ -23,10 +24,14 @@ class DashboardController extends Controller
 
         [$periodStart, $periodEnd, $periodLabel] = $this->periodRange($period);
 
-        // ================= Patient statistics (all roles) =================
-        $totalPatients = Patient::count();
-        $todaysPatients = Patient::whereDate('created_at', today())->count();
-        $monthsPatients = Patient::whereMonth('created_at', now()->month)
+        // ================= Patient statistics (scoped for doctors) =================
+        $patientQuery = Patient::query();
+        if ($user->isDoctor()) {
+            $patientQuery->forDoctor($user->id);
+        }
+        $totalPatients = (clone $patientQuery)->count();
+        $todaysPatients = (clone $patientQuery)->whereDate('created_at', today())->count();
+        $monthsPatients = (clone $patientQuery)->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
 
@@ -34,9 +39,16 @@ class DashboardController extends Controller
         $apptDate = $request->query('appt_date') ?: today()->toDateString();
         $apptStatus = $request->query('appt_status');
         $apptSearch = $request->query('appt_search');
+        $apptDoctorId = $request->query('appt_doctor_id');
 
-        $todaysAppointments = Appointment::with(['patient', 'treatment', 'treatments'])
+        $todaysAppointments = Appointment::with(['patient', 'treatment', 'treatments', 'doctor'])
             ->whereDate('appointment_date', $apptDate)
+            ->when($user->isDoctor(), function ($q) use ($user) {
+                $q->where('doctor_id', $user->id);
+            })
+            ->when(! $user->isDoctor() && $apptDoctorId, function ($q) use ($apptDoctorId) {
+                $q->where('doctor_id', $apptDoctorId);
+            })
             ->when($apptStatus, function ($q) use ($apptStatus) {
                 $q->where('status', $apptStatus);
             })
@@ -51,9 +63,13 @@ class DashboardController extends Controller
             ->orderBy('appointment_time')
             ->get();
 
-        $todayActualCount = Appointment::whereDate('appointment_date', today())->count();
+        $todayActualCount = Appointment::whereDate('appointment_date', today())
+            ->when($user->isDoctor(), function ($q) use ($user) {
+                $q->where('doctor_id', $user->id);
+            })
+            ->count();
 
-        $showAppointments = $user->hasRole('admin', 'receptionist', 'staff');
+        $showAppointments = $user->hasRole('admin', 'doctor', 'receptionist', 'staff');
 
         // ================= Financial (admin, accountant) — period-scoped =================
         $showFinancial = $user->hasRole('admin', 'accountant');
@@ -107,6 +123,8 @@ class DashboardController extends Controller
             'apptDate' => $apptDate,
             'apptStatus' => $apptStatus,
             'apptSearch' => $apptSearch,
+            'apptDoctorId' => $apptDoctorId,
+            'doctors' => User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get(),
 
             'period' => $period,
             'periodLabel' => $periodLabel,

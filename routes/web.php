@@ -5,12 +5,17 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ImplantBuyerController;
+use App\Http\Controllers\ImplantController;
+use App\Http\Controllers\ImplantPaymentController;
+use App\Http\Controllers\ImplantSaleController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MedicalHistoryController;
 use App\Http\Controllers\MedicineCategoryController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\MedicineUsageController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PatientHistoryController;
 use App\Http\Controllers\PatientTreatmentController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
@@ -50,10 +55,10 @@ Route::middleware('auth')->group(function () {
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
     });
 
-    // ---------- Patients: manage (admin, receptionist, staff) ----------
+    // ---------- Patients: manage (admin, doctor, receptionist, staff) ----------
     // The resource is registered BEFORE patients/{patient} below,
     // so /patients/create matches "create", not {patient}.
-    Route::middleware('role:admin,receptionist,staff')->group(function () {
+    Route::middleware('role:admin,doctor,receptionist,staff')->group(function () {
         Route::resource('patients', PatientController::class)->except(['index', 'show']);
     });
 
@@ -61,9 +66,17 @@ Route::middleware('auth')->group(function () {
     Route::get('patients', [PatientController::class, 'index'])->name('patients.index');
     Route::get('patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
 
-    // ---------- Medical History (admin, staff) ----------
+    // ---------- Patient History (Pre-App Historical Records & Outstandings) ----------
+    Route::middleware('role:admin,doctor,accountant,receptionist,staff')->group(function () {
+        Route::get('patient-histories/outstanding', [PatientHistoryController::class, 'outstanding'])->name('patient-histories.outstanding');
+        Route::post('patient-histories/{patientHistory}/payment', [PatientHistoryController::class, 'recordPayment'])->name('patient-histories.record-payment');
+        Route::post('patient-histories/{patientHistory}/pay', [PatientHistoryController::class, 'recordPayment'])->name('patient-histories.payment');
+        Route::resource('patient-histories', PatientHistoryController::class);
+    });
+
+    // ---------- Medical History (admin, doctor, staff) ----------
     // Create/store nested under the patient; edit/update/destroy on the record.
-    Route::middleware('role:admin,staff')->group(function () {
+    Route::middleware('role:admin,doctor,staff')->group(function () {
         Route::get('patients/{patient}/medical-histories/create',
             [MedicalHistoryController::class, 'create'])->name('medical-histories.create');
         Route::post('patients/{patient}/medical-histories',
@@ -76,10 +89,10 @@ Route::middleware('auth')->group(function () {
             [MedicalHistoryController::class, 'destroy'])->name('medical-histories.destroy');
     });
 
-    // ---------- Appointments (admin, receptionist, staff) ----------
+    // ---------- Appointments (admin, doctor, receptionist, staff) ----------
     // Written manually (not a resource) so /appointments/create
     // is registered before /appointments/{appointment}.
-    Route::middleware('role:admin,receptionist,staff')->group(function () {
+    Route::middleware('role:admin,doctor,receptionist,staff')->group(function () {
         Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
         Route::get('appointments/booked-slots', [AppointmentController::class, 'bookedSlots'])->name('appointments.booked-slots');
         Route::get('appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
@@ -90,14 +103,29 @@ Route::middleware('auth')->group(function () {
         Route::delete('appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
     });
 
-    // ---------- Treatments catalog (admin, staff) ----------
-    Route::middleware('role:admin,staff')->group(function () {
+    // ---------- Treatments catalog (admin, doctor, staff) ----------
+    Route::middleware('role:admin,doctor,staff')->group(function () {
         Route::resource('treatments', TreatmentController::class);
     });
 
-    // ---------- Patient Treatments (admin, receptionist, staff) ----------
-    Route::middleware('role:admin,receptionist,staff')->group(function () {
+    // ---------- Patient Treatments (admin, doctor, receptionist, staff) ----------
+    Route::middleware('role:admin,doctor,receptionist,staff')->group(function () {
         Route::resource('patient-treatments', PatientTreatmentController::class);
+    });
+
+    // ---------- Dental Implants (admin, accountant, staff) ----------
+    Route::middleware('role:admin,accountant,staff')->group(function () {
+        Route::post('implants/{implant}/restock', [ImplantController::class, 'restock'])->name('implants.restock');
+        Route::resource('implants', ImplantController::class);
+
+        Route::resource('implant-buyers', ImplantBuyerController::class);
+
+        Route::get('implant-sales/outstanding', [ImplantSaleController::class, 'outstanding'])->name('implant-sales.outstanding');
+        Route::get('implant-sales/{implantSale}/print', [ImplantSaleController::class, 'print'])->name('implant-sales.print');
+        Route::resource('implant-sales', ImplantSaleController::class)->except(['edit', 'update']);
+
+        Route::get('implant-payments', [ImplantPaymentController::class, 'index'])->name('implant-payments.index');
+        Route::post('implant-payments', [ImplantPaymentController::class, 'store'])->name('implant-payments.store');
     });
 
     // ---------- Billing: Invoices (admin, accountant, receptionist) ----------

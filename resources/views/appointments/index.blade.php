@@ -6,7 +6,14 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0 fw-bold">Appointments Schedule</h5>
+            <div>
+                <h5 class="mb-0 fw-bold">
+                    {{ auth()->user()->isDoctor() ? 'My Appointments Schedule' : 'Appointments Schedule' }}
+                </h5>
+                @if (auth()->user()->isDoctor())
+                    <span class="text-muted small">Showing appointments assigned to you</span>
+                @endif
+            </div>
             <a href="{{ route('appointments.create') }}" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg me-1"></i> Book Appointment
             </a>
@@ -41,11 +48,24 @@
 
             {{-- Filters Form --}}
             <form method="GET" action="{{ route('appointments.index') }}" class="row g-2 mb-3">
-                <div class="col-md-3">
+                <div class="{{ auth()->user()->isDoctor() ? 'col-md-4' : 'col-md-3' }}">
                     <label class="form-label small fw-semibold text-secondary mb-1">Search Patient</label>
                     <input type="text" name="search" value="{{ request('search') }}" class="form-control form-control-sm"
                         placeholder="Search name, MR #, or phone...">
                 </div>
+                @if (! auth()->user()->isDoctor())
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary mb-1">Doctor</label>
+                        <select name="doctor_id" class="form-select form-select-sm">
+                            <option value="">All doctors</option>
+                            @foreach ($doctors as $doc)
+                                <option value="{{ $doc->id }}" {{ (string) request('doctor_id') === (string) $doc->id ? 'selected' : '' }}>
+                                    {{ $doc->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold text-secondary mb-1">Status</label>
                     <select name="status" class="form-select form-select-sm">
@@ -57,7 +77,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="{{ auth()->user()->isDoctor() ? 'col-md-2' : 'col-md-2' }}">
                     <label class="form-label small fw-semibold text-secondary mb-1">Date Period</label>
                     <select name="date_filter" class="form-select form-select-sm">
                         <option value="">All dates</option>
@@ -67,12 +87,12 @@
                         <option value="past" {{ request('date_filter') === 'past' ? 'selected' : '' }}>Past</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="{{ auth()->user()->isDoctor() ? 'col-md-2' : 'col-md-2' }}">
                     <label class="form-label small fw-semibold text-secondary mb-1">Specific Date</label>
                     <input type="date" name="specific_date" value="{{ request('specific_date') }}" class="form-control form-control-sm"
                         placeholder="Pick exact date">
                 </div>
-                <div class="col-md-2 d-flex align-items-end gap-1">
+                <div class="{{ auth()->user()->isDoctor() ? 'col-md-2' : 'col-md-1' }} d-flex align-items-end gap-1">
                     <button type="submit" class="btn btn-primary btn-sm w-100">
                         <i class="bi bi-search me-1"></i> Filter
                     </button>
@@ -88,6 +108,7 @@
                         <tr>
                             <th>Date &amp; Time</th>
                             <th>Patient</th>
+                            <th>Doctor</th>
                             <th>Treatment(s)</th>
                             <th>Status</th>
                             <th class="text-end">Actions</th>
@@ -106,6 +127,15 @@
                                         {{ $appointment->patient->full_name }}
                                     </a>
                                     <div class="small text-muted">{{ $appointment->patient->patient_number }} &bull; {{ $appointment->patient->phone ?: 'No phone' }}</div>
+                                </td>
+                                <td>
+                                    @if ($appointment->doctor)
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                            <i class="bi bi-person-badge me-1"></i> {{ $appointment->doctor->name }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted small">—</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}</div>
