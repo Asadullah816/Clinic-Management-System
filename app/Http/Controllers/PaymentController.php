@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -174,23 +175,53 @@ class PaymentController extends Controller
     }
 
     /**
-     * All invoices that still have money owed.
+     * Outstanding Dues Ledger for all patients.
      */
-    public function outstanding()
+    public function outstanding(Request $request)
     {
-        $invoices = Invoice::with('patient')
-            ->where('due_amount', '>', 0)
-            ->orderByDesc('invoice_date')
-            ->orderByDesc('id')
-            ->paginate(15);
+        $user = auth()->user();
+        $search = $request->query('search');
+        $doctorId = $request->query('doctor_id');
 
-        // Total across ALL outstanding invoices (not just this page)
-        $totalOutstanding = Invoice::where('due_amount', '>', 0)->sum('due_amount');
+        $query = Invoice::with(['patient.assignedDoctor'])
+            ->where('due_amount', '>', 0);
 
-        return view('payments.outstanding', [
-            'invoices' => $invoices,
-            'totalOutstanding' => $totalOutstanding,
-        ]);
+        if ($user->isDoctor()) {
+            $query->whereHas('patient', function ($p) use ($user) {
+                $p->forDoctor($user->id);
+            });
+        } elseif ($doctorId) {
+            $query->whereHas('patient', function ($p) use ($doctorId) {
+                $p->where('assigned_doctor_id', $doctorId);
+            });
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('patient', function ($p) use ($search) {
+                        $p->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('patient_number', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $totalOutstanding = (float) (clone $query)->sum('due_amount');
+        $totalInvoicesCount = (clone $query)->count();
+
+        $invoices = $query->latest('invoice_date')->latest('id')->paginate(15)->withQueryString();
+        $doctors = User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get();
+
+        return view('payments.outstanding', compact(
+            'invoices',
+            'totalOutstanding',
+            'totalInvoicesCount',
+            'search',
+            'doctorId',
+            'doctors'
+        ));
     }
 
     public function print(Payment $payment)

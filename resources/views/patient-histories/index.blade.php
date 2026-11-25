@@ -15,8 +15,8 @@
             </div>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('patient-histories.outstanding') }}" class="btn btn-outline-danger btn-sm">
-                <i class="bi bi-exclamation-circle me-1"></i> Pre-App Outstandings &amp; Financials
+            <a href="{{ route('payments.outstanding') }}" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-exclamation-circle me-1"></i> Outstanding Dues
             </a>
             <a href="{{ route('patient-histories.create') }}" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg me-1"></i> Add Historical Patient Record

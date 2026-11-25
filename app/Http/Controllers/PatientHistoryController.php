@@ -27,72 +27,16 @@ class PatientHistoryController extends Controller
 
     public function index(Request $request)
     {
-        $user = auth()->user();
-
-        $query = PatientHistory::with(['patient', 'doctor', 'createdBy'])
-            ->when($user->isDoctor(), function ($q) use ($user) {
-                $q->where('doctor_id', $user->id);
-            })
-            ->when(! $user->isDoctor() && $request->filled('doctor_id'), function ($q) use ($request) {
-                $q->where('doctor_id', $request->doctor_id);
-            })
-            ->when($request->filled('status'), function ($q) use ($request) {
-                $q->where('status', $request->status);
-            })
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $search = $request->search;
-                $q->where(function ($sub) use ($search) {
-                    $sub->where('record_number', 'like', "%{$search}%")
-                        ->orWhere('procedures', 'like', "%{$search}%")
-                        ->orWhere('doctor_name', 'like', "%{$search}%")
-                        ->orWhereHas('patient', function ($p) use ($search) {
-                            $p->where('first_name', 'like', "%{$search}%")
-                                ->orWhere('last_name', 'like', "%{$search}%")
-                                ->orWhere('patient_number', 'like', "%{$search}%")
-                                ->orWhere('phone', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->when($request->filled('date_from'), function ($q) use ($request) {
-                $q->whereDate('visit_date', '>=', $request->date_from);
-            })
-            ->when($request->filled('date_to'), function ($q) use ($request) {
-                $q->whereDate('visit_date', '<=', $request->date_to);
-            });
-
-        // Summary cards
-        $metricsQuery = clone $query;
-        $totalRecords = (clone $metricsQuery)->count();
-        $totalCost = (float) (clone $metricsQuery)->sum('total_cost');
-        $totalPaid = (float) (clone $metricsQuery)->sum('paid_amount');
-        $totalDue = (float) (clone $metricsQuery)->sum('due_amount');
-
-        $histories = $query->orderByDesc('visit_date')->paginate(15)->withQueryString();
-        $doctors = User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get();
-
-        return view('patient-histories.index', [
-            'histories' => $histories,
-            'doctors' => $doctors,
-            'totalRecords' => $totalRecords,
-            'totalCost' => $totalCost,
-            'totalPaid' => $totalPaid,
-            'totalDue' => $totalDue,
-        ]);
+        return redirect()->route('patients.index');
     }
 
     public function create(Request $request)
     {
-        $patientId = $request->query('patient_id');
-        $patient = $patientId ? Patient::find($patientId) : null;
+        if ($request->filled('patient_id')) {
+            return redirect()->route('patients.show', $request->patient_id);
+        }
 
-        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
-        $doctors = User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get();
-
-        return view('patient-histories.create', [
-            'patient' => $patient,
-            'patients' => $patients,
-            'doctors' => $doctors,
-        ]);
+        return redirect()->route('patients.index');
     }
 
     public function store(Request $request)
@@ -323,48 +267,12 @@ class PatientHistoryController extends Controller
     /**
      * Financial Overview & Outstandings specifically for Historical / Pre-App Patients
      */
+    /**
+     * Historical outstandings are now unified into the main Outstanding Dues ledger (payments.outstanding).
+     */
     public function outstanding(Request $request)
     {
-        $user = auth()->user();
-
-        $query = PatientHistory::outstanding()
-            ->with(['patient', 'doctor'])
-            ->when($user->isDoctor(), function ($q) use ($user) {
-                $q->where('doctor_id', $user->id);
-            })
-            ->when(! $user->isDoctor() && $request->filled('doctor_id'), function ($q) use ($request) {
-                $q->where('doctor_id', $request->doctor_id);
-            })
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $search = $request->search;
-                $q->where(function ($sub) use ($search) {
-                    $sub->where('record_number', 'like', "%{$search}%")
-                        ->orWhere('procedures', 'like', "%{$search}%")
-                        ->orWhereHas('patient', function ($p) use ($search) {
-                            $p->where('first_name', 'like', "%{$search}%")
-                                ->orWhere('last_name', 'like', "%{$search}%")
-                                ->orWhere('patient_number', 'like', "%{$search}%")
-                                ->orWhere('phone', 'like', "%{$search}%");
-                        });
-                });
-            });
-
-        $totalHistoricalTreatmentValue = (float) (clone $query)->sum('total_cost');
-        $totalHistoricalPaid = (float) (clone $query)->sum('paid_amount');
-        $totalHistoricalOutstanding = (float) (clone $query)->sum('due_amount');
-        $totalPendingCount = (clone $query)->count();
-
-        $outstandings = $query->orderByDesc('due_amount')->paginate(15)->withQueryString();
-        $doctors = User::whereIn('role', [User::ROLE_DOCTOR, User::ROLE_ADMIN])->orderBy('name')->get();
-
-        return view('patient-histories.outstanding', [
-            'outstandings' => $outstandings,
-            'doctors' => $doctors,
-            'totalHistoricalTreatmentValue' => $totalHistoricalTreatmentValue,
-            'totalHistoricalPaid' => $totalHistoricalPaid,
-            'totalHistoricalOutstanding' => $totalHistoricalOutstanding,
-            'totalPendingCount' => $totalPendingCount,
-        ]);
+        return redirect()->route('payments.outstanding');
     }
 
     /**

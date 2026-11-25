@@ -13,7 +13,7 @@
 
     {{-- 2. Patients & Care (Dropdown Group) --}}
     @php
-        $isPatientsActive = request()->routeIs('patients.*', 'appointments.*', 'patient-histories.index', 'patient-histories.create', 'patient-histories.show', 'patient-histories.edit');
+        $isPatientsActive = request()->routeIs('patients.*', 'appointments.*');
     @endphp
     <li class="nav-item">
         <a class="group-toggle {{ $isPatientsActive ? 'active-group' : 'collapsed' }}"
@@ -44,20 +44,6 @@
                         <a class="sub-nav-link {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
                             href="{{ route('appointments.index') }}">
                             <i class="bi bi-calendar-check me-2"></i> {{ auth()->user()->isDoctor() ? 'My Schedule' : 'Appointments' }}
-                        </a>
-                    </li>
-                @endif
-                <li>
-                    <a class="sub-nav-link {{ request()->routeIs('patient-histories.index', 'patient-histories.show', 'patient-histories.edit') ? 'active' : '' }}"
-                        href="{{ route('patient-histories.index') }}">
-                        <i class="bi bi-clock-history me-2"></i> {{ auth()->user()->isDoctor() ? 'My Pre-App Patients' : 'Patient History (Pre-App)' }}
-                    </a>
-                </li>
-                @if (auth()->user()->hasRole('admin', 'doctor', 'receptionist', 'staff'))
-                    <li>
-                        <a class="sub-nav-link {{ request()->routeIs('patient-histories.create') ? 'active' : '' }}"
-                            href="{{ route('patient-histories.create') }}">
-                            <i class="bi bi-folder-plus me-2"></i> Add Pre-App Record
                         </a>
                     </li>
                 @endif
@@ -166,9 +152,9 @@
     @endif
 
     {{-- 5. Billing & Finance (Dropdown Group) --}}
-    @if (auth()->user()->hasRole('admin', 'accountant', 'receptionist'))
+    @if (auth()->user()->hasRole('admin', 'accountant', 'receptionist', 'doctor'))
         @php
-            $isBillingActive = request()->routeIs('invoices.*', 'payments.*', 'patient-histories.outstanding');
+            $isBillingActive = request()->routeIs('invoices.*', 'payments.*');
         @endphp
         <li class="nav-item">
             <a class="group-toggle {{ $isBillingActive ? 'active-group' : 'collapsed' }}"
@@ -182,28 +168,24 @@
             </a>
             <div class="collapse {{ $isBillingActive ? 'show' : '' }}" id="{{ $prefix }}-billing-group">
                 <ul class="submenu-list">
-                    <li>
-                        <a class="sub-nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}"
-                            href="{{ route('invoices.index') }}">
-                            <i class="bi bi-receipt me-2"></i> Invoices
-                        </a>
-                    </li>
-                    <li>
-                        <a class="sub-nav-link {{ request()->routeIs('payments.index', 'payments.create', 'payments.edit') ? 'active' : '' }}"
-                            href="{{ route('payments.index') }}">
-                            <i class="bi bi-cash-coin me-2"></i> Payments
-                        </a>
-                    </li>
+                    @if (!auth()->user()->isDoctor())
+                        <li>
+                            <a class="sub-nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}"
+                                href="{{ route('invoices.index') }}">
+                                <i class="bi bi-receipt me-2"></i> Invoices
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sub-nav-link {{ request()->routeIs('payments.index', 'payments.create', 'payments.edit') ? 'active' : '' }}"
+                                href="{{ route('payments.index') }}">
+                                <i class="bi bi-cash-coin me-2"></i> Payments
+                            </a>
+                        </li>
+                    @endif
                     <li>
                         <a class="sub-nav-link {{ request()->routeIs('payments.outstanding') ? 'active' : '' }}"
                             href="{{ route('payments.outstanding') }}">
                             <i class="bi bi-exclamation-circle me-2"></i> Outstanding Dues
-                        </a>
-                    </li>
-                    <li>
-                        <a class="sub-nav-link {{ request()->routeIs('patient-histories.outstanding') ? 'active' : '' }}"
-                            href="{{ route('patient-histories.outstanding') }}">
-                            <i class="bi bi-clock-history me-2 text-warning"></i> Pre-App Outstandings
                         </a>
                     </li>
                 </ul>

@@ -153,7 +153,6 @@ class Invoice extends Model
             ."• Paid Amount: PKR {$paid}\n"
             ."• *Outstanding Balance Due: PKR {$due}*\n\n"
             ."Kindly arrange to clear the outstanding dues at your earliest convenience. If you have already paid, please ignore this message.\n\n"
-            ."For queries or assistance, contact: {$clinicPhone}.\n\n"
             ."Thank you,\n"
             ."*{$clinicName}*";
 

@@ -138,10 +138,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('invoices', InvoiceController::class);
     });
 
-    // ---------- Billing: Payments (admin, accountant, receptionist) ----------
-    Route::middleware('role:admin,accountant,receptionist')->group(function () {
-        // outstanding + print BEFORE the resource so {payment} can't swallow them
+    // ---------- Billing: Payments ----------
+    Route::middleware('role:admin,accountant,receptionist,doctor,staff')->group(function () {
         Route::get('payments/outstanding', [PaymentController::class, 'outstanding'])->name('payments.outstanding');
+    });
+
+    Route::middleware('role:admin,accountant,receptionist')->group(function () {
         Route::get('payments/{payment}/print', [PaymentController::class, 'print'])->name('payments.print');
         Route::resource('payments', PaymentController::class);
     });

@@ -63,8 +63,7 @@ class Patient extends Model
         return $query->where(function ($q) use ($doctorId) {
             $q->where('assigned_doctor_id', $doctorId)
                 ->orWhereHas('appointments', fn ($a) => $a->where('doctor_id', $doctorId))
-                ->orWhereHas('patientTreatments', fn ($t) => $t->where('doctor_id', $doctorId))
-                ->orWhereHas('patientHistories', fn ($h) => $h->where('doctor_id', $doctorId));
+                ->orWhereHas('patientTreatments', fn ($t) => $t->where('doctor_id', $doctorId));
         });
     }
 

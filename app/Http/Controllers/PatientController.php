@@ -100,9 +100,8 @@ class PatientController extends Controller
             $isAssigned = $patient->assigned_doctor_id === $doctorId;
             $hasAppointment = $patient->appointments()->where('doctor_id', $doctorId)->exists();
             $hasTreatment = $patient->patientTreatments()->where('doctor_id', $doctorId)->exists();
-            $hasHistory = $patient->patientHistories()->where('doctor_id', $doctorId)->exists();
 
-            if (! $isAssigned && ! $hasAppointment && ! $hasTreatment && ! $hasHistory) {
+            if (! $isAssigned && ! $hasAppointment && ! $hasTreatment) {
                 abort(403, 'Unauthorized access to this patient record.');
             }
         }
@@ -118,13 +117,7 @@ class PatientController extends Controller
                     ->orderByDesc('appointment_time');
             },
             'patientTreatments' => function ($query) {
-                $query->with(['treatment', 'treatmentMedicines.medicine'])->orderByDesc('treatment_date');
-            },
-            'patientHistories' => function ($query) {
-                if (auth()->user()->isDoctor()) {
-                    $query->forDoctor(auth()->id());
-                }
-                $query->with(['doctor', 'createdBy', 'payments.receivedBy'])->orderByDesc('visit_date')->orderByDesc('id');
+                $query->with(['treatment', 'doctor', 'treatmentMedicines.medicine'])->orderByDesc('treatment_date');
             },
             'invoices' => function ($query) {
                 $query->orderByDesc('invoice_date')->orderByDesc('id');
@@ -141,13 +134,9 @@ class PatientController extends Controller
             },
         ]);
 
-        $historicalTotal = (float) $patient->patientHistories->sum('total_cost');
-        $historicalPaid = (float) $patient->patientHistories->sum('paid_amount');
-        $historicalDue = (float) $patient->patientHistories->sum('due_amount');
         $totalInvoiced = (float) $patient->invoices->sum('total_amount');
         $totalPaid = (float) $patient->invoices->sum('paid_amount');
         $totalOutstanding = (float) $patient->invoices->sum('due_amount');
-        $combinedDue = $historicalDue + $totalOutstanding;
 
         // Financial summary — all derived from stored columns
         return view('patients.show', [
@@ -156,10 +145,6 @@ class PatientController extends Controller
             'totalInvoiced' => $totalInvoiced,
             'totalPaid' => $totalPaid,
             'totalOutstanding' => $totalOutstanding,
-            'historicalTotal' => $historicalTotal,
-            'historicalPaid' => $historicalPaid,
-            'historicalDue' => $historicalDue,
-            'combinedDue' => $combinedDue,
         ]);
     }
 
@@ -170,9 +155,8 @@ class PatientController extends Controller
             $isAssigned = $patient->assigned_doctor_id === $doctorId;
             $hasAppointment = $patient->appointments()->where('doctor_id', $doctorId)->exists();
             $hasTreatment = $patient->patientTreatments()->where('doctor_id', $doctorId)->exists();
-            $hasHistory = $patient->patientHistories()->where('doctor_id', $doctorId)->exists();
 
-            if (! $isAssigned && ! $hasAppointment && ! $hasTreatment && ! $hasHistory) {
+            if (! $isAssigned && ! $hasAppointment && ! $hasTreatment) {
                 abort(403, 'Unauthorized access to this patient record.');
             }
         }

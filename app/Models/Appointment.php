@@ -165,7 +165,6 @@ class Appointment extends Model
         }
 
         $clinicName = Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar'));
-        $clinicPhone = Setting::get('phone', '03489030035');
         $patientName = $this->patient?->full_name ?? 'Valued Patient';
         $appointmentDate = $this->appointment_date?->format('l, d M Y') ?? '';
         $appointmentTime = $this->formatted_time;
@@ -178,7 +177,7 @@ class Appointment extends Model
             ."⏰ *Time:* {$appointmentTime}\n"
             ."👨‍⚕️ *Doctor:* {$doctorName}\n"
             ."🦷 *Treatment:* {$treatments}\n\n"
-            ."Please arrive 5 to 10 minutes prior to your scheduled time. If you need to reschedule or have any questions, kindly call or WhatsApp us at {$clinicPhone}.\n\n"
+            ."Please arrive 5 to 10 minutes prior to your scheduled time. If you need to reschedule or have any questions, kindly reply to this message.\n\n"
             ."Thank you,\n"
             ."*{$clinicName}*";
 

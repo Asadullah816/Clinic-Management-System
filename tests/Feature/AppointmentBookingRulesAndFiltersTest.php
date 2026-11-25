@@ -364,6 +364,8 @@ test('appointment generates valid whatsapp reminder url', function () {
     expect($url)->toContain(rawurlencode('Dr. Farhan Ali'));
     expect($url)->toContain(rawurlencode('Root Canal Treatment'));
     expect($url)->toContain(rawurlencode('04:00 PM'));
+    expect(urldecode($url))->toContain('kindly reply to this message');
+    expect(urldecode($url))->not->toContain('kindly call or WhatsApp us');
 
     // When appointment is completed, reminder URL must be null
     $appointment->update(['status' => Appointment::STATUS_COMPLETED]);

@@ -94,8 +94,8 @@ class DashboardController extends Controller
             // THE formula, now scoped to the selected period
             $periodProfit = $periodRevenue - $periodExpenses;
 
-            // Outstanding is a lifetime balance — never period-scoped
-            $totalOutstanding = Invoice::where('due_amount', '>', 0)->sum('due_amount');
+            // Outstanding is a lifetime balance across all patients
+            $totalOutstanding = (float) Invoice::where('due_amount', '>', 0)->sum('due_amount');
         }
 
         // ================= Inventory (admin, staff) - Hidden for now =================
