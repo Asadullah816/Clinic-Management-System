@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FailedImplant;
 use App\Models\Implant;
 use App\Models\ImplantStockTransaction;
 use Illuminate\Http\Request;
@@ -51,6 +52,8 @@ class ImplantController extends Controller
             'low_stock' => Implant::where('stock_quantity', '>', 0)->whereRaw('stock_quantity <= min_stock_alert')->count(),
             'out_of_stock' => Implant::where('stock_quantity', '<=', 0)->count(),
             'total_value' => (float) Implant::selectRaw('SUM(stock_quantity * purchase_price) as val')->value('val') ?? 0,
+            'failed_units' => (int) FailedImplant::sum('quantity'),
+            'failed_cost' => (float) FailedImplant::sum('total_cost'),
         ];
 
         return view('implants.index', compact('implants', 'brands', 'stats', 'search', 'brandFilter', 'stockFilter'));

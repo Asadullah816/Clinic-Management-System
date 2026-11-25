@@ -104,7 +104,7 @@
     {{-- 4. Dental Implants (Dropdown Group - Separate Module) --}}
     @if (auth()->user()->hasRole('admin', 'accountant', 'staff'))
         @php
-            $isImplantsActive = request()->routeIs('implants.*', 'implant-buyers.*', 'implant-sales.*', 'implant-payments.*');
+            $isImplantsActive = request()->routeIs('implants.*', 'implant-buyers.*', 'implant-sales.*', 'implant-payments.*', 'failed-implants.*');
         @endphp
         <li class="nav-item">
             <a class="group-toggle {{ $isImplantsActive ? 'active-group' : 'collapsed' }}"
@@ -146,6 +146,12 @@
                         <a class="sub-nav-link {{ request()->routeIs('implant-sales.outstanding') ? 'active' : '' }}"
                             href="{{ route('implant-sales.outstanding') }}">
                             <i class="bi bi-exclamation-circle me-2 text-danger"></i> Doctor Outstandings
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sub-nav-link {{ request()->routeIs('failed-implants.*') ? 'active' : '' }}"
+                            href="{{ route('failed-implants.index') }}">
+                            <i class="bi bi-x-octagon me-2 text-danger"></i> Failed Implants
                         </a>
                     </li>
                     <li>

@@ -131,6 +131,21 @@ class ImplantSale extends Model
         return $this->hasMany(ImplantSaleItem::class);
     }
 
+    public function failedImplants()
+    {
+        return $this->hasMany(FailedImplant::class);
+    }
+
+    public function totalFailedQuantity(): int
+    {
+        return (int) $this->failedImplants()->sum('quantity');
+    }
+
+    public function totalFailedCost(): float
+    {
+        return (float) $this->failedImplants()->sum('total_cost');
+    }
+
     public function payments()
     {
         return $this->hasMany(ImplantPayment::class)->latest();

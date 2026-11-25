@@ -30,6 +30,10 @@
                 </button>
             @endif
 
+            <a href="{{ route('failed-implants.create', ['sale_id' => $implantSale->id, 'buyer_id' => $implantSale->implant_buyer_id]) }}" class="btn btn-outline-danger">
+                <i class="bi bi-x-octagon me-1"></i> Report Failure
+            </a>
+
             <a href="{{ route('implant-sales.print', $implantSale) }}" target="_blank" class="btn btn-dark">
                 <i class="bi bi-printer me-1"></i> Print Challan
             </a>
@@ -250,6 +254,71 @@
             </div>
         </div>
     </div>
+
+    {{-- Reported Implant Failures for this Sale (Calculated Separately) --}}
+    @if ($implantSale->failedImplants->isNotEmpty())
+        <div class="card shadow-sm border-0 mb-4 border-start border-danger border-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-x-octagon text-danger me-2"></i>Reported Failed Implants
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-2">Calculated Separately</span>
+                    </h6>
+                    <span class="small text-muted">Isolated clinical loss tracking for implants supplied in this invoice.</span>
+                </div>
+                <a href="{{ route('failed-implants.create', ['sale_id' => $implantSale->id, 'buyer_id' => $implantSale->implant_buyer_id]) }}" class="btn btn-sm btn-outline-danger">
+                    + Report Another Failure
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Failure #</th>
+                                <th>Date</th>
+                                <th>Implant Model</th>
+                                <th>Tooth #</th>
+                                <th>Stage &amp; Reason</th>
+                                <th class="text-end">Loss Cost (PKR)</th>
+                                <th>Warranty Status</th>
+                                <th class="text-end pe-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($implantSale->failedImplants as $failed)
+                                <tr>
+                                    <td class="ps-3 fw-bold">
+                                        <a href="{{ route('failed-implants.show', $failed) }}" class="text-danger text-decoration-none">
+                                            {{ $failed->failure_number }}
+                                        </a>
+                                    </td>
+                                    <td>{{ $failed->failure_date->format('d M Y') }}</td>
+                                    <td>{{ $failed->implant?->fullSpecification() }}</td>
+                                    <td>{{ $failed->tooth_number ? '#' . $failed->tooth_number : '—' }}</td>
+                                    <td>
+                                        <div class="small fw-semibold">{{ $failed->reasonLabel() }}</div>
+                                        <div class="small text-muted">{{ $failed->stageLabel() }}</div>
+                                    </td>
+                                    <td class="text-end fw-bold text-danger">PKR {{ number_format($failed->total_cost, 2) }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $failed->warrantyColor() }}-subtle text-{{ $failed->warrantyColor() }} border border-{{ $failed->warrantyColor() }}-subtle">
+                                            {{ $failed->warrantyLabel() }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a href="{{ route('failed-implants.show', $failed) }}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    @endif
 
     {{-- Receive Payment Modal --}}
     @if ($implantSale->due_amount > 0)

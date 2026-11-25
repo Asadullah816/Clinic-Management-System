@@ -225,7 +225,7 @@ class ImplantSaleController extends Controller
 
     public function show(ImplantSale $implantSale)
     {
-        $implantSale->load(['buyer', 'items.implant', 'payments.createdBy', 'createdBy']);
+        $implantSale->load(['buyer', 'items.implant', 'payments.createdBy', 'createdBy', 'failedImplants.implant']);
 
         return view('implant-sales.show', compact('implantSale'));
     }

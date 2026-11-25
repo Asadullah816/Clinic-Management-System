@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\FailedImplantController;
 use App\Http\Controllers\ImplantBuyerController;
 use App\Http\Controllers\ImplantController;
 use App\Http\Controllers\ImplantPaymentController;
@@ -126,6 +127,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('implant-payments', [ImplantPaymentController::class, 'index'])->name('implant-payments.index');
         Route::post('implant-payments', [ImplantPaymentController::class, 'store'])->name('implant-payments.store');
+
+        Route::resource('failed-implants', FailedImplantController::class);
     });
 
     // ---------- Billing: Invoices (admin, accountant, receptionist) ----------

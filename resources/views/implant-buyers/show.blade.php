@@ -29,6 +29,9 @@
                     <i class="bi bi-whatsapp me-1"></i> Send WhatsApp Reminder
                 </a>
             @endif
+            <a href="{{ route('failed-implants.create', ['buyer_id' => $implantBuyer->id]) }}" class="btn btn-outline-danger">
+                <i class="bi bi-x-octagon me-1"></i> Report Failure
+            </a>
             <a href="{{ route('implant-sales.create', ['buyer_id' => $implantBuyer->id]) }}" class="btn btn-primary">
                 <i class="bi bi-cart-plus me-1"></i> New Implant Sale
             </a>
@@ -43,7 +46,7 @@
 
     {{-- Financial Overview Cards --}}
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0 border-start border-info border-4 h-100">
                 <div class="card-body p-3">
                     <span class="text-muted small fw-semibold">Total Purchases</span>
@@ -52,7 +55,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
                 <div class="card-body p-3">
                     <span class="text-muted small fw-semibold">Total Payments Received</span>
@@ -61,7 +64,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0 border-start border-danger border-4 h-100">
                 <div class="card-body p-3">
                     <span class="text-muted small fw-semibold">Current Outstanding Balance</span>
@@ -71,6 +74,15 @@
                     <span class="small text-muted">
                         {{ $due > 0 ? 'Payable to Dr Badshah Afsar' : 'All accounts settled' }}
                     </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 border-start border-dark border-4 h-100">
+                <div class="card-body p-3">
+                    <span class="text-muted small fw-semibold">Failed Implants</span>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $implantBuyer->totalFailedQuantity() }} <span class="fs-6 fw-normal text-muted">unit(s)</span></h3>
+                    <span class="small text-danger fw-semibold">PKR {{ number_format($implantBuyer->totalFailedCost(), 2) }} (Separate)</span>
                 </div>
             </div>
         </div>
@@ -144,6 +156,80 @@
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center py-4 text-muted">No sales invoices recorded for this doctor.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- Failed Implants Recorded for this Doctor (Calculated Separately) --}}
+    <div class="card shadow-sm border-0 mb-4 border-start border-danger border-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-x-octagon text-danger me-2"></i>Failed Implants Recorded
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-2">Calculated Separately</span>
+                </h6>
+                <span class="small text-muted">Isolated complication records &amp; warranty claims for this doctor/clinic.</span>
+            </div>
+            <a href="{{ route('failed-implants.create', ['buyer_id' => $implantBuyer->id]) }}" class="btn btn-sm btn-outline-danger">
+                + Report Failure
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Failure #</th>
+                            <th>Date</th>
+                            <th>Implant Model</th>
+                            <th>Patient / Tooth</th>
+                            <th>Stage &amp; Reason</th>
+                            <th class="text-end">Cost / Loss (PKR)</th>
+                            <th>Warranty Resolution</th>
+                            <th class="text-end pe-3">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($implantBuyer->failedImplants as $failed)
+                            <tr>
+                                <td class="ps-3 fw-bold">
+                                    <a href="{{ route('failed-implants.show', $failed) }}" class="text-danger text-decoration-none">
+                                        {{ $failed->failure_number }}
+                                    </a>
+                                </td>
+                                <td>{{ $failed->failure_date->format('d M Y') }}</td>
+                                <td>{{ $failed->implant?->fullSpecification() }}</td>
+                                <td>
+                                    @if ($failed->tooth_number)
+                                        <span class="badge bg-light text-dark border me-1">#{{ $failed->tooth_number }}</span>
+                                    @endif
+                                    <span class="small text-muted">{{ $failed->patient_name ?: '—' }}</span>
+                                </td>
+                                <td>
+                                    <div class="small fw-semibold">{{ $failed->reasonLabel() }}</div>
+                                    <div class="small text-muted">{{ $failed->stageLabel() }}</div>
+                                </td>
+                                <td class="text-end fw-bold text-danger">PKR {{ number_format($failed->total_cost, 2) }}</td>
+                                <td>
+                                    <span class="badge bg-{{ $failed->warrantyColor() }}-subtle text-{{ $failed->warrantyColor() }} border border-{{ $failed->warrantyColor() }}-subtle">
+                                        {{ $failed->warrantyLabel() }}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <a href="{{ route('failed-implants.show', $failed) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    No implant failures recorded for this doctor.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>

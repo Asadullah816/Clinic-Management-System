@@ -11,6 +11,9 @@
             <p class="text-muted small mb-0">Manage implant fixtures, specifications, stock on hand, and supplies.</p>
         </div>
         <div class="d-flex gap-2">
+            <a href="{{ route('failed-implants.index') }}" class="btn btn-outline-danger">
+                <i class="bi bi-x-octagon me-1"></i> Failed Implants
+            </a>
             <a href="{{ route('implant-sales.create') }}" class="btn btn-outline-primary">
                 <i class="bi bi-cart-plus me-1"></i> New Implant Sale
             </a>
@@ -63,6 +66,23 @@
             </div>
         </div>
     </div>
+
+    {{-- Separate Failed Implants Overview Alert --}}
+    @if (($stats['failed_units'] ?? 0) > 0)
+        <div class="alert alert-danger-subtle border border-danger-subtle d-flex flex-wrap justify-content-between align-items-center p-3 mb-4 rounded-3 shadow-sm gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-x-octagon-fill text-danger fs-4"></i>
+                <div>
+                    <strong class="text-danger">Failed Implants Tracked Separately:</strong>
+                    <span class="text-dark">{{ $stats['failed_units'] }} unit(s) recorded with total loss valuation of <strong>PKR {{ number_format($stats['failed_cost'], 2) }}</strong>.</span>
+                    <span class="text-muted small d-block">These losses are calculated in an isolated ledger and do not reduce active sales revenue or regular stock.</span>
+                </div>
+            </div>
+            <a href="{{ route('failed-implants.index') }}" class="btn btn-sm btn-danger text-nowrap">
+                <i class="bi bi-eye me-1"></i> View Failed Implants
+            </a>
+        </div>
+    @endif
 
     {{-- Filter & Search --}}
     <div class="card shadow-sm mb-3">
