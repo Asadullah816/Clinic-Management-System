@@ -332,3 +332,99 @@ test('new appointment can be booked at a time slot if previous appointment is co
 
     expect(Appointment::whereDate('appointment_date', $futureDate)->where('appointment_time', 'like', '08:00%')->count())->toBe(2);
 });
+
+test('appointment generates valid whatsapp reminder url', function () {
+    $doctor = User::factory()->create(['name' => 'Dr. Farhan Ali', 'role' => 'doctor']);
+    $patient = Patient::create([
+        'patient_number' => 'P-0012',
+        'first_name' => 'Usman',
+        'last_name' => 'Tariq',
+        'gender' => 'male',
+        'phone' => '03331234567',
+        'status' => 'active',
+    ]);
+    $treatment = Treatment::create(['name' => 'Root Canal Treatment', 'price' => 12000.00, 'duration' => 60, 'status' => 'active']);
+    $futureDate = Carbon::tomorrow()->toDateString();
+
+    $appointment = Appointment::create([
+        'patient_id' => $patient->id,
+        'doctor_id' => $doctor->id,
+        'treatment_id' => $treatment->id,
+        'appointment_date' => $futureDate,
+        'appointment_time' => '16:00',
+        'status' => Appointment::STATUS_SCHEDULED,
+        'created_by' => $doctor->id,
+    ]);
+
+    $url = $appointment->whatsappReminderUrl();
+
+    expect($url)->not->toBeNull();
+    expect($url)->toStartWith('https://wa.me/923331234567?text=');
+    expect($url)->toContain(rawurlencode('Usman Tariq'));
+    expect($url)->toContain(rawurlencode('Dr. Farhan Ali'));
+    expect($url)->toContain(rawurlencode('Root Canal Treatment'));
+    expect($url)->toContain(rawurlencode('04:00 PM'));
+
+    // When appointment is completed, reminder URL must be null
+    $appointment->update(['status' => Appointment::STATUS_COMPLETED]);
+    expect($appointment->whatsappReminderUrl())->toBeNull();
+
+    // When appointment is cancelled, reminder URL must be null
+    $appointment->update(['status' => Appointment::STATUS_CANCELLED]);
+    expect($appointment->whatsappReminderUrl())->toBeNull();
+});
+
+test('appointment reminder button is displayed for scheduled appointments and hidden for completed', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+    $patient = Patient::create([
+        'patient_number' => 'P-0013',
+        'first_name' => 'Bilal',
+        'last_name' => 'Zahid',
+        'gender' => 'male',
+        'phone' => '03009988776',
+        'status' => 'active',
+    ]);
+    $treatment = Treatment::create(['name' => 'Teeth Whitening', 'price' => 8000.00, 'duration' => 45, 'status' => 'active']);
+    $futureDate = Carbon::tomorrow()->toDateString();
+
+    $appointment = Appointment::create([
+        'patient_id' => $patient->id,
+        'treatment_id' => $treatment->id,
+        'appointment_date' => $futureDate,
+        'appointment_time' => '14:30',
+        'status' => Appointment::STATUS_SCHEDULED,
+        'created_by' => $user->id,
+    ]);
+
+    // Check index view for scheduled appointment
+    $resIndex = $this->actingAs($user)->get(route('appointments.index'));
+    $resIndex->assertOk();
+    $resIndex->assertSee('https://wa.me/923009988776');
+    $resIndex->assertSee('WhatsApp Reminder');
+
+    // Check show view for scheduled appointment
+    $resShow = $this->actingAs($user)->get(route('appointments.show', $appointment));
+    $resShow->assertOk();
+    $resShow->assertSee('https://wa.me/923009988776');
+    $resShow->assertSee('WhatsApp Reminder');
+
+    // Check patient profile appointments tab
+    $resPatient = $this->actingAs($user)->get(route('patients.show', $patient));
+    $resPatient->assertOk();
+    $resPatient->assertSee('https://wa.me/923009988776');
+
+    // Now mark appointment as completed: reminder button must NOT be displayed anywhere
+    $appointment->update(['status' => Appointment::STATUS_COMPLETED]);
+
+    $resIndexCompleted = $this->actingAs($user)->get(route('appointments.index'));
+    $resIndexCompleted->assertOk();
+    $resIndexCompleted->assertDontSee('https://wa.me/923009988776');
+
+    $resShowCompleted = $this->actingAs($user)->get(route('appointments.show', $appointment));
+    $resShowCompleted->assertOk();
+    $resShowCompleted->assertDontSee('https://wa.me/923009988776');
+
+    $resPatientCompleted = $this->actingAs($user)->get(route('patients.show', $patient));
+    $resPatientCompleted->assertOk();
+    $resPatientCompleted->assertDontSee('https://wa.me/923009988776');
+});

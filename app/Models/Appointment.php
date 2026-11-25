@@ -132,4 +132,56 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    /**
+     * Generate 1-click WhatsApp appointment reminder URL
+     */
+    public function whatsappReminderUrl(): ?string
+    {
+        // Reminders are ONLY valid for scheduled appointments; completed/cancelled/no-show have no reminder
+        if ($this->status !== self::STATUS_SCHEDULED) {
+            return null;
+        }
+
+        $phone = $this->patient?->phone;
+        if (empty($phone)) {
+            return null;
+        }
+
+        // Clean phone number for wa.me international format
+        $clean = preg_replace('/[^0-9]/', '', $phone);
+        if (str_starts_with($clean, '03') && strlen($clean) === 11) {
+            $clean = '92'.substr($clean, 1);
+        } elseif (str_starts_with($clean, '0092')) {
+            $clean = substr($clean, 2);
+        } elseif (str_starts_with($clean, '0')) {
+            $clean = '92'.substr($clean, 1);
+        } elseif (! str_starts_with($clean, '92')) {
+            $clean = '92'.$clean;
+        }
+
+        if (empty($clean)) {
+            return null;
+        }
+
+        $clinicName = Setting::get('clinic_name', config('app.name', 'Dr Badshah Afsar'));
+        $clinicPhone = Setting::get('phone', '03489030035');
+        $patientName = $this->patient?->full_name ?? 'Valued Patient';
+        $appointmentDate = $this->appointment_date?->format('l, d M Y') ?? '';
+        $appointmentTime = $this->formatted_time;
+        $doctorName = $this->doctor?->name ? 'Dr. '.$this->doctor->name : 'Clinic Specialist';
+        $treatments = $this->treatment_names ?: 'General Consultation / Dental Checkup';
+
+        $message = "Dear {$patientName},\n\n"
+            ."This is an appointment reminder from *{$clinicName}* regarding your upcoming visit:\n\n"
+            ."📅 *Date:* {$appointmentDate}\n"
+            ."⏰ *Time:* {$appointmentTime}\n"
+            ."👨‍⚕️ *Doctor:* {$doctorName}\n"
+            ."🦷 *Treatment:* {$treatments}\n\n"
+            ."Please arrive 5 to 10 minutes prior to your scheduled time. If you need to reschedule or have any questions, kindly call or WhatsApp us at {$clinicPhone}.\n\n"
+            ."Thank you,\n"
+            ."*{$clinicName}*";
+
+        return 'https://wa.me/'.$clean.'?text='.rawurlencode($message);
+    }
 }

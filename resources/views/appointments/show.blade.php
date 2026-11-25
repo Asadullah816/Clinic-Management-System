@@ -6,8 +6,18 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Appointment Details</h5>
-            <span class="badge text-bg-{{ $appointment->statusColor() }}">{{ $appointment->statusLabel() }}</span>
+            <h5 class="mb-0 fw-bold">Appointment Details</h5>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge text-bg-{{ $appointment->statusColor() }} px-3 py-2 fs-6">{{ $appointment->statusLabel() }}</span>
+                @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED && $appointment->whatsappReminderUrl())
+                    <a href="{{ $appointment->whatsappReminderUrl() }}" target="_blank"
+                        class="btn btn-sm text-white shadow-sm d-inline-flex align-items-center px-3 py-1"
+                        style="background-color: #25D366; border: 1px solid #20ba5a; color: #fff !important; font-weight: 600;"
+                        title="Send WhatsApp Appointment Reminder">
+                        <i class="bi bi-whatsapp me-1 fs-6"></i> WhatsApp Reminder
+                    </a>
+                @endif
+            </div>
         </div>
 
         <div class="card-body">
@@ -15,10 +25,13 @@
                 <tr>
                     <th class="w-25">Patient</th>
                     <td>
-                        <a href="{{ route('patients.show', $appointment->patient) }}" class="text-decoration-none">
+                        <a href="{{ route('patients.show', $appointment->patient) }}" class="text-decoration-none fw-semibold">
                             {{ $appointment->patient->full_name }}
                         </a>
-                        <span class="text-muted ms-1">{{ $appointment->patient->patient_number }}</span>
+                        <span class="text-muted ms-1">({{ $appointment->patient->patient_number }})</span>
+                        @if ($appointment->patient->phone)
+                            <span class="ms-3 text-secondary small"><i class="bi bi-telephone me-1"></i>{{ $appointment->patient->phone }}</span>
+                        @endif
                     </td>
                 </tr>
                 <tr>
@@ -77,17 +90,25 @@
                 </tr>
             </table>
 
-            <div class="d-flex gap-2 mt-3">
+            <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
+                @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED && $appointment->whatsappReminderUrl())
+                    <a href="{{ $appointment->whatsappReminderUrl() }}" target="_blank"
+                        class="btn btn-success shadow-sm d-inline-flex align-items-center px-3"
+                        style="background-color: #25D366; border-color: #20ba5a; color: #fff !important; font-weight: 600;"
+                        title="Send WhatsApp Appointment Reminder">
+                        <i class="bi bi-whatsapp me-2 fs-5"></i> Send WhatsApp Reminder
+                    </a>
+                @endif
                 <a href="{{ route('appointments.edit', $appointment) }}" class="btn btn-primary">
                     <i class="bi bi-pencil me-1"></i> Edit
                 </a>
-                @if (in_array($appointment->status, [\App\Models\Appointment::STATUS_SCHEDULED, \App\Models\Appointment::STATUS_COMPLETED]))
+                @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED)
                     <a href="{{ route('patient-treatments.create', [
                         'patient_id' => $appointment->patient_id,
                         'treatment_id' => $appointment->treatment_id,
                         'appointment_id' => $appointment->id,
                     ]) }}"
-                        class="btn btn-success">
+                        class="btn btn-outline-success">
                         <i class="bi bi-bandaid me-1"></i> Record Treatment
                     </a>
                 @endif

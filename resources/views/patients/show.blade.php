@@ -431,9 +431,17 @@
                                         </td>
                                         <td>{{ \Illuminate\Support\Str::limit($appointment->notes ?? '—', 30) }}</td>
                                         <td class="text-end text-nowrap">
+                                            @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED && $appointment->whatsappReminderUrl())
+                                                <a href="{{ $appointment->whatsappReminderUrl() }}" target="_blank"
+                                                    class="btn btn-sm text-white me-1 d-inline-flex align-items-center shadow-sm"
+                                                    style="background-color: #25D366; border-color: #20ba5a; color: #fff !important; font-weight: 500;"
+                                                    title="Send WhatsApp Appointment Reminder">
+                                                    <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                                                </a>
+                                            @endif
                                             @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED)
                                                 <a href="{{ route('patient-treatments.create', ['patient_id' => $appointment->patient_id, 'treatment_id' => $appointment->treatment_id, 'appointment_id' => $appointment->id, 'redirect' => 'patient']) }}"
-                                                    class="btn btn-sm btn-success me-1" title="Record Treatment">
+                                                    class="btn btn-sm btn-primary me-1 d-inline-flex align-items-center" title="Record Treatment">
                                                     <i class="bi bi-bandaid me-1"></i> Record
                                                 </a>
                                             @endif
