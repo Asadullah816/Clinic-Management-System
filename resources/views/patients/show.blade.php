@@ -47,7 +47,8 @@
 
             <div class="d-flex flex-wrap gap-2">
                 @if ($user->hasRole('admin', 'doctor', 'receptionist', 'staff'))
-                    <a href="{{ route('patient-treatments.create', ['patient_id' => $patient->id, 'redirect' => 'patient']) }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('patient-treatments.create', ['patient_id' => $patient->id, 'redirect' => 'patient']) }}"
+                        class="btn btn-primary btn-sm">
                         <i class="bi bi-bandaid me-1"></i> Record Treatment &amp; Billing
                     </a>
                 @endif
@@ -113,14 +114,14 @@
             </li>
         @endif
 
-        @if ($showUsage)
+        {{-- @if ($showUsage)
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#usage" type="button" role="tab">
                     <i class="bi bi-capsule me-1"></i> Product Usage
                     <span class="badge text-bg-secondary ms-1">{{ $patient->medicineUsages->count() }}</span>
                 </button>
             </li>
-        @endif
+        @endif --}}
     </ul>
 
     <div class="tab-content bg-white border border-top-0 rounded-bottom shadow-sm p-4">
@@ -254,15 +255,20 @@
                                                     @if ($pt->treatmentMedicines->isNotEmpty())
                                                         <div class="small text-muted">
                                                             @foreach ($pt->treatmentMedicines as $tm)
-                                                                <span class="badge bg-light text-secondary border me-1">{{ $tm->quantity }}x {{ $tm->medicine->name ?? 'Med' }}</span>
+                                                                <span
+                                                                    class="badge bg-light text-secondary border me-1">{{ $tm->quantity }}x
+                                                                    {{ $tm->medicine->name ?? 'Med' }}</span>
                                                             @endforeach
                                                         </div>
                                                     @endif
                                                 </td>
-                                                <td class="fw-semibold text-primary">PKR {{ number_format($pt->total_amount, 2) }}</td>
-                                                <td class="small text-muted">{{ \Illuminate\Support\Str::limit($pt->notes ?? '—', 35) }}</td>
+                                                <td class="fw-semibold text-primary">PKR
+                                                    {{ number_format($pt->total_amount, 2) }}</td>
+                                                <td class="small text-muted">
+                                                    {{ \Illuminate\Support\Str::limit($pt->notes ?? '—', 35) }}</td>
                                                 <td class="text-end">
-                                                    <a href="{{ route('patient-treatments.edit', $pt) }}" class="btn btn-sm btn-outline-primary py-0 px-2" title="Edit">
+                                                    <a href="{{ route('patient-treatments.edit', $pt) }}"
+                                                        class="btn btn-sm btn-outline-primary py-0 px-2" title="Edit">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
                                                 </td>
@@ -277,7 +283,8 @@
 
                 {{-- General Clinical Background, Conditions & Allergies --}}
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-clipboard2-pulse me-1 text-info"></i> Clinical Notes &amp; Medical Conditions</h6>
+                    <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-clipboard2-pulse me-1 text-info"></i> Clinical
+                        Notes &amp; Medical Conditions</h6>
                     <a href="{{ route('medical-histories.create', $patient) }}" class="btn btn-outline-info btn-sm">
                         <i class="bi bi-plus-lg me-1"></i> Add Clinical Record
                     </a>
@@ -432,7 +439,8 @@
                                         <td>
                                             <div class="fw-semibold">{{ $appointment->appointment_date->format('d M Y') }}
                                             </div>
-                                            <div class="text-muted small"><i class="bi bi-clock me-1"></i>{{ $appointment->formatted_time }}</div>
+                                            <div class="text-muted small"><i
+                                                    class="bi bi-clock me-1"></i>{{ $appointment->formatted_time }}</div>
                                         </td>
                                         <td>
                                             <div class="fw-semibold text-dark">{{ $appointment->treatment->name ?? '—' }}
@@ -463,7 +471,8 @@
                                             @endif
                                             @if ($appointment->status === \App\Models\Appointment::STATUS_SCHEDULED)
                                                 <a href="{{ route('patient-treatments.create', ['patient_id' => $appointment->patient_id, 'treatment_id' => $appointment->treatment_id, 'appointment_id' => $appointment->id, 'redirect' => 'patient']) }}"
-                                                    class="btn btn-sm btn-primary me-1 d-inline-flex align-items-center" title="Record Treatment">
+                                                    class="btn btn-sm btn-primary me-1 d-inline-flex align-items-center"
+                                                    title="Record Treatment">
                                                     <i class="bi bi-bandaid me-1"></i> Record
                                                 </a>
                                             @endif
